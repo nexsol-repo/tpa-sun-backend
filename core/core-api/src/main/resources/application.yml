@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: spring-boot-multi-module-core-api
+    config:
+      import:
+        - optional:file:.env[.properties]
+        - db-core.yml
+    web.resources.add-mappings: false
+  mail:
+    host: ${HIWORKS_HOST}
+    port: ${HIWORKS_PORT}
+    username: ${HIWORKS_EMAIL}
+    password: ${HIWORKS_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local-dev
+  jmx:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: staging
+
+---
+spring:
+  config:
+    activate:
+      on-profile: live
