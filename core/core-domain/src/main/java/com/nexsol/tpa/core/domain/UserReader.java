@@ -14,7 +14,10 @@ public class UserReader {
         return userRepository.findByCompanyCodeAndEmail(companyCode,email).orElseThrow(()-> new CoreException(CoreErrorType.USER_NOT_FOUND));
     }
 
-    public boolean exists(String companyCode,String email){
-        return userRepository.existsCompanyCodeAndEmail(companyCode,email);
+    public void exist(String bizNo, String email) {
+        if (userRepository.existsCompanyCodeAndEmail(bizNo, email)) {
+
+            throw new CoreException(CoreErrorType.USER_EXIST_DATA);
+        }
     }
 }

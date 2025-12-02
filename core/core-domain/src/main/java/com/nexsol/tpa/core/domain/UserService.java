@@ -1,9 +1,12 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.enums.EmailVerifiedType;
 import com.nexsol.tpa.core.error.CoreErrorType;
 import com.nexsol.tpa.core.error.CoreException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -13,12 +16,12 @@ public class UserService {
     private final EmailVerificationReader emailVerificationReader;
 
     public User signUp(NewUser newUser) {
-        emailVerificationReader.ensureVerified(newUser.email());
+        EmailVerification verification = emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP);
 
-        boolean exists = userReader.exists(newUser.companyCode(), newUser.email());
-        if (exists) {
-            throw new CoreException(CoreErrorType.USER_EXIST_DATA);
-        }
+        verification.validateSignup(LocalDateTime.now());
+
+        userReader.exist(newUser.companyCode(), newUser.email());
+
         return userAppender.append(newUser.toUser());
     }
 
