@@ -4,8 +4,10 @@ jar.enabled = false
 dependencies {
     implementation project(":core:core-domain")
     implementation project(":core:core-enum")
+
     runtimeOnly project(":storage:db-core")
 
-
+    implementation project(":support:security")
+    implementation project(":support:mailer")
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 }
