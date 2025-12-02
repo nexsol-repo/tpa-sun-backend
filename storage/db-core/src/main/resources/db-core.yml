@@ -18,7 +18,7 @@ spring:
     clean-on-validation-error: true
     enabled: true
     baseline-on-migrate: true
-    validate-on-migrate: false  # 임시로 validation 비활성화
+    validate-on-migrate: false
     locations: classpath:db/migration
 ---
 spring.config.activate.on-profile: local-dev

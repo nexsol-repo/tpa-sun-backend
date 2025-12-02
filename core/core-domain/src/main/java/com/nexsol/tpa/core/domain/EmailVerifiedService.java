@@ -25,13 +25,15 @@ public class EmailVerifiedService {
         EmailVerification verification = EmailVerification.builder()
                 .email(email)
                 .code(newCode)
-                .isVerified(false)      // 다시 미인증 상태로
+                .isVerified(false)
                 .verifiedType(type)
-                .attemptCount(0)        // 횟수 초기화 (필요시 로직 변경 가능)
+                .attemptCount(0)
                 .sentAt(now)
-                .expiredAt(now.plusMinutes(5)) // 5분 유효
+                .expiredAt(now.plusMinutes(5))
                 .build();
 
         emailVerificationAppender.append(verification);
+
+        emailSender.send(email, newCode);
     }
 }

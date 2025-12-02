@@ -7,7 +7,5 @@ import java.util.Optional;
 public interface EmailVerificationRepository {
     EmailVerification save(EmailVerification verification);
 
-    Optional<EmailVerification> findByEmail(String email);
-
     Optional<EmailVerification> findByEmailAndType(String email, EmailVerifiedType type);
 }
