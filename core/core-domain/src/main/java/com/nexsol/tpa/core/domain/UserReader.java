@@ -8,16 +8,19 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UserReader {
-    private final UserRepository userRepository;
 
-    public User read(String companyCode,String email){
-        return userRepository.findByCompanyCodeAndEmail(companyCode,email).orElseThrow(()-> new CoreException(CoreErrorType.USER_NOT_FOUND));
-    }
+	private final UserRepository userRepository;
 
-    public void exist(String bizNo, String email) {
-        if (userRepository.existsCompanyCodeAndEmail(bizNo, email)) {
+	public User read(String companyCode, String email) {
+		return userRepository.findByCompanyCodeAndEmail(companyCode, email)
+			.orElseThrow(() -> new CoreException(CoreErrorType.USER_NOT_FOUND));
+	}
 
-            throw new CoreException(CoreErrorType.USER_EXIST_DATA);
-        }
-    }
+	public void exist(String bizNo, String email) {
+		if (userRepository.existsCompanyCodeAndEmail(bizNo, email)) {
+
+			throw new CoreException(CoreErrorType.USER_EXIST_DATA);
+		}
+	}
+
 }

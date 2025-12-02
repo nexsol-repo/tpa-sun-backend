@@ -1,6 +1,7 @@
 package com.nexsol.tpa.core.enums;
 
 public enum EntityStatus {
-    ACTIVE,
-    DELETED,
+
+	ACTIVE, DELETED,
+
 }

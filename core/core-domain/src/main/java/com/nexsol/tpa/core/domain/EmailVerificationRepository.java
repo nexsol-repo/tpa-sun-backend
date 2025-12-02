@@ -5,7 +5,9 @@ import com.nexsol.tpa.core.enums.EmailVerifiedType;
 import java.util.Optional;
 
 public interface EmailVerificationRepository {
-    EmailVerification save(EmailVerification verification);
 
-    Optional<EmailVerification> findByEmailAndType(String email, EmailVerifiedType type);
+	EmailVerification save(EmailVerification verification);
+
+	Optional<EmailVerification> findByEmailAndType(String email, EmailVerifiedType type);
+
 }

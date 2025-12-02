@@ -12,39 +12,41 @@ import java.time.LocalDateTime;
 @Getter
 @MappedSuperclass
 public abstract class BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private  Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "VARCHAR(20)", nullable = false)
-    private EntityStatus status = EntityStatus.ACTIVE;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false)
-    private LocalDateTime createdAt;
+	@Enumerated(EnumType.STRING)
+	@Column(columnDefinition = "VARCHAR(20)", nullable = false)
+	private EntityStatus status = EntityStatus.ACTIVE;
 
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+	@CreationTimestamp
+	@Column(updatable = false, nullable = false)
+	private LocalDateTime createdAt;
 
-    public void active() {
-        this.status = EntityStatus.ACTIVE;
-    }
+	@UpdateTimestamp
+	@Column(nullable = false)
+	private LocalDateTime updatedAt;
 
-    public boolean isActive() {
-        return this.status == EntityStatus.ACTIVE;
-    }
+	public void active() {
+		this.status = EntityStatus.ACTIVE;
+	}
 
-    public void delete() {
-        this.status = EntityStatus.DELETED;
-    }
+	public boolean isActive() {
+		return this.status == EntityStatus.ACTIVE;
+	}
 
-    public boolean isDeleted() {
-        return this.status == EntityStatus.DELETED;
-    }
+	public void delete() {
+		this.status = EntityStatus.DELETED;
+	}
 
-    protected void setId(Long id) {
-        this.id = id;
-    }
+	public boolean isDeleted() {
+		return this.status == EntityStatus.DELETED;
+	}
+
+	protected void setId(Long id) {
+		this.id = id;
+	}
+
 }

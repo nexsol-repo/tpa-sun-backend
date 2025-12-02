@@ -11,24 +11,24 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class EmailVerificationRepositoryImpl implements EmailVerificationRepository {
-    private final EmailVerificationJpaRepository emailVerificationJpaRepository;
 
-    @Override
-    public EmailVerification save(EmailVerification verification) {
-        EmailVerificationEntity entity = emailVerificationJpaRepository.findByEmailAndVerifiedType(verification.email(), verification.verifiedType())
-                .orElseGet(() -> EmailVerificationEntity.fromDomain(verification));
+	private final EmailVerificationJpaRepository emailVerificationJpaRepository;
 
+	@Override
+	public EmailVerification save(EmailVerification verification) {
+		EmailVerificationEntity entity = emailVerificationJpaRepository
+			.findByEmailAndVerifiedType(verification.email(), verification.verifiedType())
+			.orElseGet(() -> EmailVerificationEntity.fromDomain(verification));
 
-        entity.update(verification);
+		entity.update(verification);
 
+		return emailVerificationJpaRepository.save(entity).toDomain();
+	}
 
-        return emailVerificationJpaRepository.save(entity).toDomain();
-    }
+	@Override
+	public Optional<EmailVerification> findByEmailAndType(String email, EmailVerifiedType type) {
+		return emailVerificationJpaRepository.findByEmailAndVerifiedType(email, type)
+			.map(EmailVerificationEntity::toDomain);
+	}
 
-
-    @Override
-    public Optional<EmailVerification> findByEmailAndType(String email, EmailVerifiedType type) {
-        return emailVerificationJpaRepository.findByEmailAndVerifiedType(email, type)
-                .map(EmailVerificationEntity::toDomain);
-    }
 }

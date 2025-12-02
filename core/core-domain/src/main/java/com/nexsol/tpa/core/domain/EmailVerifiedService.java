@@ -9,31 +9,47 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class EmailVerifiedService {
-    private final EmailSender emailSender;
-    private final EmailGenerateCode emailGenerateCode;
-    private final EmailVerificationFinder emailVerificationFinder;
-    private final EmailVerificationAppender emailVerificationAppender;
 
+	private final EmailSender emailSender;
 
-    public void sendCode(String email, EmailVerifiedType type) {
-        LocalDateTime now = LocalDateTime.now();
+	private final EmailGenerateCode emailGenerateCode;
 
-        emailVerificationFinder.find(email, type).ifPresent(exist -> exist.validateResend(now));
+	private final EmailVerificationReader emailVerificationReader;
 
-        String newCode = emailGenerateCode.generateCode();
+	private final EmailVerificationFinder emailVerificationFinder;
 
-        EmailVerification verification = EmailVerification.builder()
-                .email(email)
-                .code(newCode)
-                .isVerified(false)
-                .verifiedType(type)
-                .attemptCount(0)
-                .sentAt(now)
-                .expiredAt(now.plusMinutes(5))
-                .build();
+	private final EmailVerificationAppender emailVerificationAppender;
 
-        emailVerificationAppender.append(verification);
+	public void sendCode(String email, EmailVerifiedType type) {
+		LocalDateTime now = LocalDateTime.now();
 
-        emailSender.send(email, newCode);
-    }
+		emailVerificationFinder.find(email, type).ifPresent(exist -> exist.validateResend(now));
+
+		String newCode = emailGenerateCode.generateCode();
+
+		EmailVerification verification = EmailVerification.builder()
+			.email(email)
+			.code(newCode)
+			.isVerified(false)
+			.verifiedType(type)
+			.attemptCount(0)
+			.sentAt(now)
+			.expiredAt(now.plusMinutes(5))
+			.build();
+
+		emailVerificationAppender.append(verification);
+
+		emailSender.send(email, newCode);
+	}
+
+	public void verifyCode(String email, String code, EmailVerifiedType type) {
+		LocalDateTime now = LocalDateTime.now();
+
+		EmailVerification verification = emailVerificationReader.read(email, type);
+
+		EmailVerification verified = verification.verify(code, now);
+
+		emailVerificationAppender.append(verified);
+	}
+
 }

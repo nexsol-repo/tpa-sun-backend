@@ -9,10 +9,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class EmailVerificationReader {
-    private final EmailVerificationRepository emailVerificationRepository;
 
+	private final EmailVerificationRepository emailVerificationRepository;
 
-    public EmailVerification read(String email, EmailVerifiedType type){
-        return emailVerificationRepository.findByEmailAndType(email, type).orElseThrow(() -> new CoreException(CoreErrorType.EMAIL_VERIFIED_EMPTY));
-    }
+	public EmailVerification read(String email, EmailVerifiedType type) {
+		return emailVerificationRepository.findByEmailAndType(email, type)
+			.orElseThrow(() -> new CoreException(CoreErrorType.EMAIL_VERIFIED_EMPTY));
+	}
+
 }

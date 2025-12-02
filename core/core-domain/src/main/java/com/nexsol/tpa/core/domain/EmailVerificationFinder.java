@@ -9,9 +9,11 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class EmailVerificationFinder {
-    private final EmailVerificationRepository emailVerificationRepository;
 
-    public Optional<EmailVerification> find(String email, EmailVerifiedType type) {
-        return emailVerificationRepository.findByEmailAndType(email, type);
-    }
+	private final EmailVerificationRepository emailVerificationRepository;
+
+	public Optional<EmailVerification> find(String email, EmailVerifiedType type) {
+		return emailVerificationRepository.findByEmailAndType(email, type);
+	}
+
 }

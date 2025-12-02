@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-
 import java.time.LocalDateTime;
 
 import static com.nexsol.tpa.core.domain.EmailVerificationFixture.aVerification;
@@ -23,108 +22,102 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
-    @InjectMocks
-    private UserService userService;
 
-    @Mock private UserReader userReader;
-    @Mock private UserAppender userAppender;
-    @Mock private EmailVerificationReader emailVerificationReader;
+	@InjectMocks
+	private UserService userService;
 
-    @Test
-    @DisplayName("회원가입 성공: 인증된 이메일이고 중복이 없으면 회원이 저장된다")
-    void signUp_success() {
-        //given
-        NewUser newUser = aNewUser().withCompanyCode("111-11-11111").build();
-        User expectedUser = aUser().id(1L).companyCode("111-11-11111").build();
-        EmailVerification verifiedEmail = aVerification()
-                .email(newUser.email())
-                .build();
+	@Mock
+	private UserReader userReader;
 
-        given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP))
-                .willReturn(verifiedEmail);
+	@Mock
+	private UserAppender userAppender;
 
-        given(userAppender.append(any())).willReturn(expectedUser);
+	@Mock
+	private EmailVerificationReader emailVerificationReader;
 
-        //when
-        User result = userService.signUp(newUser);
+	@Test
+	@DisplayName("회원가입 성공: 인증된 이메일이고 중복이 없으면 회원이 저장된다")
+	void signUp_success() {
+		// given
+		NewUser newUser = aNewUser().withCompanyCode("111-11-11111").build();
+		User expectedUser = aUser().id(1L).companyCode("111-11-11111").build();
+		EmailVerification verifiedEmail = aVerification().email(newUser.email()).build();
 
-        //then
-        assertThat(result.companyCode()).isEqualTo(newUser.companyCode());
-        assertThat(result.id()).isEqualTo(1L);
+		given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP)).willReturn(verifiedEmail);
 
-        verify(userReader).exist(newUser.companyCode(), newUser.email());
-        verify(userAppender).append(any(User.class));
+		given(userAppender.append(any())).willReturn(expectedUser);
 
-    }
+		// when
+		User result = userService.signUp(newUser);
 
-    @Test
-    @DisplayName("회원가입 실패: 이메일 인증이 완료되지 않은 경우 예외 발생")
-    void signUp_fail_unverified() {
-        // given
-        NewUser newUser = aNewUser().build();
+		// then
+		assertThat(result.companyCode()).isEqualTo(newUser.companyCode());
+		assertThat(result.id()).isEqualTo(1L);
 
-        // [Fixture] 인증 안 된 상태(isVerified=false) 생성
-        EmailVerification unverifiedEmail = aVerification()
-                .email(newUser.email())
-                .isVerified(false)
-                .build();
+		verify(userReader).exist(newUser.companyCode(), newUser.email());
+		verify(userAppender).append(any(User.class));
 
-        given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP))
-                .willReturn(unverifiedEmail);
+	}
 
-        // when & then
-        assertThatThrownBy(() -> userService.signUp(newUser))
-                .isInstanceOf(CoreException.class)
-                .extracting("errorType").isEqualTo(CoreErrorType.EMAIL_VERIFIED_AUTH);
+	@Test
+	@DisplayName("회원가입 실패: 이메일 인증이 완료되지 않은 경우 예외 발생")
+	void signUp_fail_unverified() {
+		// given
+		NewUser newUser = aNewUser().build();
 
-        // (중복 체크나 저장이 호출되지 않아야 함)
-        // verify(userReader, never()).exist(any(), any());
-    }
+		// [Fixture] 인증 안 된 상태(isVerified=false) 생성
+		EmailVerification unverifiedEmail = aVerification().email(newUser.email()).isVerified(false).build();
 
-    @Test
-    @DisplayName("회원가입 실패: 인증 후 유효 시간(60분)이 지난 경우 예외 발생")
-    void signUp_fail_timeout() {
-        // given
-        NewUser newUser = aNewUser().build();
-        LocalDateTime past = LocalDateTime.now().minusMinutes(61); // 61분 전
+		given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP)).willReturn(unverifiedEmail);
 
-        // [Fixture] 인증은 됐지만 시간이 지난 상태
-        EmailVerification expiredVerification = aVerification()
-                .email(newUser.email())
-                .isVerified(true)
-                .verifiedAt(past)
-                .build();
+		// when & then
+		assertThatThrownBy(() -> userService.signUp(newUser)).isInstanceOf(CoreException.class)
+			.extracting("errorType")
+			.isEqualTo(CoreErrorType.EMAIL_VERIFIED_AUTH);
 
-        given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP))
-                .willReturn(expiredVerification);
+		// (중복 체크나 저장이 호출되지 않아야 함)
+		// verify(userReader, never()).exist(any(), any());
+	}
 
-        // when & then
-        assertThatThrownBy(() -> userService.signUp(newUser))
-                .isInstanceOf(CoreException.class)
-                .extracting("errorType").isEqualTo(CoreErrorType.EMAIL_VERIFIED_OVERTIME);
-    }
+	@Test
+	@DisplayName("회원가입 실패: 인증 후 유효 시간(60분)이 지난 경우 예외 발생")
+	void signUp_fail_timeout() {
+		// given
+		NewUser newUser = aNewUser().build();
+		LocalDateTime past = LocalDateTime.now().minusMinutes(61); // 61분 전
 
-    @Test
-    @DisplayName("회원가입 실패: 이미 존재하는 유저(사업자번호/이메일)인 경우 예외 발생")
-    void signUp_fail_duplicate() {
-        // given
-        NewUser newUser = aNewUser().build();
-        EmailVerification verifiedEmail = aVerification().email(newUser.email()).build();
+		// [Fixture] 인증은 됐지만 시간이 지난 상태
+		EmailVerification expiredVerification = aVerification().email(newUser.email())
+			.isVerified(true)
+			.verifiedAt(past)
+			.build();
 
-        given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP))
-                .willReturn(verifiedEmail);
+		given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP)).willReturn(expiredVerification);
 
+		// when & then
+		assertThatThrownBy(() -> userService.signUp(newUser)).isInstanceOf(CoreException.class)
+			.extracting("errorType")
+			.isEqualTo(CoreErrorType.EMAIL_VERIFIED_OVERTIME);
+	}
 
-        willThrow(new CoreException(CoreErrorType.USER_EXIST_DATA))
-                .given(userReader).exist(newUser.companyCode(), newUser.email());
+	@Test
+	@DisplayName("회원가입 실패: 이미 존재하는 유저(사업자번호/이메일)인 경우 예외 발생")
+	void signUp_fail_duplicate() {
+		// given
+		NewUser newUser = aNewUser().build();
+		EmailVerification verifiedEmail = aVerification().email(newUser.email()).build();
 
-        // when & then
-        assertThatThrownBy(() -> userService.signUp(newUser))
-                .isInstanceOf(CoreException.class)
-                .extracting("errorType").isEqualTo(CoreErrorType.USER_EXIST_DATA);
-    }
+		given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP)).willReturn(verifiedEmail);
+
+		willThrow(new CoreException(CoreErrorType.USER_EXIST_DATA)).given(userReader)
+			.exist(newUser.companyCode(), newUser.email());
+
+		// when & then
+		assertThatThrownBy(() -> userService.signUp(newUser)).isInstanceOf(CoreException.class)
+			.extracting("errorType")
+			.isEqualTo(CoreErrorType.USER_EXIST_DATA);
+	}
+
 }
-

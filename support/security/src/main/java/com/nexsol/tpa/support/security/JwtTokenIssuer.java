@@ -10,17 +10,25 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
 
 @Component
-@RequiredArgsConstructor
 public class JwtTokenIssuer implements TokenIssuer {
 
-    private final JwtProperties jwtProperties;
+	private final JwtProperties jwtProperties;
+    private final Key key;
 
-    @Override
-    public AuthToken issue(Long userId, String email) {
-        long now = System.currentTimeMillis();
+    public JwtTokenIssuer(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
+        byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.getSecretKey());
+        this.key = Keys.hmacShaKeyFor(keyBytes);
+    }
+
+	@Override
+	public AuthToken issue(Long userId, String email) {
+        Instant now = Instant.now();
+
 
         String accessToken = createToken(userId, email, now, jwtProperties.getAccessTokenExpiration());
 
@@ -31,18 +39,17 @@ public class JwtTokenIssuer implements TokenIssuer {
                 .accessTokenExpiration(jwtProperties.getAccessTokenExpiration())
                 .refreshTokenExpiration(jwtProperties.getRefreshTokenExpiration())
                 .build();
-    }
+	}
 
-    private String createToken(Long userId, String email, long now, long expirationSeconds) {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.getSecretKey());
-        Key key = Keys.hmacShaKeyFor(keyBytes);
-
+	private String createToken(Long userId, String email, Instant now, long expirationSeconds) {
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("email", email)
-                .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + (expirationSeconds * 1000)))
-                .signWith(key, SignatureAlgorithm.HS512)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plusSeconds(expirationSeconds)))
+                .signWith(this.key, SignatureAlgorithm.HS512)
                 .compact();
     }
+
+
 }

@@ -11,23 +11,27 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserReader userReader;
-    private final UserAppender userAppender;
-    private final EmailVerificationReader emailVerificationReader;
 
-    public User signUp(NewUser newUser) {
-        EmailVerification verification = emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP);
+	private final UserReader userReader;
 
-        verification.validateSignup(LocalDateTime.now());
+	private final UserAppender userAppender;
 
-        userReader.exist(newUser.companyCode(), newUser.email());
+	private final EmailVerificationReader emailVerificationReader;
 
-        return userAppender.append(newUser.toUser());
-    }
+	public User signUp(NewUser newUser) {
+		EmailVerification verification = emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP);
 
-    public User update(User user, ModifyUser modifyUser) {
-        User updatedUser = user.update(modifyUser);
+		verification.validateSignup(LocalDateTime.now());
 
-        return userAppender.append(updatedUser);
-    }
+		userReader.exist(newUser.companyCode(), newUser.email());
+
+		return userAppender.append(newUser.toUser());
+	}
+
+	public User update(User user, ModifyUser modifyUser) {
+		User updatedUser = user.update(modifyUser);
+
+		return userAppender.append(updatedUser);
+	}
+
 }

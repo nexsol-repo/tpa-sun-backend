@@ -10,18 +10,20 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserReader userReader;
-    private final TokenIssuer tokenIssuer;
-    private final EmailVerificationReader emailVerificationReader;
+	private final UserReader userReader;
 
-    public AuthToken signIn(String CompanyCode, String email, String code) {
-        User user = userReader.read(CompanyCode, email);
+	private final TokenIssuer tokenIssuer;
 
-        EmailVerification verification = emailVerificationReader.read(email, EmailVerifiedType.SIGNIN);
+	private final EmailVerificationReader emailVerificationReader;
 
-        verification.checkCodeForLogin(code, LocalDateTime.now());
+	public AuthToken signIn(String CompanyCode, String email, String code) {
+		User user = userReader.read(CompanyCode, email);
 
-        return tokenIssuer.issue(user.id(), user.email());
-    }
+		EmailVerification verification = emailVerificationReader.read(email, EmailVerifiedType.SIGNIN);
+
+		verification.checkCodeForLogin(code, LocalDateTime.now());
+
+		return tokenIssuer.issue(user.id(), user.email());
+	}
+
 }
-

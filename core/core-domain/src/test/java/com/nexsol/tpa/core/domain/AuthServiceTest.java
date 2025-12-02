@@ -20,52 +20,59 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
 
-    @InjectMocks
-    private AuthService authService;
-    @Mock private UserReader userReader;
-    @Mock private EmailVerificationReader emailVerificationReader;
-    @Mock private TokenIssuer tokenIssuer;
+	@InjectMocks
+	private AuthService authService;
 
-    @Test
-    @DisplayName("로그인 성공: 인증 코드가 일치하면 토큰이 발급된다")
-    void login_success() {
-        // given
-        String companyCode = "123-45-67890";
-        String email = "test@nexsol.com";
-        String code = "123456";
+	@Mock
+	private UserReader userReader;
 
-        User user = aUser().build();
-        EmailVerification verification = aVerification().code(code).build();
-        AuthToken expectedToken = new AuthToken("access", "refresh", 3600, 12000);
+	@Mock
+	private EmailVerificationReader emailVerificationReader;
 
-        given(userReader.read(companyCode, email)).willReturn(user);
-        given(emailVerificationReader.read(email, EmailVerifiedType.SIGNIN)).willReturn(verification);
-        given(tokenIssuer.issue(user.id(), user.email())).willReturn(expectedToken);
+	@Mock
+	private TokenIssuer tokenIssuer;
 
-        // when
-        AuthToken token = authService.signIn(companyCode, email, code);
+	@Test
+	@DisplayName("로그인 성공: 인증 코드가 일치하면 토큰이 발급된다")
+	void login_success() {
+		// given
+		String companyCode = "123-45-67890";
+		String email = "test@nexsol.com";
+		String code = "123456";
 
-        // then
-        assertThat(token).isNotNull();
-        assertThat(token.accessToken()).isEqualTo("access");
-    }
+		User user = aUser().build();
+		EmailVerification verification = aVerification().code(code).build();
+		AuthToken expectedToken = new AuthToken("access", "refresh", 3600, 12000);
 
-    @Test
-    @DisplayName("로그인 실패: 인증 코드가 틀리면 예외 발생")
-    void login_fail_code_mismatch() {
-        // given
-        String code = "123456";
-        String wrongCode = "000000";
+		given(userReader.read(companyCode, email)).willReturn(user);
+		given(emailVerificationReader.read(email, EmailVerifiedType.SIGNIN)).willReturn(verification);
+		given(tokenIssuer.issue(user.id(), user.email())).willReturn(expectedToken);
 
-        given(userReader.read(any(), any())).willReturn(aUser().build());
+		// when
+		AuthToken token = authService.signIn(companyCode, email, code);
 
+		// then
+		assertThat(token).isNotNull();
+		assertThat(token.accessToken()).isEqualTo("access");
+	}
 
-        EmailVerification verification = aVerification().code(code).build();
-        given(emailVerificationReader.read(any(), any())).willReturn(verification);
+	@Test
+	@DisplayName("로그인 실패: 인증 코드가 틀리면 예외 발생")
+	void login_fail_code_mismatch() {
+		// given
+		String code = "123456";
+		String wrongCode = "000000";
 
-        // when & then
-        assertThatThrownBy(() -> authService.signIn("122-22-2222", "email", wrongCode))
-                .isInstanceOf(CoreException.class)
-                .extracting("errorType").isEqualTo(CoreErrorType.EMAIL_VERIFIED_INVALID);
-    }
+		given(userReader.read(any(), any())).willReturn(aUser().build());
+
+		EmailVerification verification = aVerification().code(code).build();
+		given(emailVerificationReader.read(any(), any())).willReturn(verification);
+
+		// when & then
+		assertThatThrownBy(() -> authService.signIn("122-22-2222", "email", wrongCode))
+			.isInstanceOf(CoreException.class)
+			.extracting("errorType")
+			.isEqualTo(CoreErrorType.EMAIL_VERIFIED_INVALID);
+	}
+
 }

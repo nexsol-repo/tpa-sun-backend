@@ -13,45 +13,54 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity extends BaseEntity {
-    private String companyCode;
-    private String email;
-    private String companyName;
-    private String name;
-    private String phoneNumber;
-    private String applicantName;
-    private String applicantEmail;
-    private String applicantPhoneNumber;
 
-    public static UserEntity fromDomain(User user) {
-        UserEntity entity = new UserEntity();
-        entity.setId(user.id());
-        entity.companyCode = user.companyCode();
-        entity.update(user);
+	private String companyCode;
 
-        return entity;
-    }
-    public void update(User user) {
-        this.email = user.email();
-        this.companyName = user.companyName();
-        this.name = user.name();
-        this.phoneNumber = user.phoneNumber();
-        this.applicantName = user.applicantName();
-        this.applicantEmail = user.applicantEmail();
-        this.applicantPhoneNumber = user.applicantPhoneNumber();
-    }
+	private String email;
 
+	private String companyName;
 
-    public User toDomain() {
-        return User.builder()
-                .id(this.getId())
-                .companyCode(this.companyCode)
-                .email(this.email)
-                .companyName(this.companyName)
-                .name(this.name)
-                .phoneNumber(this.phoneNumber)
-                .applicantName(this.applicantName)
-                .applicantEmail(this.applicantEmail)
-                .applicantPhoneNumber(this.applicantPhoneNumber)
-                .build();
-    }
+	private String name;
+
+	private String phoneNumber;
+
+	private String applicantName;
+
+	private String applicantEmail;
+
+	private String applicantPhoneNumber;
+
+	public static UserEntity fromDomain(User user) {
+		UserEntity entity = new UserEntity();
+		entity.setId(user.id());
+		entity.companyCode = user.companyCode();
+		entity.update(user);
+
+		return entity;
+	}
+
+	public void update(User user) {
+		this.email = user.email();
+		this.companyName = user.companyName();
+		this.name = user.name();
+		this.phoneNumber = user.phoneNumber();
+		this.applicantName = user.applicantName();
+		this.applicantEmail = user.applicantEmail();
+		this.applicantPhoneNumber = user.applicantPhoneNumber();
+	}
+
+	public User toDomain() {
+		return User.builder()
+			.id(this.getId())
+			.companyCode(this.companyCode)
+			.email(this.email)
+			.companyName(this.companyName)
+			.name(this.name)
+			.phoneNumber(this.phoneNumber)
+			.applicantName(this.applicantName)
+			.applicantEmail(this.applicantEmail)
+			.applicantPhoneNumber(this.applicantPhoneNumber)
+			.build();
+	}
+
 }

@@ -10,14 +10,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CoreDataSourceConfig {
 
-    @Bean
-    @ConfigurationProperties(prefix = "storage.datasouce.core")
-    public HikariConfig coreHikariConfig() {
-        return new HikariConfig();
-    }
+	@Bean
+	@ConfigurationProperties(prefix = "storage.datasouce.core")
+	public HikariConfig coreHikariConfig() {
+		return new HikariConfig();
+	}
 
-    @Bean
-    public HikariDataSource coreDataSource(@Qualifier("coreHikariConfig") HikariConfig config) {
-        return new HikariDataSource(config);
-    }
+	@Bean
+	public HikariDataSource coreDataSource(@Qualifier("coreHikariConfig") HikariConfig config) {
+		return new HikariDataSource(config);
+	}
+
 }

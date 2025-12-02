@@ -12,32 +12,34 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
-    private final UserJpaRepository userJpaRepository;
 
-    @Override
-    public Optional<User> findByCompanyCodeAndEmail(String companyCode, String email) {
-        return userJpaRepository.findByCompanyCodeAndEmail(companyCode, email)
-                .map(UserEntity::toDomain);
-    }
+	private final UserJpaRepository userJpaRepository;
 
-    @Override
-    public boolean existsCompanyCodeAndEmail(String companyCode, String email) {
-        return userJpaRepository.existsByCompanyCodeAndEmail(companyCode, email);
-    }
+	@Override
+	public Optional<User> findByCompanyCodeAndEmail(String companyCode, String email) {
+		return userJpaRepository.findByCompanyCodeAndEmail(companyCode, email).map(UserEntity::toDomain);
+	}
 
-    @Override
-    public User save(User user) {
-        if (user.id() == null) {
+	@Override
+	public boolean existsCompanyCodeAndEmail(String companyCode, String email) {
+		return userJpaRepository.existsByCompanyCodeAndEmail(companyCode, email);
+	}
 
-            return userJpaRepository.save(UserEntity.fromDomain(user)).toDomain();
-        } else {
+	@Override
+	public User save(User user) {
+		if (user.id() == null) {
 
-            UserEntity entity = userJpaRepository.findById(user.id())
-                    .orElseThrow(() -> new CoreException(CoreErrorType.USER_NOT_FOUND));
+			return userJpaRepository.save(UserEntity.fromDomain(user)).toDomain();
+		}
+		else {
 
-            entity.update(user);
+			UserEntity entity = userJpaRepository.findById(user.id())
+				.orElseThrow(() -> new CoreException(CoreErrorType.USER_NOT_FOUND));
 
-            return userJpaRepository.save(entity).toDomain();
-        }
-    }
+			entity.update(user);
+
+			return userJpaRepository.save(entity).toDomain();
+		}
+	}
+
 }
