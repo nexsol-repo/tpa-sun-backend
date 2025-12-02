@@ -2,7 +2,9 @@ package com.nexsol.tpa.core.domain;
 
 import com.nexsol.tpa.core.error.CoreErrorType;
 import com.nexsol.tpa.core.error.CoreException;
+import lombok.Builder;
 
+@Builder
 public record NewUser (
         String companyCode,
         String email,
