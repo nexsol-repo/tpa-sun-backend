@@ -11,15 +11,21 @@ spring:
   jpa:
     properties:
       hibernate:
-  #        format_sql: true
-  #        show_sql: true
+          format_sql: true
+          show_sql: true
+  h2:
+    console:
+      enabled: true
 
-  flyway:
-    clean-on-validation-error: true
-    enabled: true
-    baseline-on-migrate: true
-    validate-on-migrate: false
-    locations: classpath:db/migration
+storage:
+  datasource:
+    core:
+      driver-class-name: org.h2.Driver
+      jdbc-url: jdbc:h2:mem:core;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      username: sa
+      pool-name: core-db-pool
+      data-source-properties:
+        rewriteBatchedStatements: true
 ---
 spring.config.activate.on-profile: local-dev
 spring:
@@ -34,10 +40,10 @@ spring:
 storage:
   datasource:
     core:
-      jdbc-url: jdbc:mysql://localhost:${DB_PORT}/${DB_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      jdbc-url: jdbc:mariadb://localhost:${DB_PORT}/${DB_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
       username: ${DB_USERNAME}
       password: ${DB_PASSWORD}
-      driver-class-name: com.mysql.cj.jdbc.Driver
+      driver-class-name: org.mariadb.jdbc.Driver
       hikari:
         maximum-pool-size: 8
         minimum-idle: 5

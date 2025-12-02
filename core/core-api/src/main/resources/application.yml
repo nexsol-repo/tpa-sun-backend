@@ -1,11 +1,12 @@
+spring.application.name: tpa-sun-core-api
+spring.profiles.active: local
 spring:
   application:
-    name: spring-boot-multi-module-core-api
-    config:
-      import:
-        - optional:file:.env[.properties]
-        - db-core.yml
-    web.resources.add-mappings: false
+   config:
+     import:
+       - optional:file:.env[.properties]
+       - db-core.yml
+   web.resources.add-mappings: false
   mail:
     host: ${HIWORKS_HOST}
     port: ${HIWORKS_PORT}
@@ -33,6 +34,25 @@ spring:
   config:
     activate:
       on-profile: local
+  docker:
+    compose:
+      enabled: false
+  mail:
+    host: localhost
+    port: 465
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+# JWT 설정
+jwt:
+  secret-key: "VGhpc0lzQVRlc3RTZWNyZXRLZXlGb3JKd3RUb2tlbkdlbmVyYXRpb25BbmRJdElzTG9uZ0Vub3VnaA=="
+  access-token-expiration: 3600
+  refresh-token-expiration: 1209600
 
 ---
 spring:
