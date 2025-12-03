@@ -16,6 +16,10 @@ public class UserReader {
 			.orElseThrow(() -> new CoreException(CoreErrorType.USER_NOT_FOUND));
 	}
 
+	public User read(Long id) {
+		return userRepository.findById(id).orElseThrow(() -> new CoreException(CoreErrorType.USER_NOT_FOUND));
+	}
+
 	public void exist(String bizNo, String email) {
 		if (userRepository.existsCompanyCodeAndEmail(bizNo, email)) {
 
