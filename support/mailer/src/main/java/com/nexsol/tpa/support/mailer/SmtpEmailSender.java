@@ -20,7 +20,7 @@ public class SmtpEmailSender implements EmailSender {
 			SimpleMailMessage message = new SimpleMailMessage();
 			message.setTo(toEmail);
 			message.setSubject("[TPA] 인증 번호 안내");
-			message.setText("인증 번호는 [" + authCode + "] 입니다.\n5분 안에 입력해주세요.");
+			message.setText("인증 번호는 [" + authCode + "] 입니다.\n3분 안에 입력해주세요.");
 
 			javaMailSender.send(message);
 			log.info("인증 메일 발송 성공: {}", toEmail);
