@@ -3,9 +3,10 @@ package com.nexsol.tpa.core.error;
 public enum CoreErrorCode {
 
 	// 공통
-	C1000,
+	T1000,
 	// Auth
-	C1001, C1002, C1003,
-
+	T1001, T1002, T1003, T1004,
+	// EmailVerification
+	T2001, T2002, T2003, T2004, T2005;
 
 }
