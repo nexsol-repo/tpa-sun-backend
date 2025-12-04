@@ -22,6 +22,8 @@ public abstract class RestDocsTest {
     @BeforeEach
     public void setUp(RestDocumentationContextProvider restDocumentation) {
         this.restDocumentation = restDocumentation;
+
+
     }
 
     protected WebTestClient mockController(Object controller) {

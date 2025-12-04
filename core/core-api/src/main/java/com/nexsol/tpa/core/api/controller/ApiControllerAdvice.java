@@ -1,4 +1,4 @@
-package com.nexsol.tpa.core.api.contorller;
+package com.nexsol.tpa.core.api.controller;
 
 import com.nexsol.tpa.core.api.support.response.ApiResponse;
 import com.nexsol.tpa.core.error.CoreErrorKind;

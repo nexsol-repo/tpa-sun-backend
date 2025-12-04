@@ -1,7 +1,7 @@
-package com.nexsol.tpa.core.api.contorller.v1;
+package com.nexsol.tpa.core.api.controller.v1;
 
 
-import com.nexsol.tpa.core.api.contorller.v1.request.SignInRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.SignInRequest;
 import com.nexsol.tpa.core.domain.AuthService;
 import com.nexsol.tpa.core.domain.AuthToken;
 import com.nexsol.tpa.core.domain.EmailVerifiedService;

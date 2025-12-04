@@ -1,4 +1,4 @@
-package com.nexsol.tpa.core.api.contorller;
+package com.nexsol.tpa.core.api.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

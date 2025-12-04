@@ -1,13 +1,12 @@
-package com.nexsol.tpa.core.api.contorller.v1;
+package com.nexsol.tpa.core.api.controller.v1;
 
-import com.nexsol.tpa.core.api.contorller.v1.request.EmailSendRequest;
-import com.nexsol.tpa.core.api.contorller.v1.request.EmailVerifyRequest;
-import com.nexsol.tpa.core.api.contorller.v1.request.SignInRequest;
-import com.nexsol.tpa.core.api.contorller.v1.response.AuthResponse;
+import com.nexsol.tpa.core.api.controller.v1.request.EmailSendRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.EmailVerifyRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.SignInRequest;
+import com.nexsol.tpa.core.api.controller.v1.response.AuthResponse;
 import com.nexsol.tpa.core.api.support.response.ApiResponse;
 import com.nexsol.tpa.core.domain.AuthService;
 import com.nexsol.tpa.core.domain.AuthToken;
-import com.nexsol.tpa.core.domain.EmailVerificationFinder;
 import com.nexsol.tpa.core.domain.EmailVerifiedService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,7 @@ public class AuthController {
 
 	private final EmailVerifiedService emailVerifiedService;
 
-	@PostMapping(value = "/login", version = "1.0")
+	@PostMapping(value = "/login")
 	public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody @Valid SignInRequest request) {
 		AuthToken token = authService.signIn(request.companyCode(), request.email(), request.code());
 
