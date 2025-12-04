@@ -1,6 +1,5 @@
 package com.nexsol.tpa.test.api;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,22 +14,22 @@ import static org.springframework.restdocs.webtestclient.WebTestClientRestDocume
 @ExtendWith(RestDocumentationExtension.class)
 public abstract class RestDocsTest {
 
-    protected WebTestClient webTestClient;
+	protected WebTestClient webTestClient;
 
-    private RestDocumentationContextProvider restDocumentation;
+	private RestDocumentationContextProvider restDocumentation;
 
-    @BeforeEach
-    public void setUp(RestDocumentationContextProvider restDocumentation) {
-        this.restDocumentation = restDocumentation;
+	@BeforeEach
+	public void setUp(RestDocumentationContextProvider restDocumentation) {
+		this.restDocumentation = restDocumentation;
 
+	}
 
-    }
+	protected WebTestClient mockController(Object controller) {
+		// MockMvcWebTestClient를 사용해 서버 없이 Controller 테스트
+		return MockMvcWebTestClient.bindToController(controller)
+			.configureClient()
+			.filter(documentationConfiguration(restDocumentation))
+			.build();
+	}
 
-    protected WebTestClient mockController(Object controller) {
-        // MockMvcWebTestClient를 사용해 서버 없이 Controller 테스트
-        return MockMvcWebTestClient.bindToController(controller)
-                .configureClient()
-                .filter(documentationConfiguration(restDocumentation))
-                .build();
-    }
 }
