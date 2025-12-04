@@ -14,6 +14,12 @@ public class AuthService {
 
 	private final TokenIssuer tokenIssuer;
 
+	private final TokenReader tokenReader;
+
+	private final TokenRemover tokenRemover;
+
+	private final TokenAppender tokenAppender;
+
 	private final EmailVerificationReader emailVerificationReader;
 
 	public AuthToken signIn(String CompanyCode, String email, String code) {
@@ -23,7 +29,28 @@ public class AuthService {
 
 		verification.checkCodeForLogin(code, LocalDateTime.now());
 
-		return tokenIssuer.issue(user.id(), user.email());
+		AuthToken authToken = tokenIssuer.issue(user.id(), user.email());
+
+		tokenAppender
+			.append(RefreshToken.create(user.id(), authToken.refreshToken(), authToken.refreshTokenExpiration()));
+
+		return authToken;
+	}
+
+	public AuthToken reissue(String currentRefreshToken) {
+
+		RefreshToken storedToken = tokenReader.read(currentRefreshToken);
+
+		User user = userReader.read(storedToken.userId());
+
+		AuthToken newAuthToken = tokenIssuer.issue(user.id(), user.email());
+
+		tokenRemover.remove(currentRefreshToken);
+
+		tokenAppender
+			.append(RefreshToken.create(user.id(), newAuthToken.refreshToken(), newAuthToken.refreshTokenExpiration()));
+
+		return newAuthToken;
 	}
 
 }

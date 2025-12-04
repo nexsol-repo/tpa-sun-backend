@@ -1,4 +1,4 @@
-package com.nexsol.tpa.core.api.contorller.v1.request;
+package com.nexsol.tpa.core.api.controller.v1.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

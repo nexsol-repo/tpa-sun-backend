@@ -13,6 +13,9 @@ public enum CoreErrorType {
 
 	USER_EXIST_DATA(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T1003, "해당 유저가 존재합니다.", CoreErrorLevel.INFO),
 	INVALID_INPUT(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T1004, "잘못된 입력값입니다.", CoreErrorLevel.INFO),
+	TOKEN_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T1005, "존재하지 않는 refresh token 입니다.",
+			CoreErrorLevel.INFO),
+	AUTH_UNAUTHORIZED(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T1006, "만료된 refresh token 입니다.", CoreErrorLevel.INFO),
 
 	// EmailVerification
 	EMAIL_VERIFIED_OVERTIME(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T2001, "인증 시간이 만료되었습니다.", CoreErrorLevel.INFO),

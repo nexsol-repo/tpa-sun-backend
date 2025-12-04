@@ -6,6 +6,8 @@ public interface UserRepository {
 
 	Optional<User> findByCompanyCodeAndEmail(String companyCode, String email);
 
+	Optional<User> findById(Long id);
+
 	boolean existsCompanyCodeAndEmail(String companyCode, String email);
 
 	User save(User user);

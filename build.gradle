@@ -5,6 +5,7 @@ plugins {
     id 'io.spring.dependency-management'
     id 'io.spring.javaformat' apply(false)
     id 'org.asciidoctor.jvm.convert' apply(false)
+
 }
 
 apply from: 'lint.gradle'
@@ -41,8 +42,14 @@ subprojects {
         testImplementation("org.assertj:assertj-core:3.27.3")
         testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
         testCompileOnly("org.projectlombok:lombok:1.18.42")
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-        testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+        testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+        testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+        testImplementation("org.springframework.boot:spring-boot-starter-mail-test")
+        testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
+        testImplementation("org.springframework.boot:spring-boot-starter-security-test")
+
+
 
     }
 
@@ -73,10 +80,27 @@ subprojects {
 
     tasks.register('restDocsTest', Test) {
         group = 'verification'
+        description = 'Runs REST Docs tests.'
+
         useJUnitPlatform {
             includeTags('restdocs')
         }
+
+        // [중요] 컴파일이 먼저 수행되도록 의존성 명시
+        dependsOn 'testClasses'
+
+        // 테스트 클래스 위치 지정
+        testClassesDirs = sourceSets.test.output.classesDirs
+
+        // [핵심 해결책] 런타임 클래스패스에 '메인 소스셋의 출력(컴파일된 클래스들)'을 명시적으로 추가
+        classpath = sourceSets.test.runtimeClasspath + sourceSets.main.output
+
+        testLogging {
+            events "passed", "skipped", "failed"
+            showStandardStreams = true
+        }
     }
+
 
     tasks.register('developTest', Test) {
         group = 'verification'

@@ -1,0 +1,12 @@
+dependencies {
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+
+    compileOnly 'org.springframework.boot:spring-boot-starter-webmvc-test'
+
+    compileOnly 'org.springframework.boot:spring-boot-jackson'
+
+    compileOnly 'org.springframework.boot:spring-boot-webclient'
+
+    api 'org.springframework.restdocs:spring-restdocs-webtestclient:4.0.0'
+
+}

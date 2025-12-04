@@ -1,4 +1,4 @@
-package com.nexsol.tpa.core.api.contorller.v1.response;
+package com.nexsol.tpa.core.api.controller.v1.response;
 
 import com.nexsol.tpa.core.domain.User;
 

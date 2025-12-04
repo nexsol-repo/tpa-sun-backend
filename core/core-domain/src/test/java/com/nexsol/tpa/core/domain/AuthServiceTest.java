@@ -6,6 +6,7 @@ import com.nexsol.tpa.core.error.CoreException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,6 +17,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
@@ -31,6 +33,15 @@ public class AuthServiceTest {
 
 	@Mock
 	private TokenIssuer tokenIssuer;
+
+	@Mock
+	private TokenReader tokenReader;
+
+	@Mock
+	private TokenRemover tokenRemover;
+
+	@Mock
+	private TokenAppender tokenAppender;
 
 	@Test
 	@DisplayName("로그인 성공: 인증 코드가 일치하면 토큰이 발급된다")
@@ -54,6 +65,13 @@ public class AuthServiceTest {
 		// then
 		assertThat(token).isNotNull();
 		assertThat(token.accessToken()).isEqualTo("access");
+
+		ArgumentCaptor<RefreshToken> captor = ArgumentCaptor.forClass(RefreshToken.class);
+		verify(tokenAppender).append(captor.capture());
+
+		RefreshToken savedRefreshToken = captor.getValue();
+		assertThat(savedRefreshToken.userId()).isEqualTo(user.id());
+		assertThat(savedRefreshToken.token()).isEqualTo("refresh");
 	}
 
 	@Test

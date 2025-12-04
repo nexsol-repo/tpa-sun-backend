@@ -1,16 +1,18 @@
-package com.nexsol.tpa.core.api.contorller.v1;
+package com.nexsol.tpa.core.api.controller.v1;
 
-import com.nexsol.tpa.core.api.contorller.v1.request.EmailSendRequest;
-import com.nexsol.tpa.core.api.contorller.v1.request.EmailVerifyRequest;
-import com.nexsol.tpa.core.api.contorller.v1.request.SignInRequest;
-import com.nexsol.tpa.core.api.contorller.v1.response.AuthResponse;
+import com.nexsol.tpa.core.api.controller.v1.request.EmailSendRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.EmailVerifyRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.SignInRequest;
+import com.nexsol.tpa.core.api.controller.v1.response.AuthResponse;
 import com.nexsol.tpa.core.api.support.response.ApiResponse;
 import com.nexsol.tpa.core.domain.AuthService;
 import com.nexsol.tpa.core.domain.AuthToken;
-import com.nexsol.tpa.core.domain.EmailVerificationFinder;
 import com.nexsol.tpa.core.domain.EmailVerifiedService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,10 +27,21 @@ public class AuthController {
 
 	private final EmailVerifiedService emailVerifiedService;
 
-	@PostMapping("/login")
-	public ApiResponse<AuthResponse> login(@RequestBody @Valid SignInRequest request) {
+	@PostMapping(value = "/login")
+	public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody @Valid SignInRequest request) {
 		AuthToken token = authService.signIn(request.companyCode(), request.email(), request.code());
-		return ApiResponse.success(AuthResponse.of(token));
+
+		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", token.refreshToken())
+			.httpOnly(true)
+			// .secure(true)
+			.secure(false)
+			.path("/")
+			.maxAge(token.refreshTokenExpiration())
+			.sameSite("Strict")
+			.build();
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+			.body(ApiResponse.success(AuthResponse.of(token)));
 	}
 
 	@PostMapping("/email/send")
