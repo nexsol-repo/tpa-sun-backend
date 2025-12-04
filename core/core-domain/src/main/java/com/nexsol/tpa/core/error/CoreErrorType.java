@@ -22,7 +22,12 @@ public enum CoreErrorType {
 	EMAIL_VERIFIED_INVALID(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T2002, "인증 코드가 일치하지 않습니다.", CoreErrorLevel.INFO),
 	EMAIL_VERIFIED_REPEAT(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T2003, "잠시 후 다시 시도해주세요.", CoreErrorLevel.INFO),
 	EMAIL_VERIFIED_AUTH(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T2004, "이메일 인증이 완료되지 않았습니다.", CoreErrorLevel.INFO),
-	EMAIL_VERIFIED_EMPTY(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T2005, "인증 요청 내역이 없습니다.", CoreErrorLevel.INFO);
+	EMAIL_VERIFIED_EMPTY(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T2005, "인증 요청 내역이 없습니다.", CoreErrorLevel.INFO),
+
+    // Insurance
+    INSURANCE_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR,CoreErrorCode.T3001,"보험가입데이터를 찾을 수 없습니다.",CoreErrorLevel.INFO),
+    INSURANCE_MANUAL_CONSULTATION_REQUIRED(CoreErrorKind.CLIENT_ERROR,CoreErrorCode.T3002,"현재 조건으로는 가입할수 없습니다.",CoreErrorLevel.INFO);
+
 
 	private final CoreErrorKind kind;
 
