@@ -49,7 +49,6 @@ subprojects {
         testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
         testImplementation("org.springframework.boot:spring-boot-starter-security-test")
 
-        testImplementation 'org.springframework.boot:spring-boot-starter-test-classic'
 
 
     }

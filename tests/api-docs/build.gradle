@@ -1,13 +1,12 @@
 dependencies {
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
+
     compileOnly 'org.springframework.boot:spring-boot-starter-webmvc-test'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test-classic'
+    compileOnly 'org.springframework.boot:spring-boot-jackson'
 
-    api 'org.springframework.restdocs:spring-restdocs-mockmvc'
-//    api 'org.springframework.restdocs:spring-restdocs-restassured:4.0.0-M3'
-//    api('io.rest-assured:spring-mock-mvc:5.5.6') {
-//        exclude group: 'org.springframework'
-//        exclude group: 'org.springframework.boot'
-//    }
+    compileOnly 'org.springframework.boot:spring-boot-webclient'
+
+    api 'org.springframework.restdocs:spring-restdocs-webtestclient:4.0.0'
+
 }

@@ -1,37 +1,34 @@
 package com.nexsol.tpa.test.api;
 
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.filter.CharacterEncodingFilter;
-
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.documentationConfiguration;
 
 @Tag("restdocs")
 @ExtendWith(RestDocumentationExtension.class)
 public abstract class RestDocsTest {
 
-	protected MockMvc mockMvc;
+    protected WebTestClient webTestClient;
 
-	// 자식 클래스에서 테스트 대상 컨트롤러를 제공하도록 강제
-	protected abstract Object initController();
+    private RestDocumentationContextProvider restDocumentation;
 
-	@BeforeEach
-	public void setUp(RestDocumentationContextProvider restDocumentation) {
-		Object controller = initController();
+    @BeforeEach
+    public void setUp(RestDocumentationContextProvider restDocumentation) {
+        this.restDocumentation = restDocumentation;
+    }
 
-		this.mockMvc = MockMvcBuilders.standaloneSetup(controller)
-			.apply(documentationConfiguration(restDocumentation)) // REST Docs 설정
-			.addFilters(new CharacterEncodingFilter("UTF-8", true)) // 한글 깨짐 방지
-			.alwaysDo(print()) // 테스트 로그 출력
-			.build();
-	}
-
+    protected WebTestClient mockController(Object controller) {
+        // MockMvcWebTestClient를 사용해 서버 없이 Controller 테스트
+        return MockMvcWebTestClient.bindToController(controller)
+                .configureClient()
+                .filter(documentationConfiguration(restDocumentation))
+                .build();
+    }
 }

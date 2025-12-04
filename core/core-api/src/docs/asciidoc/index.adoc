@@ -1,0 +1,24 @@
+= TPA Sun Backend API 문서
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+// 스니펫 경로 변수 설정
+:snippets: build/generated-snippets
+
+== 소개
+TPA Sun Backend API 문서입니다.
+
+== 인증 (Auth)
+
+=== 로그인
+// [변경] operation:: 매크로 대신 수동 include 사용
+==== 요청
+include::{snippets}/auth-login/http-request.adoc[]
+include::{snippets}/auth-login/request-fields.adoc[]
+
+==== 응답
+include::{snippets}/auth-login/http-response.adoc[]
+include::{snippets}/auth-login/response-fields.adoc[]
