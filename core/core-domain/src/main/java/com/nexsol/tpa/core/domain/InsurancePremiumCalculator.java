@@ -14,7 +14,7 @@ public class InsurancePremiumCalculator {
 	public InsuranceCoverage calculate(InsurancePlant plant, InsuranceCondition condition) {
 
 		// 1. 요율 조회 (Policy 위임)
-		String region = plant.addressInfo().region();
+		String region = plant.region();
 		double mdRate = ratePolicy.getMdRate(region);
 		double biRate = ratePolicy.getBiRate(region);
 

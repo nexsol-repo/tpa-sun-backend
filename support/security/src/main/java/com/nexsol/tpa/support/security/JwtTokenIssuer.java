@@ -1,7 +1,10 @@
 package com.nexsol.tpa.support.security;
 
 import com.nexsol.tpa.core.domain.AuthToken;
+import com.nexsol.tpa.core.domain.JwtPayload;
 import com.nexsol.tpa.core.domain.TokenIssuer;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -52,6 +55,27 @@ public class JwtTokenIssuer implements TokenIssuer {
 			.expiration(Date.from(now.plusSeconds(expirationSeconds)))
 			.signWith(this.key, Jwts.SIG.HS256)
 			.compact();
+	}
+
+	public JwtPayload parseToken(String token) {
+		Claims claims = Jwts.parser().setSigningKey(getSecretKey()).build().parseClaimsJws(token).getBody();
+
+		Long sub = Long.parseLong(claims.getSubject());
+		return new JwtPayload(sub);
+	}
+
+	public boolean validateToken(String token) {
+		try {
+			Jwts.parser().setSigningKey(getSecretKey()).build().parseClaimsJws(token);
+			return true;
+		}
+		catch (JwtException | IllegalArgumentException e) {
+			return false;
+		}
+	}
+
+	public Long getUserId(String token) {
+		return parseToken(token).sub();
 	}
 
 	private SecretKey getSecretKey() {

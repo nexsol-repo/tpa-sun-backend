@@ -25,7 +25,7 @@ public class InsuranceApplicationEntity extends BaseEntity {
 	// 필수 값 + Enum 타입 지정
 	@Enumerated(EnumType.STRING)
 	@Column(columnDefinition = "VARCHAR(20)", nullable = false)
-	private InsuranceStatus status;
+	private InsuranceStatus insuranceStatus;
 
 	@Embedded
 	private AgreementInfoEmbeddable agreementInfo;
@@ -53,7 +53,7 @@ public class InsuranceApplicationEntity extends BaseEntity {
 		entity.setId(domain.id());
 		entity.applicationNumber = domain.applicationNumber();
 		entity.userId = domain.userId();
-		entity.status = domain.status();
+		entity.insuranceStatus = domain.status();
 
 		if (domain.agreementInfo() != null)
 			entity.agreementInfo = new AgreementInfoEmbeddable(domain.agreementInfo());
@@ -66,7 +66,7 @@ public class InsuranceApplicationEntity extends BaseEntity {
 	}
 
 	public void update(InsuranceApplication domain) {
-		this.status = domain.status();
+		this.insuranceStatus = domain.status();
 
 		if (domain.plantInfo() != null)
 			this.plantInfo = new PlantInfoEmbeddable(domain.plantInfo());
@@ -81,7 +81,7 @@ public class InsuranceApplicationEntity extends BaseEntity {
 			.id(this.getId())
 			.applicationNumber(this.applicationNumber)
 			.userId(this.userId)
-			.status(this.status)
+			.status(this.insuranceStatus)
 			.agreementInfo(this.agreementInfo != null ? this.agreementInfo.toDomain() : null)
 			.applicantInfo(this.applicantInfo != null ? this.applicantInfo.toDomain() : null)
 			.plantInfo(this.plantInfo != null ? this.plantInfo.toDomain() : null)
