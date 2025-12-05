@@ -1,5 +1,7 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.error.CoreErrorType;
+import com.nexsol.tpa.core.error.CoreException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,11 @@ public class InsuranceApplicationService {
     private final InsuranceApplicationWriter applicationWriter;
     private final InsuranceInspector insuranceInspector;
     private final InsurancePremiumCalculator premiumCalculator;
+
+
+    public InsuranceApplication getInsuranceApplication(Long applicationId) {
+        return applicationReader.read(applicationId);
+    }
 
 
     public InsuranceApplication savePlantInit(Long userId, AgreementInfo agreementInfo) {
@@ -58,6 +65,21 @@ public class InsuranceApplicationService {
         }
 
         return applicationWriter.writer(updated);
+    }
+
+    public InsuranceApplication completeApplication(Long applicationId) {
+        InsuranceApplication app = applicationReader.read(applicationId);
+
+
+        validateForCompletion(app);
+
+
+        return applicationWriter.writer(app);
+    }
+    private void validateForCompletion(InsuranceApplication app) {
+        if (app.plantInfo() == null) throw new CoreException(CoreErrorType.INVALID_INPUT, "발전소 정보가 입력되지 않았습니다.");
+        if (app.condition() == null) throw new CoreException(CoreErrorType.INVALID_INPUT, "가입 조건이 입력되지 않았습니다.");
+        if (app.coverage() == null) throw new CoreException(CoreErrorType.INVALID_INPUT, "보험료 산출이 완료되지 않았습니다.");
     }
 
 }
