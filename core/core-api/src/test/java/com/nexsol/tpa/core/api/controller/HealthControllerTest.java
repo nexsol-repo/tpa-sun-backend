@@ -13,22 +13,23 @@ import static org.springframework.restdocs.webtestclient.WebTestClientRestDocume
 @Tag("restdocs")
 public class HealthControllerTest extends RestDocsTest {
 
-    @BeforeEach
-    void setUp() {
-        this.webTestClient = mockController(new HealthController());
-    }
+	@BeforeEach
+	void setUp() {
+		this.webTestClient = mockController(new HealthController());
+	}
 
-    @Test
-    @DisplayName("헬스 체크 API 문서화")
-    void health() {
-        webTestClient.get().uri("/health")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .consumeWith(document("health-check",
-                        requestPreprocessor(),
-                        responsePreprocessor()
-                        // 요청/응답 필드가 없으므로 fields() 생략 가능
-                ));
-    }
+	@Test
+	@DisplayName("헬스 체크 API 문서화")
+	void health() {
+		webTestClient.get()
+			.uri("/health")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.consumeWith(document("health-check", requestPreprocessor(), responsePreprocessor()
+			// 요청/응답 필드가 없으므로 fields() 생략 가능
+			));
+	}
+
 }
