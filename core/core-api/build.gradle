@@ -6,6 +6,7 @@ dependencies {
     implementation project(":core:core-enum")
 
     runtimeOnly project(":storage:db-core")
+    runtimeOnly project(":storage:file-core")
 
     implementation project(":support:security")
     implementation project(":support:mailer")

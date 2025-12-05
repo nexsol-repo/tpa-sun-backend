@@ -27,7 +27,12 @@ jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token-expiration: 3600
   refresh-token-expiration: 1209600
-
+minio:
+  endpoint: ${MINIO_URL}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket-name: tpa-sun
+  region: ap-northeast-2
 
 ---
 spring:
