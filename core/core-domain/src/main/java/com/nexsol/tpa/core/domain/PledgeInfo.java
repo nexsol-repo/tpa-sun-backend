@@ -9,7 +9,7 @@ public record PledgeInfo(
         String managerName,
         String managerPhone,
         Long amount,
-        Address address,
+        String address,
         BondSendStatus bondSendStatus,
         String remark
 ) {}

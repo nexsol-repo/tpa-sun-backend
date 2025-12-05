@@ -10,7 +10,8 @@ import java.time.LocalDate;
 @Builder
 public record InsurancePlant(
 String plantName,
-Address addressInfo,
+String address,
+String region,
 BigDecimal capacity,
 BigDecimal area,
 LocalDate inspectionDate,

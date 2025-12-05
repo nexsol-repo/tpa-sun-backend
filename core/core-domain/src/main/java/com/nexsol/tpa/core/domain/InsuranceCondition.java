@@ -1,7 +1,10 @@
 package com.nexsol.tpa.core.domain;
 
+import lombok.Builder;
+
 import java.time.LocalDate;
 
+@Builder
 public record InsuranceCondition(
         Boolean essInstalled,           // ESS 설치 여부 (Wrapper Class 사용으로 null 허용 - 작성중 대비)
         Long propertyDamageAmount,      // 재물손해 가입금액
