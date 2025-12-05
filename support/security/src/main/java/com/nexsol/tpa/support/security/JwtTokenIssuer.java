@@ -6,18 +6,19 @@ import com.nexsol.tpa.core.domain.TokenIssuer;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
+
 import java.time.Instant;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtTokenIssuer implements TokenIssuer {
 
@@ -58,7 +59,8 @@ public class JwtTokenIssuer implements TokenIssuer {
 	}
 
 	public JwtPayload parseToken(String token) {
-		Claims claims = Jwts.parser().setSigningKey(getSecretKey()).build().parseClaimsJws(token).getBody();
+
+		Claims claims = Jwts.parser().verifyWith(this.key).build().parseSignedClaims(token).getPayload();
 
 		Long sub = Long.parseLong(claims.getSubject());
 		return new JwtPayload(sub);
@@ -66,20 +68,18 @@ public class JwtTokenIssuer implements TokenIssuer {
 
 	public boolean validateToken(String token) {
 		try {
-			Jwts.parser().setSigningKey(getSecretKey()).build().parseClaimsJws(token);
+
+			Jwts.parser().verifyWith(this.key).build().parseSignedClaims(token);
 			return true;
 		}
 		catch (JwtException | IllegalArgumentException e) {
+			log.error("토큰 검증 실패: {}", e.getMessage());
 			return false;
 		}
 	}
 
 	public Long getUserId(String token) {
 		return parseToken(token).sub();
-	}
-
-	private SecretKey getSecretKey() {
-		return Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
 	}
 
 }
