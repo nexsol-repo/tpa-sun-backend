@@ -7,5 +7,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public interface InsuranceRateRepository {
-    Optional<BigDecimal> findRate(RateType type, String key, LocalDate date);
+
+	Optional<BigDecimal> findRate(RateType type, String key, LocalDate date);
+
 }

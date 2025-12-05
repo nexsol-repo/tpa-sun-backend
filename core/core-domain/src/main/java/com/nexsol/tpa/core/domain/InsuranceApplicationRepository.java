@@ -4,12 +4,12 @@ import java.util.Optional;
 
 public interface InsuranceApplicationRepository {
 
+	InsuranceApplication save(InsuranceApplication application);
 
-    InsuranceApplication save(InsuranceApplication application);
+	Optional<InsuranceApplication> findById(Long id);
 
-    Optional<InsuranceApplication> findById(Long id);
+	Optional<InsuranceApplication> findByApplicationNumber(String applicationNumber);
 
-    Optional<InsuranceApplication> findByApplicationNumber(String applicationNumber);
+	Optional<InsuranceApplication> findWritingApplication(Long userId);
 
-    Optional<InsuranceApplication> findWritingApplication(Long userId);
 }

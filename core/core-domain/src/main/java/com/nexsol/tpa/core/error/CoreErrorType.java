@@ -24,10 +24,12 @@ public enum CoreErrorType {
 	EMAIL_VERIFIED_AUTH(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T2004, "이메일 인증이 완료되지 않았습니다.", CoreErrorLevel.INFO),
 	EMAIL_VERIFIED_EMPTY(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T2005, "인증 요청 내역이 없습니다.", CoreErrorLevel.INFO),
 
-    // Insurance
-    INSURANCE_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR,CoreErrorCode.T3001,"보험가입데이터를 찾을 수 없습니다.",CoreErrorLevel.INFO),
-    INSURANCE_MANUAL_CONSULTATION_REQUIRED(CoreErrorKind.CLIENT_ERROR,CoreErrorCode.T3002,"현재 조건으로는 가입할수 없습니다.",CoreErrorLevel.INFO),
-    INSURANCE_RATE_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR,CoreErrorCode.T3003,"요율 정보가 없습니다.",CoreErrorLevel.INFO);
+	// Insurance
+	INSURANCE_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T3001, "보험가입데이터를 찾을 수 없습니다.",
+			CoreErrorLevel.INFO),
+	INSURANCE_MANUAL_CONSULTATION_REQUIRED(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T3002, "현재 조건으로는 가입할수 없습니다.",
+			CoreErrorLevel.INFO),
+	INSURANCE_RATE_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T3003, "요율 정보가 없습니다.", CoreErrorLevel.INFO);
 
 	private final CoreErrorKind kind;
 

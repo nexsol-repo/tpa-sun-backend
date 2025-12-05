@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class InsuranceApplicationWriter {
-    private final InsuranceApplicationRepository insuranceApplicationRepository;
 
-    InsuranceApplication writer(InsuranceApplication insuranceApplication) {
-        return insuranceApplicationRepository.save(insuranceApplication);
-    }
+	private final InsuranceApplicationRepository insuranceApplicationRepository;
 
+	InsuranceApplication writer(InsuranceApplication insuranceApplication) {
+		return insuranceApplicationRepository.save(insuranceApplication);
+	}
 
 }

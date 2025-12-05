@@ -8,78 +8,83 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class InsuranceApplicationService {
-    private final UserReader userReader;
-    private final InsuranceApplicationReader applicationReader;
-    private final InsuranceApplicationWriter applicationWriter;
-    private final InsuranceInspector insuranceInspector;
-    private final InsurancePremiumCalculator premiumCalculator;
 
+	private final UserReader userReader;
 
-    public InsuranceApplication getInsuranceApplication(Long applicationId) {
-        return applicationReader.read(applicationId);
-    }
+	private final InsuranceApplicationReader applicationReader;
 
+	private final InsuranceApplicationWriter applicationWriter;
 
-    public InsuranceApplication savePlantInit(Long userId, AgreementInfo agreementInfo) {
-        User user = userReader.read(userId);
+	private final InsuranceInspector insuranceInspector;
 
-        ApplicantInfo applicantInfo = ApplicantInfo.builder()
-                .companyCode(user.companyCode())
-                .companyName(user.companyName())
-                .ceoName(user.name())
-                .ceoPhoneNumber(user.phoneNumber())
-                .applicantName(user.applicantName())
-                .applicantPhoneNumber(user.applicantPhoneNumber())
-                .email(user.email())
-                .build();
+	private final InsurancePremiumCalculator premiumCalculator;
 
-        // TODO SUN: 추후 바뀜 현재는 하드코딩해야함
-        String applicationNumber = "2025-NO-TEST-1234";
+	public InsuranceApplication getInsuranceApplication(Long applicationId) {
+		return applicationReader.read(applicationId);
+	}
 
-        InsuranceApplication newInsurance = InsuranceApplication.create(userId, applicationNumber, applicantInfo, agreementInfo);
+	public InsuranceApplication savePlantInit(Long userId, AgreementInfo agreementInfo) {
+		User user = userReader.read(userId);
 
-        return applicationWriter.writer(newInsurance);
+		ApplicantInfo applicantInfo = ApplicantInfo.builder()
+			.companyCode(user.companyCode())
+			.companyName(user.companyName())
+			.ceoName(user.name())
+			.ceoPhoneNumber(user.phoneNumber())
+			.applicantName(user.applicantName())
+			.applicantPhoneNumber(user.applicantPhoneNumber())
+			.email(user.email())
+			.build();
 
-    }
+		// TODO SUN: 추후 바뀜 현재는 하드코딩해야함
+		String applicationNumber = "2025-NO-TEST-1234";
 
+		InsuranceApplication newInsurance = InsuranceApplication.create(userId, applicationNumber, applicantInfo,
+				agreementInfo);
 
-    public InsuranceApplication savePlantInfo(Long applicationId, InsurancePlant plantInfo) {
-        InsuranceApplication application = applicationReader.read(applicationId);
+		return applicationWriter.writer(newInsurance);
 
-        InsuranceApplication updated = application.updatePlantInfo(plantInfo);
+	}
 
-        return applicationWriter.writer(updated);
-    }
+	public InsuranceApplication savePlantInfo(Long applicationId, InsurancePlant plantInfo) {
+		InsuranceApplication application = applicationReader.read(applicationId);
 
-    public InsuranceApplication saveCondition(Long applicationId, InsuranceCondition condition) {
-        InsuranceApplication application = applicationReader.read(applicationId);
+		InsuranceApplication updated = application.updatePlantInfo(plantInfo);
 
-        insuranceInspector.inspectCondition(condition);
+		return applicationWriter.writer(updated);
+	}
 
-        InsuranceApplication updated = application.updateCondition(condition);
+	public InsuranceApplication saveCondition(Long applicationId, InsuranceCondition condition) {
+		InsuranceApplication application = applicationReader.read(applicationId);
 
-        if (updated.plantInfo() != null) {
-            InsuranceCoverage coverage = premiumCalculator.calculate(updated.plantInfo(), condition);
+		insuranceInspector.inspectCondition(condition);
 
-            updated = updated.updateCoverage(coverage);
-        }
+		InsuranceApplication updated = application.updateCondition(condition);
 
-        return applicationWriter.writer(updated);
-    }
+		if (updated.plantInfo() != null) {
+			InsuranceCoverage coverage = premiumCalculator.calculate(updated.plantInfo(), condition);
 
-    public InsuranceApplication completeApplication(Long applicationId) {
-        InsuranceApplication app = applicationReader.read(applicationId);
+			updated = updated.updateCoverage(coverage);
+		}
 
+		return applicationWriter.writer(updated);
+	}
 
-        validateForCompletion(app);
+	public InsuranceApplication completeApplication(Long applicationId) {
+		InsuranceApplication app = applicationReader.read(applicationId);
 
+		validateForCompletion(app);
 
-        return applicationWriter.writer(app);
-    }
-    private void validateForCompletion(InsuranceApplication app) {
-        if (app.plantInfo() == null) throw new CoreException(CoreErrorType.INVALID_INPUT, "발전소 정보가 입력되지 않았습니다.");
-        if (app.condition() == null) throw new CoreException(CoreErrorType.INVALID_INPUT, "가입 조건이 입력되지 않았습니다.");
-        if (app.coverage() == null) throw new CoreException(CoreErrorType.INVALID_INPUT, "보험료 산출이 완료되지 않았습니다.");
-    }
+		return applicationWriter.writer(app);
+	}
+
+	private void validateForCompletion(InsuranceApplication app) {
+		if (app.plantInfo() == null)
+			throw new CoreException(CoreErrorType.INVALID_INPUT, "발전소 정보가 입력되지 않았습니다.");
+		if (app.condition() == null)
+			throw new CoreException(CoreErrorType.INVALID_INPUT, "가입 조건이 입력되지 않았습니다.");
+		if (app.coverage() == null)
+			throw new CoreException(CoreErrorType.INVALID_INPUT, "보험료 산출이 완료되지 않았습니다.");
+	}
 
 }

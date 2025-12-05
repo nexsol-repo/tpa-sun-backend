@@ -12,10 +12,12 @@ import java.time.LocalDate;
 @Component
 @RequiredArgsConstructor
 public class InsuranceRateReader {
-    private final InsuranceRateRepository insuranceRateRepository;
 
-    public BigDecimal read(RateType type, String key){
-        return insuranceRateRepository.findRate(type, key, LocalDate.now())
-                .orElseThrow(()->new CoreException(CoreErrorType.INSURANCE_RATE_NOT_FOUND_DATA));
-    }
+	private final InsuranceRateRepository insuranceRateRepository;
+
+	public BigDecimal read(RateType type, String key) {
+		return insuranceRateRepository.findRate(type, key, LocalDate.now())
+			.orElseThrow(() -> new CoreException(CoreErrorType.INSURANCE_RATE_NOT_FOUND_DATA));
+	}
+
 }

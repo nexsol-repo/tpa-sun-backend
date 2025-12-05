@@ -10,30 +10,36 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AgreementInfoEmbeddable {
 
-    private boolean re100Interest;
-    private boolean personalInfoCollectionAgreed;
-    private boolean personalInfoThirdPartyAgreed;
-    private boolean groupRuleAgreed;
-    private boolean marketingAgreed;
-    private LocalDateTime agreedAt;
+	private boolean re100Interest;
 
-    public AgreementInfoEmbeddable(AgreementInfo domain) {
-        this.re100Interest = domain.re100Interest();
-        this.personalInfoCollectionAgreed = domain.personalInfoCollectionAgreed();
-        this.personalInfoThirdPartyAgreed = domain.personalInfoThirdPartyAgreed();
-        this.groupRuleAgreed = domain.groupRuleAgreed();
-        this.marketingAgreed = domain.marketingAgreed();
-        this.agreedAt = domain.agreedAt();
-    }
+	private boolean personalInfoCollectionAgreed;
 
-    public AgreementInfo toDomain() {
-        return AgreementInfo.builder()
-                .re100Interest(re100Interest)
-                .personalInfoCollectionAgreed(personalInfoCollectionAgreed)
-                .personalInfoThirdPartyAgreed(personalInfoThirdPartyAgreed)
-                .groupRuleAgreed(groupRuleAgreed)
-                .marketingAgreed(marketingAgreed)
-                .agreedAt(agreedAt)
-                .build();
-    }
+	private boolean personalInfoThirdPartyAgreed;
+
+	private boolean groupRuleAgreed;
+
+	private boolean marketingAgreed;
+
+	private LocalDateTime agreedAt;
+
+	public AgreementInfoEmbeddable(AgreementInfo domain) {
+		this.re100Interest = domain.re100Interest();
+		this.personalInfoCollectionAgreed = domain.personalInfoCollectionAgreed();
+		this.personalInfoThirdPartyAgreed = domain.personalInfoThirdPartyAgreed();
+		this.groupRuleAgreed = domain.groupRuleAgreed();
+		this.marketingAgreed = domain.marketingAgreed();
+		this.agreedAt = domain.agreedAt();
+	}
+
+	public AgreementInfo toDomain() {
+		return AgreementInfo.builder()
+			.re100Interest(re100Interest)
+			.personalInfoCollectionAgreed(personalInfoCollectionAgreed)
+			.personalInfoThirdPartyAgreed(personalInfoThirdPartyAgreed)
+			.groupRuleAgreed(groupRuleAgreed)
+			.marketingAgreed(marketingAgreed)
+			.agreedAt(agreedAt)
+			.build();
+	}
+
 }

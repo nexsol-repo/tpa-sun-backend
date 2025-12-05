@@ -13,16 +13,18 @@ import java.time.LocalDate;
 @Table(name = "insurance_rate")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class InsuranceRateEntity extends BaseEntity{
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RateType rateType;
+public class InsuranceRateEntity extends BaseEntity {
 
-    @Column(nullable = false)
-    private String rateKey;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private RateType rateType;
 
-    @Column(nullable = false, precision = 10, scale = 5)
-    private BigDecimal rateValue;
+	@Column(nullable = false)
+	private String rateKey;
 
-    private LocalDate effectiveDate;
+	@Column(nullable = false, precision = 10, scale = 5)
+	private BigDecimal rateValue;
+
+	private LocalDate effectiveDate;
+
 }

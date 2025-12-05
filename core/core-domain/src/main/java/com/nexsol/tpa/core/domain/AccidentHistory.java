@@ -5,9 +5,5 @@ import lombok.Builder;
 import java.time.LocalDate;
 
 @Builder
-public record AccidentHistory(
-        LocalDate accidentDate,
-        Long insurancePayment,
-        String accidentContent
-) {
+public record AccidentHistory(LocalDate accidentDate, Long insurancePayment, String accidentContent) {
 }

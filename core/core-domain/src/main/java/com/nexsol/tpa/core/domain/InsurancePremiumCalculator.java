@@ -5,57 +5,57 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
-
 @Component
 @RequiredArgsConstructor
 public class InsurancePremiumCalculator {
 
-    private final InsuranceRatePolicy ratePolicy;
+	private final InsuranceRatePolicy ratePolicy;
 
+	public InsuranceCoverage calculate(InsurancePlant plant, InsuranceCondition condition) {
 
+		// 1. 요율 조회 (Policy 위임)
+		String region = plant.addressInfo().region();
+		double mdRate = ratePolicy.getMdRate(region);
+		double biRate = ratePolicy.getBiRate(region);
 
-    public InsuranceCoverage calculate(InsurancePlant plant, InsuranceCondition condition) {
+		// 2. 계산
+		long premiumMD = calculatePremium(condition.propertyDamageAmount(), mdRate);
+		long premiumBI = calculatePremium(condition.businessInterruptionAmount(), biRate);
+		long premiumGL = calculateGlPremium(plant, condition.liabilityAmount());
 
-        // 1. 요율 조회 (Policy 위임)
-        String region = plant.addressInfo().region();
-        double mdRate = ratePolicy.getMdRate(region);
-        double biRate = ratePolicy.getBiRate(region);
+		long totalPremium = premiumMD + premiumBI + premiumGL;
 
-        // 2. 계산
-        long premiumMD = calculatePremium(condition.propertyDamageAmount(), mdRate);
-        long premiumBI = calculatePremium(condition.businessInterruptionAmount(), biRate);
-        long premiumGL = calculateGlPremium(plant, condition.liabilityAmount());
+		return InsuranceCoverage.builder()
+			.propertyDamageDeductible(100_000_000L)
+			.liabilityDeductible(300_000L)
+			.businessInterruptionDeductible(0L)
+			.totalPremium(totalPremium)
+			.build();
+	}
 
-        long totalPremium = premiumMD + premiumBI + premiumGL;
+	private long calculatePremium(Long amount, double rate) {
+		if (amount == null)
+			return 0;
+		return (long) (amount * rate);
+	}
 
-        return InsuranceCoverage.builder()
-                .propertyDamageDeductible(100_000_000L)
-                .liabilityDeductible(300_000L)
-                .businessInterruptionDeductible(0L)
-                .totalPremium(totalPremium)
-                .build();
-    }
+	private long calculateGlPremium(InsurancePlant plant, Long liabilityAmount) {
+		if (liabilityAmount == null)
+			return 0;
 
-    private long calculatePremium(Long amount, double rate) {
-        if (amount == null) return 0;
-        return (long) (amount * rate);
-    }
+		// 면적 보정 로직
+		BigDecimal area = plant.area();
+		if (area == null || area.compareTo(BigDecimal.ZERO) == 0) {
+			BigDecimal capacity = plant.capacity() != null ? plant.capacity() : BigDecimal.ZERO;
+			area = capacity.multiply(BigDecimal.valueOf(4.93));
+		}
 
-    private long calculateGlPremium(InsurancePlant plant, Long liabilityAmount) {
-        if (liabilityAmount == null) return 0;
+		// Policy를 통해 값 조회 (구간 로직 등은 Policy가 알아서 처리)
+		long basePremium = ratePolicy.getBasePremium(area.doubleValue());
+		double amountFactor = ratePolicy.getAmountCoefficient(liabilityAmount);
+		double typeFactor = ratePolicy.getFacilityTypeCoefficient(plant.facilityType());
 
-        // 면적 보정 로직
-        BigDecimal area = plant.area();
-        if (area == null || area.compareTo(BigDecimal.ZERO) == 0) {
-            BigDecimal capacity = plant.capacity() != null ? plant.capacity() : BigDecimal.ZERO;
-            area = capacity.multiply(BigDecimal.valueOf(4.93));
-        }
+		return (long) (basePremium * amountFactor * typeFactor);
+	}
 
-        // Policy를 통해 값 조회 (구간 로직 등은 Policy가 알아서 처리)
-        long basePremium = ratePolicy.getBasePremium(area.doubleValue());
-        double amountFactor = ratePolicy.getAmountCoefficient(liabilityAmount);
-        double typeFactor = ratePolicy.getFacilityTypeCoefficient(plant.facilityType());
-
-        return (long) (basePremium * amountFactor * typeFactor);
-    }
 }

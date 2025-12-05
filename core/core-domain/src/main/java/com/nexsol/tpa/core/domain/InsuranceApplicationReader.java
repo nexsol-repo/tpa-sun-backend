@@ -8,9 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class InsuranceApplicationReader {
-    private final InsuranceApplicationRepository insuranceApplicationRepository;
 
-    public InsuranceApplication read(Long applicationId){
-        return insuranceApplicationRepository.findById(applicationId).orElseThrow(()->new CoreException(CoreErrorType.INSURANCE_NOT_FOUND_DATA));
-    }
+	private final InsuranceApplicationRepository insuranceApplicationRepository;
+
+	public InsuranceApplication read(Long applicationId) {
+		return insuranceApplicationRepository.findById(applicationId)
+			.orElseThrow(() -> new CoreException(CoreErrorType.INSURANCE_NOT_FOUND_DATA));
+	}
+
 }

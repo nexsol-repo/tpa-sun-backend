@@ -7,24 +7,29 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @NoArgsConstructor
 public class CoverageEmbeddable {
-    private Long deductiblePd;
-    private Long deductibleLi;
-    private Long deductibleBi;
-    private Long totalPremium;
 
-    public CoverageEmbeddable(InsuranceCoverage domain) {
-        this.deductiblePd = domain.propertyDamageDeductible();
-        this.deductibleLi = domain.liabilityDeductible();
-        this.deductibleBi = domain.businessInterruptionDeductible();
-        this.totalPremium = domain.totalPremium();
-    }
+	private Long deductiblePd;
 
-    public InsuranceCoverage toDomain() {
-        return InsuranceCoverage.builder()
-                .propertyDamageDeductible(deductiblePd)
-                .liabilityDeductible(deductibleLi)
-                .businessInterruptionDeductible(deductibleBi)
-                .totalPremium(totalPremium)
-                .build();
-    }
+	private Long deductibleLi;
+
+	private Long deductibleBi;
+
+	private Long totalPremium;
+
+	public CoverageEmbeddable(InsuranceCoverage domain) {
+		this.deductiblePd = domain.propertyDamageDeductible();
+		this.deductibleLi = domain.liabilityDeductible();
+		this.deductibleBi = domain.businessInterruptionDeductible();
+		this.totalPremium = domain.totalPremium();
+	}
+
+	public InsuranceCoverage toDomain() {
+		return InsuranceCoverage.builder()
+			.propertyDamageDeductible(deductiblePd)
+			.liabilityDeductible(deductibleLi)
+			.businessInterruptionDeductible(deductibleBi)
+			.totalPremium(totalPremium)
+			.build();
+	}
+
 }

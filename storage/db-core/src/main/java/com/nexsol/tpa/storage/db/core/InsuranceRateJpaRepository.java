@@ -8,18 +8,17 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.Optional;
 
-public interface InsuranceRateJpaRepository extends JpaRepository<InsuranceRateEntity,Long> {
-    @Query("""
-        SELECT r FROM InsuranceRateEntity r 
-        WHERE r.rateType = :rateType 
-          AND r.rateKey = :rateKey 
-          AND r.effectiveDate <= :date 
-        ORDER BY r.effectiveDate DESC 
-        LIMIT 1
-    """)
-    Optional<InsuranceRateEntity> findRate(
-            @Param("rateType") RateType rateType,
-            @Param("rateKey") String rateKey,
-            @Param("date") LocalDate date);
+public interface InsuranceRateJpaRepository extends JpaRepository<InsuranceRateEntity, Long> {
+
+	@Query("""
+			    SELECT r FROM InsuranceRateEntity r
+			    WHERE r.rateType = :rateType
+			      AND r.rateKey = :rateKey
+			      AND r.effectiveDate <= :date
+			    ORDER BY r.effectiveDate DESC
+			    LIMIT 1
+			""")
+	Optional<InsuranceRateEntity> findRate(@Param("rateType") RateType rateType, @Param("rateKey") String rateKey,
+			@Param("date") LocalDate date);
 
 }

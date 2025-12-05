@@ -4,12 +4,6 @@ import com.nexsol.tpa.core.enums.BondSendStatus;
 import lombok.Builder;
 
 @Builder
-public record PledgeInfo(
-        String bankName,
-        String managerName,
-        String managerPhone,
-        Long amount,
-        String address,
-        BondSendStatus bondSendStatus,
-        String remark
-) {}
+public record PledgeInfo(String bankName, String managerName, String managerPhone, Long amount, String address,
+		BondSendStatus bondSendStatus, String remark) {
+}
