@@ -86,7 +86,7 @@ subprojects {
             includeTags('restdocs')
         }
 
-        // [중요] 컴파일이 먼저 수행되도록 의존성 명시
+        // 컴파일이 먼저 수행되도록 의존성 명시
         dependsOn 'testClasses'
 
         // 테스트 클래스 위치 지정
@@ -111,5 +111,23 @@ subprojects {
 
     tasks.named('asciidoctor') {
         dependsOn restDocsTest
+        inputs.dir file('build/generated-snippets')
+    }
+    bootJar {
+        dependsOn asciidoctor
+
+        from("${asciidoctor.outputDir}"){
+            into 'static/docs'
+        }
+    }
+
+    tasks.register('copyDocsToResources', Copy) {
+        dependsOn asciidoctor
+        from asciidoctor.outputDir
+        into file("build/resources/main/static/docs") // 실행되는 클래스패스 위치
+    }
+
+    tasks.named('bootRun') {
+        dependsOn 'copyDocsToResources'
     }
 }
