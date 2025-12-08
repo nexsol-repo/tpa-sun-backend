@@ -19,8 +19,10 @@ public class InsuranceApplicationService {
 
 	private final InsurancePremiumCalculator premiumCalculator;
 
-	public InsuranceApplication getInsuranceApplication(Long applicationId) {
-		return applicationReader.read(applicationId);
+	public InsuranceApplication getInsuranceApplication(Long userId, Long applicationId) {
+		InsuranceApplication application = applicationReader.read(applicationId);
+		application.validateOwner(userId);
+		return application;
 	}
 
 	public InsuranceApplication savePlantInit(Long userId, AgreementInfo agreementInfo) {
@@ -46,18 +48,21 @@ public class InsuranceApplicationService {
 
 	}
 
-	public InsuranceApplication savePlantInfo(Long applicationId, InsurancePlant plantInfo) {
+	public InsuranceApplication savePlantInfo(Long userId, Long applicationId, InsurancePlant plantInfo) {
 		InsuranceApplication application = applicationReader.read(applicationId);
+
+		application.validateOwner(userId);
 
 		InsuranceApplication updated = application.updatePlantInfo(plantInfo);
 
 		return applicationWriter.writer(updated);
 	}
 
-	public InsuranceApplication saveCondition(Long applicationId, InsuranceCondition condition,
+	public InsuranceApplication saveCondition(Long userId, Long applicationId, InsuranceCondition condition,
 			InsuranceDocument document) {
 		InsuranceApplication application = applicationReader.read(applicationId);
 
+		application.validateOwner(userId);
 		insuranceInspector.inspectCondition(condition);
 		insuranceInspector.inspectDocuments(document);
 
@@ -72,12 +77,16 @@ public class InsuranceApplicationService {
 		return applicationWriter.writer(updated);
 	}
 
-	public InsuranceApplication completeApplication(Long applicationId) {
-		InsuranceApplication app = applicationReader.read(applicationId);
+	public InsuranceApplication completeApplication(Long userId, Long applicationId, DocumentFile signatureFile) {
+		InsuranceApplication application = applicationReader.read(applicationId);
 
-		validateForCompletion(app);
+		application.validateOwner(userId);
 
-		return applicationWriter.writer(app);
+		validateForCompletion(application);
+
+		InsuranceApplication completedApp = application.signAndComplete(signatureFile);
+
+		return applicationWriter.writer(completedApp);
 	}
 
 	private void validateForCompletion(InsuranceApplication app) {

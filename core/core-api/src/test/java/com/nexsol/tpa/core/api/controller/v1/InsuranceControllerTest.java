@@ -1,9 +1,6 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
-import com.nexsol.tpa.core.api.controller.v1.request.DocumentRequest;
-import com.nexsol.tpa.core.api.controller.v1.request.InsuranceConditionRequest;
-import com.nexsol.tpa.core.api.controller.v1.request.InsurancePlantRequest;
-import com.nexsol.tpa.core.api.controller.v1.request.InsuranceStartRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.*;
 import com.nexsol.tpa.core.domain.*;
 import com.nexsol.tpa.core.enums.BondSendStatus;
 import com.nexsol.tpa.core.enums.InsuranceDocumentType;
@@ -12,9 +9,17 @@ import com.nexsol.tpa.test.api.RestDocsTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,15 +36,35 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.document;
+import static org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.documentationConfiguration;
 
 public class InsuranceControllerTest extends RestDocsTest {
 
 	private final InsuranceApplicationService insuranceApplicationService = mock(InsuranceApplicationService.class);
 
 	@BeforeEach
-	void setUp() {
+	public void setUp(RestDocumentationContextProvider restDocumentation) {
+		// 1. @AuthenticationPrincipal 처리를 위한 커스텀 리졸버
+		HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
+			@Override
+			public boolean supportsParameter(MethodParameter parameter) {
+				return parameter.getParameterType().equals(Long.class)
+						&& parameter.hasParameterAnnotation(AuthenticationPrincipal.class);
+			}
 
-		this.webTestClient = mockController(new InsuranceController(insuranceApplicationService));
+			@Override
+			public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+					NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+				return 1L; // 테스트용 User ID
+			}
+		};
+
+		// 2. MockController 직접 빌드하여 부모 클래스(RestDocsTest)의 webTestClient 필드에 할당
+		this.webTestClient = MockMvcWebTestClient.bindToController(new InsuranceController(insuranceApplicationService))
+			.customArgumentResolvers(authPrincipalResolver) // 리졸버 등록
+			.configureClient()
+			.filter(documentationConfiguration(restDocumentation)) // RestDocs 설정 적용
+			.build();
 	}
 
 	private InsuranceApplication createMockApplication(Long id, InsuranceStatus status) {
@@ -58,6 +83,7 @@ public class InsuranceControllerTest extends RestDocsTest {
 	void getApplication() {
 		// given
 		Long appId = 1L;
+		Long userId = 1L;
 		DocumentFile mockFile = DocumentFile.builder()
 			.fileKey("insurance/2025/uuid.pdf")
 			.originalFileName("doc.pdf")
@@ -77,7 +103,7 @@ public class InsuranceControllerTest extends RestDocsTest {
 			.documents(mockDocs)
 			.build();
 
-		given(insuranceApplicationService.getInsuranceApplication(appId)).willReturn(mockApp);
+		given(insuranceApplicationService.getInsuranceApplication(userId, appId)).willReturn(mockApp);
 
 		// when & then
 		webTestClient.get()
@@ -88,6 +114,7 @@ public class InsuranceControllerTest extends RestDocsTest {
 			.isOk()
 			.expectBody()
 			.consumeWith(document("insurance-get", requestPreprocessor(), responsePreprocessor(),
+
 					pathParameters(parameterWithName("applicationId").description("청약서 ID")),
 					responseFields(getInsuranceResponseFields().toArray(FieldDescriptor[]::new))));
 	}
@@ -95,11 +122,12 @@ public class InsuranceControllerTest extends RestDocsTest {
 	@Test
 	@DisplayName("Step 1. 청약 시작 (약관 동의)")
 	void start() {
+		Long userId = 1L;
 		// given
 		InsuranceStartRequest request = new InsuranceStartRequest(true, true, true, true, true);
 		InsuranceApplication mockApp = createMockApplication(101L, InsuranceStatus.PENDING);
 
-		given(insuranceApplicationService.savePlantInit(any(), any(AgreementInfo.class))).willReturn(mockApp);
+		given(insuranceApplicationService.savePlantInit(eq(userId), any(AgreementInfo.class))).willReturn(mockApp);
 
 		// when & then
 		webTestClient.post()
@@ -127,6 +155,7 @@ public class InsuranceControllerTest extends RestDocsTest {
 	@DisplayName("Step 2. 발전소 정보 저장 (임시저장)")
 	void savePlant() {
 		// given
+		Long userId = 1L;
 		Long appId = 101L;
 		InsurancePlantRequest request = new InsurancePlantRequest("해운대 햇살 발전소", "부산광역시 해운대구 우동 1234", "부산",
 				new BigDecimal("500.0"), new BigDecimal("2000.0"), LocalDate.of(2023, 1, 1), "지붕위(판넬)", "고정식",
@@ -134,7 +163,8 @@ public class InsuranceControllerTest extends RestDocsTest {
 
 		InsuranceApplication mockApp = createMockApplication(appId, InsuranceStatus.PENDING);
 
-		given(insuranceApplicationService.savePlantInfo(eq(appId), any(InsurancePlant.class))).willReturn(mockApp);
+		given(insuranceApplicationService.savePlantInfo(eq(userId), eq(appId), any(InsurancePlant.class)))
+			.willReturn(mockApp);
 
 		// when & then
 		webTestClient.post()
@@ -164,6 +194,7 @@ public class InsuranceControllerTest extends RestDocsTest {
 	@DisplayName("Step 3. 가입 조건 저장 (심사 및 보험료 산출)")
 	void saveCondition() {
 		// given
+		Long userId = 1L;
 		Long appId = 101L;
 		DocumentRequest mockDoc = new DocumentRequest("insurance/2025/uuid.pdf", "biz_license.pdf", 1024L, "pdf");
 		InsuranceConditionRequest request = new InsuranceConditionRequest(true, // ESS
@@ -182,7 +213,7 @@ public class InsuranceControllerTest extends RestDocsTest {
 
 		InsuranceApplication mockApp = createMockApplication(appId, InsuranceStatus.PENDING);
 
-		given(insuranceApplicationService.saveCondition(eq(appId), any(InsuranceCondition.class),
+		given(insuranceApplicationService.saveCondition(eq(userId), eq(appId), any(InsuranceCondition.class),
 				any(InsuranceDocument.class)))
 			.willReturn(mockApp);
 		// when & then
@@ -283,21 +314,33 @@ public class InsuranceControllerTest extends RestDocsTest {
 	@DisplayName("Step 4. 최종 가입 완료")
 	void complete() {
 		// given
+		Long userId = 1L;
 		Long appId = 101L;
+		DocumentRequest mockSignature = new DocumentRequest("signatures/2025/uuid.png", "sign.png", 512L, "png");
+
+		InsuranceCompleteRequest request = new InsuranceCompleteRequest(mockSignature);
+
 		InsuranceApplication mockApp = createMockApplication(appId, InsuranceStatus.COMPLETED);
 
-		given(insuranceApplicationService.completeApplication(appId)).willReturn(mockApp);
+		given(insuranceApplicationService.completeApplication(userId, appId, request.toSignatureFile()))
+			.willReturn(mockApp);
 
 		// when & then
 		webTestClient.post()
 			.uri("/v1/insurance/{applicationId}/complete", appId)
 			.contentType(MediaType.APPLICATION_JSON)
+			.bodyValue(request)
 			.exchange()
 			.expectStatus()
 			.isOk()
 			.expectBody()
 			.consumeWith(document("insurance-complete", requestPreprocessor(), responsePreprocessor(),
 					pathParameters(parameterWithName("applicationId").description("청약서 ID")),
+					requestFields(fieldWithPath("signature").type(JsonFieldType.OBJECT).description("전자 서명 파일 정보 (필수)"),
+							fieldWithPath("signature.key").type(JsonFieldType.STRING).description("서명 파일 키 (업로드 후 발급)"),
+							fieldWithPath("signature.name").type(JsonFieldType.STRING).description("서명 파일명"),
+							fieldWithPath("signature.size").type(JsonFieldType.NUMBER).description("서명 파일 크기"),
+							fieldWithPath("signature.extension").type(JsonFieldType.STRING).description("서명 파일 확장자")),
 					responseFields(getInsuranceResponseFields().toArray(FieldDescriptor[]::new))));
 	}
 

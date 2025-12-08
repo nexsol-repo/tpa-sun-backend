@@ -9,7 +9,7 @@ public enum CoreErrorType {
 
 	NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T1000, "해당 데이터를 찾지 못했습니다.", CoreErrorLevel.INFO),
 	// Auth User
-	USER_NOT_FOUND(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T1001, "해당 유저를 찾을 수 없습니다..", CoreErrorLevel.INFO),
+	USER_NOT_FOUND(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T1001, "해당 유저를 찾을 수 없습니다.", CoreErrorLevel.INFO),
 
 	USER_EXIST_DATA(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T1003, "해당 유저가 존재합니다.", CoreErrorLevel.INFO),
 	INVALID_INPUT(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T1004, "잘못된 입력값입니다.", CoreErrorLevel.INFO),
@@ -30,6 +30,8 @@ public enum CoreErrorType {
 	INSURANCE_MANUAL_CONSULTATION_REQUIRED(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T3002, "현재 조건으로는 가입할수 없습니다.",
 			CoreErrorLevel.INFO),
 	INSURANCE_RATE_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T3003, "요율 정보가 없습니다.", CoreErrorLevel.INFO),
+	INSURANCE_USER_UNAUTHORIZED(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T3004, "해당 청약서에 대한 접근 권한이 없습니다",
+			CoreErrorLevel.INFO),
 
 	// FileUpload
 	FILE_UPLOAD_VALIDATION_KEY(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T4000, "파일 키는 필수 입니다.", CoreErrorLevel.INFO),
