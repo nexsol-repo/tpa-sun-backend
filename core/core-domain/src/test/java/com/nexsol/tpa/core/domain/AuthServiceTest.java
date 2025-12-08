@@ -57,7 +57,7 @@ public class AuthServiceTest {
 
 		given(userReader.read(companyCode, email)).willReturn(user);
 		given(emailVerificationReader.read(email, EmailVerifiedType.SIGNIN)).willReturn(verification);
-		given(tokenIssuer.issue(user.id(), user.email())).willReturn(expectedToken);
+		given(tokenIssuer.issue(user.id(), user.applicantEmail())).willReturn(expectedToken);
 
 		// when
 		AuthToken token = authService.signIn(companyCode, email, code);

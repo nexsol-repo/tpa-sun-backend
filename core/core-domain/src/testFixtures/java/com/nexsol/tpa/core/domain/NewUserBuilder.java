@@ -4,8 +4,6 @@ public class NewUserBuilder {
 
 	private String companyCode = "123-45-67890";
 
-	private String email = "test@nexsol.com";
-
 	private String companyName = "(주)넥솔";
 
 	private String name = "테스트마스터";
@@ -32,7 +30,7 @@ public class NewUserBuilder {
 	}
 
 	public NewUserBuilder withEmail(String email) {
-		this.email = email;
+		this.applicantEmail = email;
 		return this;
 	}
 
@@ -43,7 +41,7 @@ public class NewUserBuilder {
 	}
 
 	public NewUser build() {
-		return new NewUser(companyCode, email, companyName, name, phoneNumber, applicantName, applicantEmail,
+		return new NewUser(companyCode, companyName, name, phoneNumber, applicantName, applicantEmail,
 				applicantPhoneNumber, termsAgreed, privacyAgreed);
 	}
 

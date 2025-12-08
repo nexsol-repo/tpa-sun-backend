@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 
 @Builder
 public record InsuranceApplication(Long id, String applicationNumber, Long userId, ApplicantInfo applicantInfo,
-		InsurancePlant plantInfo, InsuranceCondition condition, InsuranceCoverage coverage, AgreementInfo agreementInfo,
-		InsuranceStatus status, LocalDateTime createdAt, LocalDateTime updatedAt
+		InsurancePlant plantInfo, InsuranceCondition condition, InsuranceCoverage coverage, InsuranceDocument documents,
+		AgreementInfo agreementInfo, InsuranceStatus status, LocalDateTime createdAt, LocalDateTime updatedAt
 
 ) {
 
@@ -32,21 +32,24 @@ public record InsuranceApplication(Long id, String applicationNumber, Long userI
 			.plantInfo(newPlantInfo) // 업데이트
 			.condition(this.condition)
 			.coverage(this.coverage)
+			.documents(this.documents)
 			.status(this.status)
 			.createdAt(this.createdAt)
 			.build();
 	}
 
 	// 3단계: 가입 조건 입력
-	public InsuranceApplication updateCondition(InsuranceCondition newCondition) {
+	public InsuranceApplication updateConditionAndDocument(InsuranceCondition newCondition,
+			InsuranceDocument newDocuments) {
 		return InsuranceApplication.builder()
 			.id(this.id)
 			.applicationNumber(this.applicationNumber)
 			.userId(this.userId)
 			.applicantInfo(this.applicantInfo)
 			.plantInfo(this.plantInfo)
-			.condition(newCondition) // 업데이트
+			.condition(newCondition)
 			.coverage(this.coverage)
+			.documents(newDocuments)
 			.status(this.status)
 			.createdAt(this.createdAt)
 			.build();
@@ -56,12 +59,15 @@ public record InsuranceApplication(Long id, String applicationNumber, Long userI
 	public InsuranceApplication updateCoverage(InsuranceCoverage newCoverage) {
 		return InsuranceApplication.builder()
 			.id(this.id)
-			// ... (나머지 필드 복사)
+			.applicationNumber(this.applicationNumber)
+			.userId(this.userId)
+			.applicantInfo(this.applicantInfo)
 			.plantInfo(this.plantInfo)
 			.condition(this.condition)
-			.coverage(newCoverage) // 업데이트
+			.coverage(newCoverage)
+			.documents(this.documents)
 			.status(this.status)
-			// ...
+			.createdAt(this.createdAt)
 			.build();
 	}
 }

@@ -20,4 +20,16 @@ public class InsuranceInspector {
 		}
 	}
 
+	public void inspectDocuments(InsuranceDocument documents) {
+		if (documents.attachments() != null) {
+			documents.attachments().forEach(att -> validatePdf(att.file()));
+		}
+	}
+
+	private void validatePdf(DocumentFile file) {
+		if (file != null && !"pdf".equalsIgnoreCase(file.extension())) {
+			throw new CoreException(CoreErrorType.FILE_UPLOAD_VALIDATION_CONTENT);
+		}
+	}
+
 }

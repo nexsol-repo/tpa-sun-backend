@@ -29,7 +29,15 @@ public enum CoreErrorType {
 			CoreErrorLevel.INFO),
 	INSURANCE_MANUAL_CONSULTATION_REQUIRED(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T3002, "현재 조건으로는 가입할수 없습니다.",
 			CoreErrorLevel.INFO),
-	INSURANCE_RATE_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T3003, "요율 정보가 없습니다.", CoreErrorLevel.INFO);
+	INSURANCE_RATE_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T3003, "요율 정보가 없습니다.", CoreErrorLevel.INFO),
+
+	// FileUpload
+	FILE_UPLOAD_VALIDATION_KEY(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T4000, "파일 키는 필수 입니다.", CoreErrorLevel.INFO),
+	FILE_UPLOAD_VALIDATION_CONTENT(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T4001, "모든 서류는 PDF 형식이어야 합니다.",
+			CoreErrorLevel.INFO),
+	FILE_UPLOAD_VALIDATION_IMAGE(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T4002, "서명은 이미지 파일만 가능합니다.",
+			CoreErrorLevel.INFO),
+	FILE_UPLOAD_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T4003, "파일이 존재하지 않습니다.", CoreErrorLevel.INFO);
 
 	private final CoreErrorKind kind;
 

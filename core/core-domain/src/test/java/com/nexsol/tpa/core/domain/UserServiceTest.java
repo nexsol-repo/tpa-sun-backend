@@ -43,9 +43,10 @@ public class UserServiceTest {
 		// given
 		NewUser newUser = aNewUser().withCompanyCode("111-11-11111").build();
 		User expectedUser = aUser().id(1L).companyCode("111-11-11111").build();
-		EmailVerification verifiedEmail = aVerification().email(newUser.email()).build();
+		EmailVerification verifiedEmail = aVerification().email(newUser.applicantEmail()).build();
 
-		given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP)).willReturn(verifiedEmail);
+		given(emailVerificationReader.read(newUser.applicantEmail(), EmailVerifiedType.SIGNUP))
+			.willReturn(verifiedEmail);
 
 		given(userAppender.append(any())).willReturn(expectedUser);
 
@@ -56,7 +57,7 @@ public class UserServiceTest {
 		assertThat(result.companyCode()).isEqualTo(newUser.companyCode());
 		assertThat(result.id()).isEqualTo(1L);
 
-		verify(userReader).exist(newUser.companyCode(), newUser.email());
+		verify(userReader).exist(newUser.companyCode(), newUser.applicantEmail());
 		verify(userAppender).append(any(User.class));
 
 	}
@@ -68,9 +69,10 @@ public class UserServiceTest {
 		NewUser newUser = aNewUser().build();
 
 		// [Fixture] 인증 안 된 상태(isVerified=false) 생성
-		EmailVerification unverifiedEmail = aVerification().email(newUser.email()).isVerified(false).build();
+		EmailVerification unverifiedEmail = aVerification().email(newUser.applicantEmail()).isVerified(false).build();
 
-		given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP)).willReturn(unverifiedEmail);
+		given(emailVerificationReader.read(newUser.applicantEmail(), EmailVerifiedType.SIGNUP))
+			.willReturn(unverifiedEmail);
 
 		// when & then
 		assertThatThrownBy(() -> userService.signUp(newUser)).isInstanceOf(CoreException.class)
@@ -89,12 +91,13 @@ public class UserServiceTest {
 		LocalDateTime past = LocalDateTime.now().minusMinutes(61); // 61분 전
 
 		// [Fixture] 인증은 됐지만 시간이 지난 상태
-		EmailVerification expiredVerification = aVerification().email(newUser.email())
+		EmailVerification expiredVerification = aVerification().email(newUser.applicantEmail())
 			.isVerified(true)
 			.verifiedAt(past)
 			.build();
 
-		given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP)).willReturn(expiredVerification);
+		given(emailVerificationReader.read(newUser.applicantEmail(), EmailVerifiedType.SIGNUP))
+			.willReturn(expiredVerification);
 
 		// when & then
 		assertThatThrownBy(() -> userService.signUp(newUser)).isInstanceOf(CoreException.class)
@@ -107,12 +110,13 @@ public class UserServiceTest {
 	void signUp_fail_duplicate() {
 		// given
 		NewUser newUser = aNewUser().build();
-		EmailVerification verifiedEmail = aVerification().email(newUser.email()).build();
+		EmailVerification verifiedEmail = aVerification().email(newUser.applicantEmail()).build();
 
-		given(emailVerificationReader.read(newUser.email(), EmailVerifiedType.SIGNUP)).willReturn(verifiedEmail);
+		given(emailVerificationReader.read(newUser.applicantEmail(), EmailVerifiedType.SIGNUP))
+			.willReturn(verifiedEmail);
 
 		willThrow(new CoreException(CoreErrorType.USER_EXIST_DATA)).given(userReader)
-			.exist(newUser.companyCode(), newUser.email());
+			.exist(newUser.companyCode(), newUser.applicantEmail());
 
 		// when & then
 		assertThatThrownBy(() -> userService.signUp(newUser)).isInstanceOf(CoreException.class)

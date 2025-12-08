@@ -33,7 +33,7 @@ public class InsuranceApplicationService {
 			.ceoPhoneNumber(user.phoneNumber())
 			.applicantName(user.applicantName())
 			.applicantPhoneNumber(user.applicantPhoneNumber())
-			.email(user.email())
+			.email(user.applicantEmail())
 			.build();
 
 		// TODO SUN: 추후 바뀜 현재는 하드코딩해야함
@@ -54,12 +54,14 @@ public class InsuranceApplicationService {
 		return applicationWriter.writer(updated);
 	}
 
-	public InsuranceApplication saveCondition(Long applicationId, InsuranceCondition condition) {
+	public InsuranceApplication saveCondition(Long applicationId, InsuranceCondition condition,
+			InsuranceDocument document) {
 		InsuranceApplication application = applicationReader.read(applicationId);
 
 		insuranceInspector.inspectCondition(condition);
+		insuranceInspector.inspectDocuments(document);
 
-		InsuranceApplication updated = application.updateCondition(condition);
+		InsuranceApplication updated = application.updateConditionAndDocument(condition, document);
 
 		if (updated.plantInfo() != null) {
 			InsuranceCoverage coverage = premiumCalculator.calculate(updated.plantInfo(), condition);
