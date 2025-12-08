@@ -1,6 +1,8 @@
 package com.nexsol.tpa.storage.db.core;
 
 import com.nexsol.tpa.core.domain.InsuranceApplication;
+import com.nexsol.tpa.core.domain.InsuranceAttachment;
+import com.nexsol.tpa.core.domain.InsuranceDocument;
 import com.nexsol.tpa.core.enums.InsuranceStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -8,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "insurance_application")
@@ -76,7 +79,16 @@ public class InsuranceApplicationEntity extends BaseEntity {
 			this.coverageInfo = new CoverageEmbeddable(domain.coverage());
 	}
 
-	public InsuranceApplication toDomain() {
+	public InsuranceApplication toDomain(List<InsuranceAttachmentEntity> attachments) {
+		InsuranceDocument documents = null;
+		if (attachments != null && !attachments.isEmpty()) {
+			List<InsuranceAttachment> attachmentList = attachments.stream()
+				.map(InsuranceAttachmentEntity::toDomain) // Entity가 스스로 Domain으로 변환
+				.toList();
+
+			documents = InsuranceDocument.builder().attachments(attachmentList).build();
+		}
+
 		return InsuranceApplication.builder()
 			.id(this.getId())
 			.applicationNumber(this.applicationNumber)
@@ -87,6 +99,7 @@ public class InsuranceApplicationEntity extends BaseEntity {
 			.plantInfo(this.plantInfo != null ? this.plantInfo.toDomain() : null)
 			.condition(this.conditionInfo != null ? this.conditionInfo.toDomain() : null)
 			.coverage(this.coverageInfo != null ? this.coverageInfo.toDomain() : null)
+			.documents(documents)
 			.createdAt(this.getCreatedAt())
 			.updatedAt(this.getUpdatedAt())
 			.build();
