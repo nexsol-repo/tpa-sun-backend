@@ -5,14 +5,13 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record SignUpRequest(@NotBlank String companyCode, @Email @NotBlank String email, String companyName,
-		@NotBlank String name, String phoneNumber, String applicantName, @Email String applicantEmail,
-		String applicantPhoneNumber, @NotNull Boolean termsAgreed, @NotNull Boolean privacyAgreed) {
+public record SignUpRequest(@NotBlank String companyCode, String companyName, @NotBlank String name, String phoneNumber,
+		String applicantName, @Email String applicantEmail, String applicantPhoneNumber, @NotNull Boolean termsAgreed,
+		@NotNull Boolean privacyAgreed) {
 
 	public NewUser toNewUser() {
 		return NewUser.builder()
 			.companyCode(companyCode)
-			.email(email)
 			.companyName(companyName)
 			.name(name)
 			.phoneNumber(phoneNumber)

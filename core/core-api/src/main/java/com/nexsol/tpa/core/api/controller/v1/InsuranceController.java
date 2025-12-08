@@ -57,7 +57,7 @@ public class InsuranceController {
 			@RequestBody InsuranceConditionRequest request) { // @Valid 없음 (임시저장)
 
 		InsuranceApplication app = insuranceApplicationService.saveCondition(applicationId,
-				request.toInsuranceCondition());
+				request.toInsuranceCondition(), request.toInsuranceDocument());
 		return ApiResponse.success(InsuranceResponse.of(app));
 	}
 
@@ -67,7 +67,7 @@ public class InsuranceController {
 	@PostMapping("/{applicationId}/complete")
 	public ApiResponse<InsuranceResponse> complete(@PathVariable Long applicationId) {
 
-		// TODO: 서명 파일 처리 등이 있다면 MultipartFile 추가 필요
+		// TODO SUN: 서명 파일 처리 등이 있다면 MultipartFile 추가 필요
 		InsuranceApplication app = insuranceApplicationService.completeApplication(applicationId);
 		return ApiResponse.success(InsuranceResponse.of(app));
 	}
