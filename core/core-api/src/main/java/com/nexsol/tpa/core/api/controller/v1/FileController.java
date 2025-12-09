@@ -5,6 +5,7 @@ import com.nexsol.tpa.core.api.support.response.ApiResponse;
 import com.nexsol.tpa.core.domain.DocumentFile;
 import com.nexsol.tpa.core.domain.FileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,27 +19,29 @@ public class FileController {
 	private final FileService fileService;
 
 	@PostMapping("/insurance")
-	public ApiResponse<FileResponse> uploadInsurance(@RequestPart("file") MultipartFile file) throws IOException {
+	public ApiResponse<FileResponse> uploadInsurance(@AuthenticationPrincipal Long userId,
+			@RequestPart("file") MultipartFile file) throws IOException {
 
-		DocumentFile uploadedFile = fileService.uploadInsurance(file.getInputStream(), file.getOriginalFilename(),
-				file.getSize(), file.getContentType());
+		DocumentFile uploadedFile = fileService.uploadInsurance(userId, file.getInputStream(),
+				file.getOriginalFilename(), file.getSize(), file.getContentType());
 
 		return ApiResponse.success(FileResponse.of(uploadedFile));
 	}
 
 	@PostMapping("/signature")
-	public ApiResponse<FileResponse> uploadSignature(@RequestPart("file") MultipartFile file) throws IOException {
+	public ApiResponse<FileResponse> uploadSignature(@AuthenticationPrincipal Long userId,
+			@RequestPart("file") MultipartFile file) throws IOException {
 
-		DocumentFile uploadedFile = fileService.uploadSignature(file.getInputStream(), file.getOriginalFilename(),
-				file.getSize(), file.getContentType());
+		DocumentFile uploadedFile = fileService.uploadSignature(userId, file.getInputStream(),
+				file.getOriginalFilename(), file.getSize(), file.getContentType());
 
 		return ApiResponse.success(FileResponse.of(uploadedFile));
 	}
 
 	@DeleteMapping
-	public ApiResponse<Object> deleteFile(@RequestParam("key") String key) {
+	public ApiResponse<Object> deleteFile(@AuthenticationPrincipal Long userId, @RequestParam("key") String key) {
 
-		fileService.deleteFile(key);
+		fileService.deleteFile(userId, key);
 
 		return ApiResponse.success();
 	}

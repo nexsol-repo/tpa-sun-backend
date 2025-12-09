@@ -1,5 +1,5 @@
 spring.application.name: tpa-sun-core-api
-spring.profiles.active: local
+spring.profiles.active: local-dev
 spring:
   application:
   config:
@@ -8,12 +8,13 @@ spring:
       - db-core.yml
   web.resources.add-mappings: false
   mail:
-    host: ${HIWORKS_HOST}
-    port: ${HIWORKS_PORT}
-    username: ${HIWORKS_EMAIL}
-    password: ${HIWORKS_PASSWORD}
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_EMAIL}
+    password: ${GMAIL_PASSWORD}
     properties:
       mail:
+        debug: true
         smtp:
           auth: true
           starttls:

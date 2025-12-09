@@ -8,6 +8,8 @@ import com.nexsol.tpa.core.api.controller.v1.response.InsuranceResponse;
 import com.nexsol.tpa.core.api.support.response.ApiResponse;
 import com.nexsol.tpa.core.domain.InsuranceApplication;
 import com.nexsol.tpa.core.domain.InsuranceApplicationService;
+import com.nexsol.tpa.core.domain.InsuranceDocument;
+import com.nexsol.tpa.core.domain.JoinCondition;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,7 +38,7 @@ public class InsuranceController {
 	public ApiResponse<InsuranceResponse> start(@AuthenticationPrincipal Long userId,
 			@RequestBody @Valid InsuranceStartRequest request) {
 
-		InsuranceApplication app = insuranceApplicationService.savePlantInit(userId, request.toAgreementInfo());
+		InsuranceApplication app = insuranceApplicationService.saveInit(userId, request.toAgreementInfo());
 		return ApiResponse.success(InsuranceResponse.of(app));
 	}
 
@@ -45,12 +47,10 @@ public class InsuranceController {
 	 */
 	@PostMapping("/{applicationId}/plant")
 	public ApiResponse<InsuranceResponse> savePlant(@AuthenticationPrincipal Long userId,
-			@PathVariable Long applicationId, @RequestBody InsurancePlantRequest request) { // @Valid
-																							// 없음
-																							// (임시저장)
+			@PathVariable Long applicationId, @RequestBody InsurancePlantRequest request) {
 
 		InsuranceApplication app = insuranceApplicationService.savePlantInfo(userId, applicationId,
-				request.toInsurancePlant());
+				request.toInsuredPlant());
 		return ApiResponse.success(InsuranceResponse.of(app));
 	}
 
@@ -59,12 +59,14 @@ public class InsuranceController {
 	 */
 	@PostMapping("/{applicationId}/condition")
 	public ApiResponse<InsuranceResponse> saveCondition(@AuthenticationPrincipal Long userId,
-			@PathVariable Long applicationId, @RequestBody InsuranceConditionRequest request) { // @Valid
-																								// 없음
-																								// (임시저장)
+			@PathVariable Long applicationId, @RequestBody InsuranceConditionRequest request) {
 
-		InsuranceApplication app = insuranceApplicationService.saveCondition(userId, applicationId,
-				request.toInsuranceCondition(), request.toInsuranceDocument());
+		JoinCondition condition = request.toJoinCondition();
+
+		InsuranceDocument documents = request.toInsuranceDocument();
+
+		InsuranceApplication app = insuranceApplicationService.saveCondition(userId, applicationId, condition,
+				documents);
 		return ApiResponse.success(InsuranceResponse.of(app));
 	}
 
@@ -75,7 +77,6 @@ public class InsuranceController {
 	public ApiResponse<InsuranceResponse> complete(@AuthenticationPrincipal Long userId,
 			@PathVariable Long applicationId, @RequestBody @Valid InsuranceCompleteRequest request) {
 
-		// TODO SUN: 서명 파일 처리 등이 있다면 MultipartFile 추가 필요
 		InsuranceApplication app = insuranceApplicationService.completeApplication(userId, applicationId,
 				request.toSignatureFile());
 		return ApiResponse.success(InsuranceResponse.of(app));
