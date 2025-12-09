@@ -1,6 +1,6 @@
 package com.nexsol.tpa.storage.db.core;
 
-import com.nexsol.tpa.core.domain.AgreementInfo;
+import com.nexsol.tpa.core.domain.Agreement;
 import jakarta.persistence.Embeddable;
 import lombok.NoArgsConstructor;
 
@@ -22,7 +22,7 @@ public class AgreementInfoEmbeddable {
 
 	private LocalDateTime agreedAt;
 
-	public AgreementInfoEmbeddable(AgreementInfo domain) {
+	public AgreementInfoEmbeddable(Agreement domain) {
 		this.re100Interest = domain.re100Interest();
 		this.personalInfoCollectionAgreed = domain.personalInfoCollectionAgreed();
 		this.personalInfoThirdPartyAgreed = domain.personalInfoThirdPartyAgreed();
@@ -31,8 +31,8 @@ public class AgreementInfoEmbeddable {
 		this.agreedAt = domain.agreedAt();
 	}
 
-	public AgreementInfo toDomain() {
-		return AgreementInfo.builder()
+	public Agreement toDomain() {
+		return Agreement.builder()
 			.re100Interest(re100Interest)
 			.personalInfoCollectionAgreed(personalInfoCollectionAgreed)
 			.personalInfoThirdPartyAgreed(personalInfoThirdPartyAgreed)

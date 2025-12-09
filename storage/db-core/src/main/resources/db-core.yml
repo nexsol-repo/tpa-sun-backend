@@ -37,8 +37,10 @@ spring:
     compose:
       enabled: true
   flyway:
-    enabled: false
+    enabled: true
+    baseline-on-migrate: true
     validate-on-migrate: false
+    locations: classpath:db/migration
 storage:
   datasource:
     core:

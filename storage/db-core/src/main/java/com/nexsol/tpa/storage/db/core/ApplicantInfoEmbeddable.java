@@ -1,6 +1,6 @@
 package com.nexsol.tpa.storage.db.core;
 
-import com.nexsol.tpa.core.domain.ApplicantInfo;
+import com.nexsol.tpa.core.domain.Applicant;
 import jakarta.persistence.Embeddable;
 import lombok.NoArgsConstructor;
 
@@ -8,39 +8,39 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ApplicantInfoEmbeddable {
 
-	private String appCompanyCode;
+	private String companyCode;
 
-	private String appCompanyName;
+	private String companyName;
 
-	private String appCeoName;
+	private String ceoName;
 
-	private String appCeoPhone;
+	private String ceoPhoneNumber;
 
-	private String appApplicantName;
+	private String applicantName;
 
-	private String appApplicantPhone;
+	private String applicantPhoneNumber;
 
-	private String appEmail;
+	private String applicantEmail;
 
-	public ApplicantInfoEmbeddable(ApplicantInfo domain) {
-		this.appCompanyCode = domain.companyCode();
-		this.appCompanyName = domain.companyName();
-		this.appCeoName = domain.ceoName();
-		this.appCeoPhone = domain.ceoPhoneNumber();
-		this.appApplicantName = domain.applicantName();
-		this.appApplicantPhone = domain.applicantPhoneNumber();
-		this.appEmail = domain.email();
+	public ApplicantInfoEmbeddable(Applicant domain) {
+		this.companyCode = domain.companyCode();
+		this.companyName = domain.companyName();
+		this.ceoName = domain.ceoName();
+		this.ceoPhoneNumber = domain.ceoPhoneNumber();
+		this.applicantName = domain.applicantName();
+		this.applicantPhoneNumber = domain.applicantPhoneNumber();
+		this.applicantEmail = domain.applicantEmail();
 	}
 
-	public ApplicantInfo toDomain() {
-		return ApplicantInfo.builder()
-			.companyCode(appCompanyCode)
-			.companyName(appCompanyName)
-			.ceoName(appCeoName)
-			.ceoPhoneNumber(appCeoPhone)
-			.applicantName(appApplicantName)
-			.applicantPhoneNumber(appApplicantPhone)
-			.email(appEmail)
+	public Applicant toDomain() {
+		return Applicant.builder()
+			.companyCode(companyCode)
+			.companyName(companyName)
+			.ceoName(ceoName)
+			.ceoPhoneNumber(ceoPhoneNumber)
+			.applicantName(applicantName)
+			.applicantPhoneNumber(applicantPhoneNumber)
+			.applicantEmail(applicantEmail)
 			.build();
 	}
 
