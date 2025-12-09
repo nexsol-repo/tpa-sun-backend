@@ -14,7 +14,7 @@ public class FileService {
 
 	private final FileStorageClient fileStorageClient;
 
-	public DocumentFile uploadInsurance(InputStream inputStream, String originalFileName, long size,
+	public DocumentFile uploadInsurance(Long userId, InputStream inputStream, String originalFileName, long size,
 			String contentType) {
 		String extension = getExtension(originalFileName);
 
@@ -22,7 +22,7 @@ public class FileService {
 			throw new CoreException(CoreErrorType.FILE_UPLOAD_VALIDATION_CONTENT);
 		}
 
-		String objectKey = "insurance/" + UUID.randomUUID() + "." + extension;
+		String objectKey = "insurance/" + userId + "/" + UUID.randomUUID() + "." + extension;
 
 		String savedKey = fileStorageClient.upload(inputStream, objectKey, size, contentType);
 
@@ -34,7 +34,7 @@ public class FileService {
 			.build();
 	}
 
-	public DocumentFile uploadSignature(InputStream inputStream, String originalFileName, long size,
+	public DocumentFile uploadSignature(Long userId, InputStream inputStream, String originalFileName, long size,
 			String contentType) {
 		String extension = getExtension(originalFileName);
 
@@ -42,7 +42,7 @@ public class FileService {
 			throw new CoreException(CoreErrorType.FILE_UPLOAD_VALIDATION_IMAGE);
 		}
 
-		String objectKey = "signatures/" + UUID.randomUUID() + "." + extension;
+		String objectKey = "signatures/" + userId + "/" + UUID.randomUUID() + "." + extension;
 
 		String savedKey = fileStorageClient.upload(inputStream, objectKey, size, contentType);
 
@@ -54,9 +54,14 @@ public class FileService {
 			.build();
 	}
 
-	public void deleteFile(String fileKey) {
+	public void deleteFile(Long userId, String fileKey) {
 		if (fileKey == null || fileKey.isBlank()) {
 			throw new CoreException(CoreErrorType.FILE_UPLOAD_NOT_FOUND_DATA);
+		}
+		String userPathToken = "/" + userId + "/";
+
+		if (!fileKey.contains(userPathToken)) {
+			throw new CoreException(CoreErrorType.FILE_UPLOAD_UNAUTHORIZED);
 		}
 
 		fileStorageClient.delete(fileKey);

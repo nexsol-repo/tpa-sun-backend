@@ -5,7 +5,7 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record AgreementInfo(
+public record Agreement(
 		// 1. RE100 관심 여부 (선택)
 		boolean re100Interest,
 
@@ -19,10 +19,10 @@ public record AgreementInfo(
 
 		// 동의 일시 (Audit 용도)
 		LocalDateTime agreedAt) {
-	public static AgreementInfo create(boolean re100, boolean collection, boolean thirdParty, boolean groupRule,
+	public static Agreement create(boolean re100, boolean collection, boolean thirdParty, boolean groupRule,
 			boolean marketing) {
 
-		return AgreementInfo.builder()
+		return Agreement.builder()
 			.re100Interest(re100)
 			.personalInfoCollectionAgreed(collection)
 			.personalInfoThirdPartyAgreed(thirdParty)

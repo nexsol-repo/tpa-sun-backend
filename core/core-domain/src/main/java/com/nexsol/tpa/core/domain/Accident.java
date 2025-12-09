@@ -1,4 +1,9 @@
 package com.nexsol.tpa.core.domain;
 
-public record Accident() {
+import lombok.Builder;
+
+import java.time.LocalDate;
+
+@Builder
+public record Accident(LocalDate date, Long paymentAmount, String content) {
 }

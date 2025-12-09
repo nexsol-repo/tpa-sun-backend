@@ -39,7 +39,9 @@ public enum CoreErrorType {
 			CoreErrorLevel.INFO),
 	FILE_UPLOAD_VALIDATION_IMAGE(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T4002, "서명은 이미지 파일만 가능합니다.",
 			CoreErrorLevel.INFO),
-	FILE_UPLOAD_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T4003, "파일이 존재하지 않습니다.", CoreErrorLevel.INFO);
+	FILE_UPLOAD_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T4003, "파일이 존재하지 않습니다.", CoreErrorLevel.INFO),
+	FILE_UPLOAD_UNAUTHORIZED(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T4004, "잘못된 접근이거나 권한이 없는 파일입니다.",
+			CoreErrorLevel.INFO);
 
 	private final CoreErrorKind kind;
 

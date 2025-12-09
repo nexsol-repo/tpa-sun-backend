@@ -1,4 +1,9 @@
 package com.nexsol.tpa.core.domain;
 
-public class Pledge {
+import com.nexsol.tpa.core.enums.BondSendStatus;
+import lombok.Builder;
+
+@Builder
+public record Pledge(String bankName, String managerName, String phone, BondSendStatus bondSendStatus, String remark,
+		Long amount, String address) {
 }
