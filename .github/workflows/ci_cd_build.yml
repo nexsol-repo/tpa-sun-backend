@@ -1,0 +1,69 @@
+name: CI/CD - TPA Sun Backend
+
+on:
+  push:
+    branches:
+      - dev
+      - main # main 브랜치 추가
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: tpa-sun-backend
+  DEPLOY_PATH: /home/nex3/app/tpa-sun-backend
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker
+
+      - name: Set Environment Variables based on Branch
+        id: set-env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "TARGET_ENV=prod" >> $GITHUB_ENV
+            echo "Target Environment: PROD (Main)"
+          else
+            echo "TARGET_ENV=dev" >> $GITHUB_ENV
+            echo "Target Environment: DEV"
+          fi
+
+      - name: Build Docker Image Locally
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          # 이미지 태그를 환경별로 구분 (latest vs dev) 또는 동일하게 latest 사용 후 배포 시 구분
+          # 여기서는 관리 편의상 환경별 태그를 붙입니다.
+          tags: ${{ env.IMAGE_NAME }}:${{ env.TARGET_ENV }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # --- 배포 단계 ---
+
+      - name: Prepare Deployment Directory
+        run: |
+          mkdir -p ${{ env.DEPLOY_PATH }}
+          cp docker-compose.app.yml ${{ env.DEPLOY_PATH }}/
+          cp scripts/deploy.sh ${{ env.DEPLOY_PATH }}/
+          chmod +x ${{ env.DEPLOY_PATH }}/deploy.sh
+
+      - name: Execute Deployment Script
+        working-directory: ${{ env.DEPLOY_PATH }}
+        env:
+          # 위에서 빌드한 이미지 태그 전달
+          DOCKER_IMAGE: ${{ env.IMAGE_NAME }}:${{ env.TARGET_ENV }}
+        run: |
+          # deploy.sh 실행 시 환경(dev/prod)을 인자로 전달
+          ./deploy.sh ${{ env.TARGET_ENV }}
+
+      - name: Cleanup Docker System
+        run: |
+          docker image prune -f
