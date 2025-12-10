@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 사용법: ./deploy.sh [dev|prod]
+# Usage: ./deploy.sh [dev|prod]
 TARGET_ENV=$1
 
 if [ -z "$TARGET_ENV" ]; then
@@ -11,7 +11,7 @@ fi
 APP_NAME="tpa-sun-api"
 BASE_PATH="/home/nex3/app/${APP_NAME}"
 
-# 환경별 설정
+# Environment specific settings
 if [ "$TARGET_ENV" == "prod" ]; then
   ENV_FILE=".env.prod"
   NGINX_CONF="/etc/nginx/conf.d/tpa-sun-api-prod.conf"
@@ -24,7 +24,7 @@ fi
 
 echo "🚀 Starting Deployment for $TARGET_ENV environment (App: $APP_NAME)..."
 
-# 1. 환경변수 파일 준비
+# 1. Prepare .env file
 if [ -f "${BASE_PATH}/${ENV_FILE}" ]; then
   echo "📄 Copying ${ENV_FILE} to .env"
   cp "${BASE_PATH}/${ENV_FILE}" "${BASE_PATH}/.env"
@@ -34,11 +34,16 @@ else
   exit 1
 fi
 
-# 2. 현재 실행 중인 포트 확인
+# 2. Check currently running port
 CURRENT_PORT_FILE="${BASE_PATH}/current_port_${TARGET_ENV}.txt"
-CURRENT_PORT=$(cat $CURRENT_PORT_FILE 2>/dev/null || echo "$DEFAULT_PORT")
+# If file doesn't exist, default to DEFAULT_PORT
+if [ -f "$CURRENT_PORT_FILE" ]; then
+    CURRENT_PORT=$(cat "$CURRENT_PORT_FILE")
+else
+    CURRENT_PORT="$DEFAULT_PORT"
+fi
 
-# 3. 포트 스위칭 로직
+# 3. Determine Target Port
 if [ "$TARGET_ENV" == "dev" ]; then
   if [ "$CURRENT_PORT" == "8081" ]; then
     TARGET_PORT="8082"; TARGET_COLOR="green"
@@ -55,20 +60,24 @@ fi
 
 echo "🔄 $TARGET_ENV Deployment: $CURRENT_PORT -> $TARGET_PORT ($TARGET_COLOR)"
 
-# 4. 컨테이너 실행
+# 4. Run Container
 export HOST_PORT=$TARGET_PORT
+
+# Set DOCKER_IMAGE from env var or default
 if [ -z "$DOCKER_IMAGE" ]; then
   export DOCKER_IMAGE="tpa-sun-api:${TARGET_ENV}"
 fi
 
 COMPOSE_PROJECT_NAME="${APP_NAME}-${TARGET_ENV}-${TARGET_COLOR}"
 
+# Use --env-file explicitly to avoid ambiguity, though standard .env in dir works too
 docker compose -f docker-compose.app.yml -p $COMPOSE_PROJECT_NAME up -d
 
+# 5. Health Check
 echo "🏥 Health Checking ($TARGET_PORT)..."
 
-# [수정] 5회 반복 (5초 간격, 총 25초 대기)
 for i in {1..5}; do
+  # Use 127.0.0.1 explicitly to avoid localhost resolution issues
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:${TARGET_PORT}/health)
 
   if [ "$STATUS" == "200" ]; then
@@ -83,7 +92,6 @@ done
 if [ "$STATUS" != "200" ]; then
   echo "❌ Health Check Failed. Status: $STATUS"
 
-  # 실패 시 로그 출력
   echo "--- Docker Logs (Last 50 lines) ---"
   docker compose -f docker-compose.app.yml -p $COMPOSE_PROJECT_NAME logs --tail 50
   echo "-----------------------------------"
@@ -93,14 +101,16 @@ if [ "$STATUS" != "200" ]; then
   exit 1
 fi
 
-# 6. Nginx 설정 변경 & Reload
+# 6. Switch Nginx Traffic
 echo "🔄 Switching Nginx Traffic..."
+# Update proxy_pass port in nginx config
 sudo sed -i "s/127.0.0.1:[0-9]\{4\}/127.0.0.1:${TARGET_PORT}/g" $NGINX_CONF
 sudo nginx -s reload
 
-# 7. 포트 기록 업데이트 & 구버전 종료
-echo "$TARGET_PORT" > $CURRENT_PORT_FILE
+# 7. Update Current Port File
+echo "$TARGET_PORT" > "$CURRENT_PORT_FILE"
 
+# 8. Stop Old Container
 if [ "$TARGET_COLOR" == "blue" ]; then
   OLD_COLOR="green"
 else
@@ -109,6 +119,8 @@ fi
 
 OLD_PROJECT_NAME="${APP_NAME}-${TARGET_ENV}-${OLD_COLOR}"
 echo "🛑 Stopping old container ($OLD_PROJECT_NAME)..."
+# We need to set HOST_PORT for the old container to down it correctly,
+# though 'down' mainly needs project name. Setting it to old port to be safe.
 HOST_PORT=$CURRENT_PORT docker compose -f docker-compose.app.yml -p $OLD_PROJECT_NAME down
 
 echo "🎉 $TARGET_ENV Deployment Finished!"
