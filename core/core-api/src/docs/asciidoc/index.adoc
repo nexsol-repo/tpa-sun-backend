@@ -68,6 +68,44 @@ include::{snippets}/health-check/http-request.adoc[]
 ==== 응답
 include::{snippets}/health-check/http-response.adoc[]
 
+
+== 파일 (File)
+
+=== 보험 증빙 서류 업로드 (PDF)
+보험 가입에 필요한 증빙 서류(사업자등록증, 발전사업허가증 등)를 업로드합니다.
+PDF 파일만 허용되며, 업로드 후 반환된 `key`를 사용하여 보험 가입 조건 저장 API를 호출해야 합니다.
+
+==== 요청
+include::{snippets}/files-upload-insurance/http-request.adoc[]
+include::{snippets}/files-upload-insurance/request-parts.adoc[]
+
+==== 응답
+include::{snippets}/files-upload-insurance/http-response.adoc[]
+include::{snippets}/files-upload-insurance/response-fields.adoc[]
+
+=== 전자 서명 이미지 업로드
+청약서 서명을 위한 이미지 파일을 업로드합니다.
+이미지 파일(PNG, JPG 등)만 허용됩니다.
+
+==== 요청
+include::{snippets}/files-upload-signature/http-request.adoc[]
+include::{snippets}/files-upload-signature/request-parts.adoc[]
+
+==== 응답
+include::{snippets}/files-upload-signature/http-response.adoc[]
+include::{snippets}/files-upload-signature/response-fields.adoc[]
+
+=== 파일 삭제
+업로드된 파일을 스토리지에서 즉시 삭제합니다. (업로드 취소 시 사용)
+
+==== 요청
+include::{snippets}/files-delete/http-request.adoc[]
+include::{snippets}/files-delete/query-parameters.adoc[]
+
+==== 응답
+include::{snippets}/files-delete/http-response.adoc[]
+include::{snippets}/files-delete/response-fields.adoc[]
+
 == 보험 (Insurance)
 
 === 1. 청약 시작 (약관 동의)

@@ -31,10 +31,15 @@ public class UserControllerTest extends RestDocsTest {
 	@DisplayName("회원가입 API 문서화")
 	void signup() {
 		// given
-		SignUpRequest request = new SignUpRequest("123-45-67890", "test@nexsol.com", "(주)넥솔", "홍길동", "010-1234-5678",
-				"신청자명", "applicant@nexsol.com", "010-2222-2222", true, true);
+		SignUpRequest request = new SignUpRequest("123-45-67890", "(주)넥솔", "홍길동", "010-1234-5678", "신청자명",
+				"applicant@nexsol.com", "010-2222-2222", true, true);
 
-		User mockUser = User.builder().id(1L).companyCode("123-45-67890").email("test@nexsol.com").name("홍길동").build();
+		User mockUser = User.builder()
+			.id(1L)
+			.companyCode("123-45-67890")
+			.applicantEmail("applicant@nexsol.com")
+			.name("홍길동")
+			.build();
 
 		when(userService.signUp(any())).thenReturn(mockUser);
 
@@ -49,13 +54,14 @@ public class UserControllerTest extends RestDocsTest {
 			.expectBody()
 			.consumeWith(document("user-signup", requestPreprocessor(), responsePreprocessor(), requestFields(
 					fieldWithPath("companyCode").type(JsonFieldType.STRING).description("사업자 번호 (필수)"),
-					fieldWithPath("email").type(JsonFieldType.STRING).description("이메일 (필수)"),
-					fieldWithPath("companyName").type(JsonFieldType.STRING).description("회사명").optional(),
+					fieldWithPath("companyName").type(JsonFieldType.STRING).description("회사명 (필수)").optional(),
 					fieldWithPath("name").type(JsonFieldType.STRING).description("대표자명 (필수)"),
-					fieldWithPath("phoneNumber").type(JsonFieldType.STRING).description("연락처").optional(),
-					fieldWithPath("applicantName").type(JsonFieldType.STRING).description("신청자명").optional(),
-					fieldWithPath("applicantEmail").type(JsonFieldType.STRING).description("신청자 이메일").optional(),
-					fieldWithPath("applicantPhoneNumber").type(JsonFieldType.STRING).description("신청자 연락처").optional(),
+					fieldWithPath("phoneNumber").type(JsonFieldType.STRING).description("연락처 (필수)").optional(),
+					fieldWithPath("applicantName").type(JsonFieldType.STRING).description("신청자명 (필수)").optional(),
+					fieldWithPath("applicantEmail").type(JsonFieldType.STRING).description("신청자 이메일 (필수)").optional(),
+					fieldWithPath("applicantPhoneNumber").type(JsonFieldType.STRING)
+						.description("신청자 연락처 (필수)")
+						.optional(),
 					fieldWithPath("termsAgreed").type(JsonFieldType.BOOLEAN).description("이용약관 동의 여부 (필수)"),
 					fieldWithPath("privacyAgreed").type(JsonFieldType.BOOLEAN).description("개인정보 처리방침 동의 여부 (필수)")),
 					responseFields(

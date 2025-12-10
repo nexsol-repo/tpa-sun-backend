@@ -6,7 +6,6 @@ public class UserFixture {
 		return User.builder()
 			.id(1L) // 테스트용 ID
 			.companyCode("123-45-67890")
-			.email("test@nexsol.com")
 			.companyName("(주)넥솔")
 			.name("테스트마스터")
 			.phoneNumber("010-1234-5678")

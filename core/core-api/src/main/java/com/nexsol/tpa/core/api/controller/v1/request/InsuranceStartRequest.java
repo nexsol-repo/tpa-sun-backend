@@ -1,6 +1,6 @@
 package com.nexsol.tpa.core.api.controller.v1.request;
 
-import com.nexsol.tpa.core.domain.AgreementInfo;
+import com.nexsol.tpa.core.domain.Agreement;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,8 +17,8 @@ public record InsuranceStartRequest(@NotNull Boolean re100Interest,
 
 		// [선택] 마케팅 동의
 		@NotNull Boolean marketingAgreed) {
-	public AgreementInfo toAgreementInfo() {
-		return AgreementInfo.create(re100Interest, personalInfoCollectionAgreed, personalInfoThirdPartyAgreed,
+	public Agreement toAgreementInfo() {
+		return Agreement.create(re100Interest, personalInfoCollectionAgreed, personalInfoThirdPartyAgreed,
 				groupRuleAgreed, marketingAgreed);
 	}
 }

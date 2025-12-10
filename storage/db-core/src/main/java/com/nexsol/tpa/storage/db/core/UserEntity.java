@@ -16,8 +16,6 @@ public class UserEntity extends BaseEntity {
 
 	private String companyCode;
 
-	private String email;
-
 	private String companyName;
 
 	private String name;
@@ -40,7 +38,7 @@ public class UserEntity extends BaseEntity {
 	}
 
 	public void update(User user) {
-		this.email = user.email();
+
 		this.companyName = user.companyName();
 		this.name = user.name();
 		this.phoneNumber = user.phoneNumber();
@@ -53,7 +51,6 @@ public class UserEntity extends BaseEntity {
 		return User.builder()
 			.id(this.getId())
 			.companyCode(this.companyCode)
-			.email(this.email)
 			.companyName(this.companyName)
 			.name(this.name)
 			.phoneNumber(this.phoneNumber)

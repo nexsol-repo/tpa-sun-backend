@@ -1,7 +1,5 @@
 package com.nexsol.tpa.core.domain;
 
-import com.nexsol.tpa.core.error.CoreErrorType;
-import com.nexsol.tpa.core.error.CoreException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,72 +17,66 @@ public class InsuranceApplicationService {
 
 	private final InsurancePremiumCalculator premiumCalculator;
 
-	public InsuranceApplication getInsuranceApplication(Long applicationId) {
-		return applicationReader.read(applicationId);
+	public InsuranceApplication getInsuranceApplication(Long userId, Long applicationId) {
+		InsuranceApplication application = applicationReader.read(applicationId);
+		application.validateOwner(userId);
+		return application;
 	}
 
-	public InsuranceApplication savePlantInit(Long userId, AgreementInfo agreementInfo) {
+	public InsuranceApplication saveInit(Long userId, Agreement agreement) {
 		User user = userReader.read(userId);
-
-		ApplicantInfo applicantInfo = ApplicantInfo.builder()
-			.companyCode(user.companyCode())
-			.companyName(user.companyName())
-			.ceoName(user.name())
-			.ceoPhoneNumber(user.phoneNumber())
-			.applicantName(user.applicantName())
-			.applicantPhoneNumber(user.applicantPhoneNumber())
-			.email(user.email())
-			.build();
-
+		Applicant applicant = Applicant.toApplicant(user);
 		// TODO SUN: 추후 바뀜 현재는 하드코딩해야함
-		String applicationNumber = "2025-NO-TEST-1234";
+		String applicationNumber = "2025-NO-TEST-" + System.currentTimeMillis();
 
-		InsuranceApplication newInsurance = InsuranceApplication.create(userId, applicationNumber, applicantInfo,
-				agreementInfo);
+		InsuranceApplication newApplication = InsuranceApplication.create(userId, applicationNumber, applicant,
+				agreement);
 
-		return applicationWriter.writer(newInsurance);
+		return applicationWriter.writer(newApplication);
 
 	}
 
-	public InsuranceApplication savePlantInfo(Long applicationId, InsurancePlant plantInfo) {
+	public InsuranceApplication savePlantInfo(Long userId, Long applicationId, InsurancePlant plant) {
 		InsuranceApplication application = applicationReader.read(applicationId);
 
-		InsuranceApplication updated = application.updatePlantInfo(plantInfo);
+		application.validateOwner(userId);
+
+		InsuranceApplication updated = application.toBuilder().plant(plant).build();
 
 		return applicationWriter.writer(updated);
 	}
 
-	public InsuranceApplication saveCondition(Long applicationId, InsuranceCondition condition) {
+	public InsuranceApplication saveCondition(Long userId, Long applicationId, JoinCondition condition,
+			InsuranceDocument documents) {
 		InsuranceApplication application = applicationReader.read(applicationId);
 
+		application.validateOwner(userId);
 		insuranceInspector.inspectCondition(condition);
+		insuranceInspector.inspectDocuments(documents);
 
-		InsuranceApplication updated = application.updateCondition(condition);
+		InsuranceApplication withCondition = application.toBuilder().condition(condition).documents(documents).build();
 
-		if (updated.plantInfo() != null) {
-			InsuranceCoverage coverage = premiumCalculator.calculate(updated.plantInfo(), condition);
+		if (withCondition.plant() != null) {
 
-			updated = updated.updateCoverage(coverage);
+			PremiumQuote quote = premiumCalculator.calculate(withCondition.plant(), condition);
+
+			withCondition = withCondition.toBuilder().quote(quote).build();
 		}
 
-		return applicationWriter.writer(updated);
+		return applicationWriter.writer(withCondition);
 	}
 
-	public InsuranceApplication completeApplication(Long applicationId) {
-		InsuranceApplication app = applicationReader.read(applicationId);
+	public InsuranceApplication completeApplication(Long userId, Long applicationId, DocumentFile signatureFile) {
+		InsuranceApplication application = applicationReader.read(applicationId);
+		application.validateOwner(userId);
 
-		validateForCompletion(app);
+		InsuranceApplication completed = application.complete();
 
-		return applicationWriter.writer(app);
-	}
+		InsuranceDocument signedDocs = application.documents().addSignature(signatureFile);
 
-	private void validateForCompletion(InsuranceApplication app) {
-		if (app.plantInfo() == null)
-			throw new CoreException(CoreErrorType.INVALID_INPUT, "발전소 정보가 입력되지 않았습니다.");
-		if (app.condition() == null)
-			throw new CoreException(CoreErrorType.INVALID_INPUT, "가입 조건이 입력되지 않았습니다.");
-		if (app.coverage() == null)
-			throw new CoreException(CoreErrorType.INVALID_INPUT, "보험료 산출이 완료되지 않았습니다.");
+		completed = completed.toBuilder().documents(signedDocs).build();
+
+		return applicationWriter.writer(completed);
 	}
 
 }

@@ -6,8 +6,8 @@ import java.util.Optional;
 
 public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
 
-	Optional<UserEntity> findByCompanyCodeAndEmail(String companyCode, String email);
+	Optional<UserEntity> findByCompanyCodeAndApplicantEmail(String companyCode, String email);
 
-	boolean existsByCompanyCodeAndEmail(String companyCode, String email);
+	boolean existsByCompanyCodeAndApplicantEmail(String companyCode, String email);
 
 }

@@ -5,9 +5,8 @@ import com.nexsol.tpa.core.error.CoreException;
 import lombok.Builder;
 
 @Builder
-public record NewUser(String companyCode, String email, String companyName, String name, String phoneNumber,
-		String applicantName, String applicantEmail, String applicantPhoneNumber, boolean termsAgreed,
-		boolean privacyAgreed) {
+public record NewUser(String companyCode, String companyName, String name, String phoneNumber, String applicantName,
+		String applicantEmail, String applicantPhoneNumber, boolean termsAgreed, boolean privacyAgreed) {
 
 	public NewUser {
 		// 생성자 내 검증 (Compact Constructor)
@@ -22,7 +21,6 @@ public record NewUser(String companyCode, String email, String companyName, Stri
 	public User toUser() {
 		return User.builder()
 			.companyCode(companyCode)
-			.email(email)
 			.companyName(companyName)
 			.name(name)
 			.phoneNumber(phoneNumber)

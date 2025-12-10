@@ -11,7 +11,7 @@ public class InsurancePremiumCalculator {
 
 	private final InsuranceRatePolicy ratePolicy;
 
-	public InsuranceCoverage calculate(InsurancePlant plant, InsuranceCondition condition) {
+	public PremiumQuote calculate(InsurancePlant plant, JoinCondition condition) {
 
 		// 1. 요율 조회 (Policy 위임)
 		String region = plant.region();
@@ -25,10 +25,10 @@ public class InsurancePremiumCalculator {
 
 		long totalPremium = premiumMD + premiumBI + premiumGL;
 
-		return InsuranceCoverage.builder()
-			.propertyDamageDeductible(100_000_000L)
-			.liabilityDeductible(300_000L)
-			.businessInterruptionDeductible(0L)
+		return PremiumQuote.builder()
+			.mdPremium(premiumMD)
+			.biPremium(premiumBI)
+			.glPremium(premiumGL)
 			.totalPremium(totalPremium)
 			.build();
 	}

@@ -29,7 +29,7 @@ public class AuthService {
 
 		verification.checkCodeForLogin(code, LocalDateTime.now());
 
-		AuthToken authToken = tokenIssuer.issue(user.id(), user.email());
+		AuthToken authToken = tokenIssuer.issue(user.id(), user.applicantEmail());
 
 		tokenAppender
 			.append(RefreshToken.create(user.id(), authToken.refreshToken(), authToken.refreshTokenExpiration()));
@@ -43,7 +43,7 @@ public class AuthService {
 
 		User user = userReader.read(storedToken.userId());
 
-		AuthToken newAuthToken = tokenIssuer.issue(user.id(), user.email());
+		AuthToken newAuthToken = tokenIssuer.issue(user.id(), user.applicantEmail());
 
 		tokenRemover.remove(currentRefreshToken);
 

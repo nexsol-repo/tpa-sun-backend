@@ -17,7 +17,7 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	public Optional<User> findByCompanyCodeAndEmail(String companyCode, String email) {
-		return userJpaRepository.findByCompanyCodeAndEmail(companyCode, email).map(UserEntity::toDomain);
+		return userJpaRepository.findByCompanyCodeAndApplicantEmail(companyCode, email).map(UserEntity::toDomain);
 	}
 
 	@Override
@@ -27,7 +27,7 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	public boolean existsCompanyCodeAndEmail(String companyCode, String email) {
-		return userJpaRepository.existsByCompanyCodeAndEmail(companyCode, email);
+		return userJpaRepository.existsByCompanyCodeAndApplicantEmail(companyCode, email);
 	}
 
 	@Override

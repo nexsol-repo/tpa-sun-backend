@@ -1,21 +1,31 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
-import com.nexsol.tpa.core.api.controller.v1.request.InsuranceConditionRequest;
-import com.nexsol.tpa.core.api.controller.v1.request.InsurancePlantRequest;
-import com.nexsol.tpa.core.api.controller.v1.request.InsuranceStartRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.*;
 import com.nexsol.tpa.core.domain.*;
 import com.nexsol.tpa.core.enums.BondSendStatus;
+import com.nexsol.tpa.core.enums.InsuranceDocumentType;
 import com.nexsol.tpa.core.enums.InsuranceStatus;
 import com.nexsol.tpa.test.api.RestDocsTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -23,19 +33,41 @@ import static org.mockito.Mockito.*;
 import static com.nexsol.tpa.test.api.RestDocsUtils.requestPreprocessor;
 import static com.nexsol.tpa.test.api.RestDocsUtils.responsePreprocessor;
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.document;
+import static org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.documentationConfiguration;
 
 public class InsuranceControllerTest extends RestDocsTest {
 
 	private final InsuranceApplicationService insuranceApplicationService = mock(InsuranceApplicationService.class);
 
 	@BeforeEach
-	void setUp() {
+	public void setUp(RestDocumentationContextProvider restDocumentation) {
+		// 1. @AuthenticationPrincipal 처리를 위한 커스텀 리졸버
+		HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
+			@Override
+			public boolean supportsParameter(MethodParameter parameter) {
+				return parameter.getParameterType().equals(Long.class)
+						&& parameter.hasParameterAnnotation(AuthenticationPrincipal.class);
+			}
 
-		this.webTestClient = mockController(new InsuranceController(insuranceApplicationService));
+			@Override
+			public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+					NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+				return 1L; // 테스트용 User ID
+			}
+		};
+
+		// 2. MockController 직접 빌드하여 부모 클래스(RestDocsTest)의 webTestClient 필드에 할당
+		this.webTestClient = MockMvcWebTestClient.bindToController(new InsuranceController(insuranceApplicationService))
+			.customArgumentResolvers(authPrincipalResolver) // 리졸버 등록
+			.configureClient()
+			.filter(documentationConfiguration(restDocumentation)) // RestDocs 설정 적용
+			.build();
 	}
 
 	private InsuranceApplication createMockApplication(Long id, InsuranceStatus status) {
@@ -54,95 +86,84 @@ public class InsuranceControllerTest extends RestDocsTest {
 	void getApplication() {
 		// given
 		Long appId = 1L;
-		InsuranceApplication mockApp = createMockApplication(appId, InsuranceStatus.PENDING);
+		Long userId = 1L;
+		DocumentFile mockFile = DocumentFile.builder()
+			.fileKey("insurance/2025/uuid.pdf")
+			.originalFileName("doc.pdf")
+			.size(1024L)
+			.extension("pdf")
+			.build();
+		InsuranceAttachment att1 = InsuranceAttachment.builder()
+			.type(InsuranceDocumentType.BUSINESS_LICENSE)
+			.file(mockFile)
+			.build();
+		InsuranceDocument mockDocs = InsuranceDocument.builder().attachments(List.of(att1)).build();
 
-		given(insuranceApplicationService.getInsuranceApplication(appId)).willReturn(mockApp);
+		InsuranceApplication mockApp = InsuranceApplication.builder()
+			.id(appId)
+			.applicationNumber("2025-APP-" + appId)
+			.status(InsuranceStatus.PENDING)
+			.documents(mockDocs)
+			.build();
+
+		given(insuranceApplicationService.getInsuranceApplication(userId, appId)).willReturn(mockApp);
 
 		// when & then
 		webTestClient.get()
 			.uri("/v1/insurance/{applicationId}", appId)
+			.header("Authorization", "Bearer {ACCESS_TOKEN}")
 			.accept(MediaType.APPLICATION_JSON)
 			.exchange()
 			.expectStatus()
 			.isOk()
 			.expectBody()
 			.consumeWith(document("insurance-get", requestPreprocessor(), responsePreprocessor(),
+					requestHeaders(headerWithName("Authorization").description("Bearer Access Token (필수)")),
 					pathParameters(parameterWithName("applicationId").description("청약서 ID")),
-					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 코드"),
-							fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("청약서 ID"),
-							fieldWithPath("data.applicationNumber").type(JsonFieldType.STRING).description("청약 번호"),
-							fieldWithPath("data.status").type(JsonFieldType.STRING)
-								.description("진행 상태 (WRITING, COMPLETED...)"),
-							fieldWithPath("data.applicantInfo").type(JsonFieldType.OBJECT)
-								.optional()
-								.description("신청자 정보 스냅샷"),
-							fieldWithPath("data.agreementInfo").type(JsonFieldType.OBJECT)
-								.optional()
-								.description("동의 내역"),
-							fieldWithPath("data.plantInfo").type(JsonFieldType.OBJECT).optional().description("발전소 정보"),
-							fieldWithPath("data.conditionInfo").type(JsonFieldType.OBJECT)
-								.optional()
-								.description("가입 조건"),
-							fieldWithPath("data.coverageInfo").type(JsonFieldType.OBJECT)
-								.optional()
-								.description("보험료 산출 내역"),
-							fieldWithPath("error").type(JsonFieldType.STRING)
-								.optional()
-								.description("에러 메시지 (정상 시 null)"))));
+					responseFields(getInsuranceResponseFields().toArray(FieldDescriptor[]::new))));
 	}
 
 	@Test
 	@DisplayName("Step 1. 청약 시작 (약관 동의)")
 	void start() {
+		Long userId = 1L;
 		// given
 		InsuranceStartRequest request = new InsuranceStartRequest(true, true, true, true, true);
 		InsuranceApplication mockApp = createMockApplication(101L, InsuranceStatus.PENDING);
 
-		given(insuranceApplicationService.savePlantInit(any(), any(AgreementInfo.class))).willReturn(mockApp);
+		given(insuranceApplicationService.saveInit(eq(userId), any(Agreement.class))).willReturn(mockApp);
 
 		// when & then
 		webTestClient.post()
 			.uri("/v1/insurance/start")
+			.header("Authorization", "Bearer {ACCESS_TOKEN}")
 			.contentType(MediaType.APPLICATION_JSON)
 			.bodyValue(request)
 			.exchange()
 			.expectStatus()
 			.isOk()
 			.expectBody()
-			.consumeWith(document("insurance-start", requestPreprocessor(), responsePreprocessor(), requestFields(
-					fieldWithPath("re100Interest").type(JsonFieldType.BOOLEAN)
-						.description("RE100 발전함 장기고정계약 안내 관심 여부 (선택)"),
-					fieldWithPath("personalInfoCollectionAgreed").type(JsonFieldType.BOOLEAN)
-						.description("개인(신용)정보 수집 및 이용 동의 (필수)"),
-					fieldWithPath("personalInfoThirdPartyAgreed").type(JsonFieldType.BOOLEAN)
-						.description("개인정보 제3자 제공 동의 (필수)"),
-					fieldWithPath("groupRuleAgreed").type(JsonFieldType.BOOLEAN)
-						.description("단체규약 및 가입 시 유의사항 동의 (필수)"),
-					fieldWithPath("marketingAgreed").type(JsonFieldType.BOOLEAN).description("마케팅 및 홍보서비스 동의 (선택)")),
-					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 코드"),
-							fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("생성된 청약서 ID"),
-							fieldWithPath("data.applicationNumber").type(JsonFieldType.STRING).description("청약 번호"),
-							fieldWithPath("data.status").type(JsonFieldType.STRING).description("상태"),
-							fieldWithPath("data.applicantInfo").type(JsonFieldType.OBJECT)
-								.optional()
-								.description("신청자 정보"),
-							fieldWithPath("data.agreementInfo").type(JsonFieldType.OBJECT)
-								.optional()
-								.description("동의 내역"),
-							fieldWithPath("data.plantInfo").type(JsonFieldType.OBJECT).optional().description("발전소 정보"),
-							fieldWithPath("data.conditionInfo").type(JsonFieldType.OBJECT)
-								.optional()
-								.description("가입 조건"),
-							fieldWithPath("data.coverageInfo").type(JsonFieldType.OBJECT)
-								.optional()
-								.description("보험료 정보"),
-							fieldWithPath("error").type(JsonFieldType.STRING).optional().description("에러"))));
+			.consumeWith(document("insurance-start", requestPreprocessor(), responsePreprocessor(),
+					requestHeaders(headerWithName("Authorization").description("Bearer Access Token (필수)")),
+					requestFields(
+							fieldWithPath("re100Interest").type(JsonFieldType.BOOLEAN)
+								.description("RE100 발전함 장기고정계약 안내 관심 여부 (선택)"),
+							fieldWithPath("personalInfoCollectionAgreed").type(JsonFieldType.BOOLEAN)
+								.description("개인(신용)정보 수집 및 이용 동의 (필수)"),
+							fieldWithPath("personalInfoThirdPartyAgreed").type(JsonFieldType.BOOLEAN)
+								.description("개인정보 제3자 제공 동의 (필수)"),
+							fieldWithPath("groupRuleAgreed").type(JsonFieldType.BOOLEAN)
+								.description("단체규약 및 가입 시 유의사항 동의 (필수)"),
+							fieldWithPath("marketingAgreed").type(JsonFieldType.BOOLEAN)
+								.description("마케팅 및 홍보서비스 동의 (선택)")),
+					responseFields(getInsuranceResponseFields().toArray(FieldDescriptor[]::new))));
 	}
 
 	@Test
 	@DisplayName("Step 2. 발전소 정보 저장 (임시저장)")
 	void savePlant() {
 		// given
+		Long userId = 1L;
 		Long appId = 101L;
 		InsurancePlantRequest request = new InsurancePlantRequest("해운대 햇살 발전소", "부산광역시 해운대구 우동 1234", "부산",
 				new BigDecimal("500.0"), new BigDecimal("2000.0"), LocalDate.of(2023, 1, 1), "지붕위(판넬)", "고정식",
@@ -150,11 +171,13 @@ public class InsuranceControllerTest extends RestDocsTest {
 
 		InsuranceApplication mockApp = createMockApplication(appId, InsuranceStatus.PENDING);
 
-		given(insuranceApplicationService.savePlantInfo(eq(appId), any(InsurancePlant.class))).willReturn(mockApp);
+		given(insuranceApplicationService.savePlantInfo(eq(userId), eq(appId), any(InsurancePlant.class)))
+			.willReturn(mockApp);
 
 		// when & then
 		webTestClient.post()
 			.uri("/v1/insurance/{applicationId}/plant", appId)
+			.header("Authorization", "Bearer {ACCESS_TOKEN}")
 			.contentType(MediaType.APPLICATION_JSON)
 			.bodyValue(request)
 			.exchange()
@@ -163,59 +186,65 @@ public class InsuranceControllerTest extends RestDocsTest {
 			.expectBody()
 			.consumeWith(document("insurance-save-plant", requestPreprocessor(), responsePreprocessor(),
 					pathParameters(parameterWithName("applicationId").description("청약서 ID")),
+					requestHeaders(headerWithName("Authorization").description("Bearer Access Token (필수)")),
 					requestFields(fieldWithPath("plantName").type(JsonFieldType.STRING).description("발전소명").optional(),
-							fieldWithPath("address").type(JsonFieldType.STRING).description("발전소 기본 주소").optional(),
-							fieldWithPath("addressDetail").type(JsonFieldType.STRING)
-								.description("발전소 상세 주소")
-								.optional(),
-							fieldWithPath("region").type(JsonFieldType.STRING)
-								.description("지역 (부산, 전남 등 - Daum API 반환값)")
-								.optional(),
-							fieldWithPath("capacity").type(JsonFieldType.NUMBER).description("설비 용량 (kW)").optional(),
-							fieldWithPath("area").type(JsonFieldType.NUMBER).description("설비 면적 (m²)").optional(),
-							fieldWithPath("inspectionDate").type(JsonFieldType.STRING)
-								.description("사용전 검사일")
-								.optional(),
-							fieldWithPath("facilityType").type(JsonFieldType.STRING)
-								.description("설비 형태 (평지, 지붕위 등)")
-								.optional(),
-							fieldWithPath("driveMethod").type(JsonFieldType.STRING).description("구동 방식").optional(),
-							fieldWithPath("salesTarget").type(JsonFieldType.STRING).description("전력 판매처").optional()),
-					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 코드"),
-							fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("청약서 ID"),
-							fieldWithPath("data.applicationNumber").type(JsonFieldType.STRING).description("청약 번호"),
-							fieldWithPath("data.status").type(JsonFieldType.STRING).description("상태"),
-							fieldWithPath("data.plantInfo").type(JsonFieldType.OBJECT)
-								.description("업데이트된 발전소 정보")
-								.optional(),
-							fieldWithPath("data.applicantInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("data.agreementInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("data.conditionInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("data.coverageInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("error").type(JsonFieldType.STRING).optional().ignored())));
+							fieldWithPath("address").type(JsonFieldType.STRING).description("주소").optional(),
+							fieldWithPath("region").type(JsonFieldType.STRING).description("지역").optional(),
+							fieldWithPath("capacity").type(JsonFieldType.NUMBER).description("용량").optional(),
+							fieldWithPath("area").type(JsonFieldType.NUMBER).description("면적").optional(),
+							fieldWithPath("inspectionDate").type(JsonFieldType.STRING).description("검사일").optional(),
+							fieldWithPath("facilityType").type(JsonFieldType.STRING).description("설비형태").optional(),
+							fieldWithPath("driveMethod").type(JsonFieldType.STRING).description("구동방식").optional(),
+							fieldWithPath("salesTarget").type(JsonFieldType.STRING).description("판매처").optional()),
+
+					responseFields(getInsuranceResponseFields().toArray(FieldDescriptor[]::new))));
 	}
 
 	@Test
 	@DisplayName("Step 3. 가입 조건 저장 (심사 및 보험료 산출)")
 	void saveCondition() {
 		// given
+		Long userId = 1L;
 		Long appId = 101L;
-		InsuranceConditionRequest request = new InsuranceConditionRequest(true, // ESS
-				300_000_000L, // 재물
-				false, 100_000_000L, // 배상
-				50_000_000L, // 휴지
-				LocalDate.now().plusDays(1), // 개시일
-				false, // 사고이력
-				null, null, null, true, // 질권설정
-				"국민은행", "홍길동", "010-1234-5678", 200_000_000L, "서울시...", BondSendStatus.NOT_SENT, "비고");
+
+		// 1. 문서 요청 객체 생성 (DocumentRequest)
+		DocumentRequest mockDoc = new DocumentRequest("insurance/2025/uuid.pdf", "biz_license.pdf", 1024L, "pdf");
+
+		// 2. [Refactored] 계층형 문서 세트 생성
+		DocumentSetRequest documentSet = new DocumentSetRequest(mockDoc, // businessLicense
+				mockDoc, // powerGenerationLicense
+				null, // preUseInspection
+				null, // supplyCertificate
+				null // etc
+		);
+
+		// 3. [Refactored] 질권 정보 객체 생성
+		PledgeRequest pledgeRequest = new PledgeRequest("국민은행", "홍길동", "010-1234-5678", 200_000_000L, "서울시...",
+				BondSendStatus.NOT_SENT, "비고");
+
+		// 4. [Refactored] 메인 요청 객체 생성 (Accident는 null로 가정)
+		InsuranceConditionRequest request = new InsuranceConditionRequest(true, // essInstalled
+				300_000_000L, // propertyDamageAmount
+				true, 100_000_000L, // liabilityAmount
+				50_000_000L, // businessInterruptionAmount
+
+				LocalDate.now().plusDays(1), // startDate
+				null, // accident (없음)
+				pledgeRequest, // pledge
+				documentSet // documents
+		);
 
 		InsuranceApplication mockApp = createMockApplication(appId, InsuranceStatus.PENDING);
 
-		given(insuranceApplicationService.saveCondition(eq(appId), any(InsuranceCondition.class))).willReturn(mockApp);
+		// Service Mocking (도메인 객체 매핑 확인)
+		given(insuranceApplicationService.saveCondition(eq(userId), eq(appId), any(JoinCondition.class),
+				any(InsuranceDocument.class)))
+			.willReturn(mockApp);
 
 		// when & then
 		webTestClient.post()
 			.uri("/v1/insurance/{applicationId}/condition", appId)
+			.header("Authorization", "Bearer {ACCESS_TOKEN}")
 			.contentType(MediaType.APPLICATION_JSON)
 			.bodyValue(request)
 			.exchange()
@@ -224,94 +253,265 @@ public class InsuranceControllerTest extends RestDocsTest {
 			.expectBody()
 			.consumeWith(document("insurance-save-condition", requestPreprocessor(), responsePreprocessor(),
 					pathParameters(parameterWithName("applicationId").description("청약서 ID")),
+					requestHeaders(headerWithName("Authorization").description("Bearer Access Token (필수)")),
 					requestFields(
-							fieldWithPath("essInstalled").type(JsonFieldType.BOOLEAN)
-								.description("ESS 설치 여부")
-								.optional(),
+							// 1. 기본 정보
+							fieldWithPath("essInstalled").type(JsonFieldType.BOOLEAN).description("ESS 설치 여부"),
 							fieldWithPath("propertyDamageAmount").type(JsonFieldType.NUMBER)
 								.description("재물손해 가입금액")
 								.optional(),
-							fieldWithPath("civilWorkIncluded").type(JsonFieldType.BOOLEAN)
-								.description("토목공사 포함 여부")
-								.optional(),
+							fieldWithPath("civilWorkIncluded").type(JsonFieldType.BOOLEAN).description("토목공사 여부"),
+
 							fieldWithPath("liabilityAmount").type(JsonFieldType.NUMBER)
 								.description("배상책임 가입금액")
 								.optional(),
 							fieldWithPath("businessInterruptionAmount").type(JsonFieldType.NUMBER)
-								.description("기업휴지 가입금액 (선택)")
+								.description("기업휴지 가입금액")
 								.optional(),
 							fieldWithPath("startDate").type(JsonFieldType.STRING).description("보험 개시일").optional(),
-							fieldWithPath("accidentHistory").type(JsonFieldType.BOOLEAN)
-								.description("최근 5년 사고 이력 유무")
+
+							// 2. 사고 이력 (Optional Group)
+							fieldWithPath("accident").type(JsonFieldType.OBJECT)
+								.description("사고 이력 정보 (없으면 null)")
 								.optional(),
-							fieldWithPath("accidentDate").type(JsonFieldType.STRING)
-								.description("사고 일자 (이력 있을 시)")
+							fieldWithPath("accident.date").type(JsonFieldType.STRING).description("사고 일자").optional(),
+							fieldWithPath("accident.paymentAmount").type(JsonFieldType.NUMBER)
+								.description("사고 보험금")
 								.optional(),
-							fieldWithPath("accidentPayment").type(JsonFieldType.NUMBER)
-								.description("사고 보험금 (이력 있을 시)")
+							fieldWithPath("accident.content").type(JsonFieldType.STRING)
+								.description("사고 내용")
 								.optional(),
-							fieldWithPath("accidentContent").type(JsonFieldType.STRING)
-								.description("사고 내용 (이력 있을 시)")
+
+							// 3. 질권 설정 (Optional Group)
+							fieldWithPath("pledge").type(JsonFieldType.OBJECT)
+								.description("질권 설정 정보 (없으면 null)")
 								.optional(),
-							fieldWithPath("pledgeSet").type(JsonFieldType.BOOLEAN).description("질권 설정 유무").optional(),
-							fieldWithPath("pledgeBankName").type(JsonFieldType.STRING).description("질권 은행명").optional(),
-							fieldWithPath("pledgeManagerName").type(JsonFieldType.STRING)
+							fieldWithPath("pledge.bankName").type(JsonFieldType.STRING)
+								.description("질권 은행명")
+								.optional(),
+							fieldWithPath("pledge.managerName").type(JsonFieldType.STRING)
 								.description("질권 담당자명")
 								.optional(),
-							fieldWithPath("pledgeManagerPhone").type(JsonFieldType.STRING)
+							fieldWithPath("pledge.managerPhone").type(JsonFieldType.STRING)
 								.description("질권 담당자 연락처")
 								.optional(),
-							fieldWithPath("pledgeAmount").type(JsonFieldType.NUMBER).description("질권 설정 금액").optional(),
-							fieldWithPath("pledgeAddress").type(JsonFieldType.STRING).description("질권 주소").optional(),
-							fieldWithPath("pledgeBondStatus").type(JsonFieldType.STRING)
+							fieldWithPath("pledge.amount").type(JsonFieldType.NUMBER)
+								.description("질권 설정 금액")
+								.optional(),
+							fieldWithPath("pledge.address").type(JsonFieldType.STRING).description("질권 주소").optional(),
+							fieldWithPath("pledge.bondStatus").type(JsonFieldType.STRING)
 								.description("증권 송부 여부 (NOT_SENT, SENT, NOT_APPLICABLE)")
 								.optional(),
-							fieldWithPath("pledgeRemark").type(JsonFieldType.STRING).description("질권 비고").optional()),
-					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 코드"),
-							fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("청약서 ID"),
-							fieldWithPath("data.applicationNumber").type(JsonFieldType.STRING).description("청약 번호"),
-							fieldWithPath("data.status").type(JsonFieldType.STRING).description("상태"),
-							fieldWithPath("data.conditionInfo").type(JsonFieldType.OBJECT)
-								.description("업데이트된 가입 조건")
+							fieldWithPath("pledge.remark").type(JsonFieldType.STRING).description("질권 비고").optional(),
+
+							// 4. 첨부 서류 (Grouping)
+							fieldWithPath("documents").type(JsonFieldType.OBJECT).description("첨부 서류 꾸러미").optional(),
+
+							// 4-1. 사업자등록증
+							fieldWithPath("documents.businessLicense").type(JsonFieldType.OBJECT)
+								.description("사업자등록증 정보")
 								.optional(),
-							fieldWithPath("data.coverageInfo").type(JsonFieldType.OBJECT)
-								.description("산출된 보험료 정보 (자동 계산)")
+							fieldWithPath("documents.businessLicense.key").type(JsonFieldType.STRING)
+								.description("파일 키")
 								.optional(),
-							fieldWithPath("data.applicantInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("data.agreementInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("data.plantInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("error").type(JsonFieldType.STRING).optional().ignored())));
+							fieldWithPath("documents.businessLicense.name").type(JsonFieldType.STRING)
+								.description("원본명")
+								.optional(),
+							fieldWithPath("documents.businessLicense.size").type(JsonFieldType.NUMBER)
+								.description("크기")
+								.optional(),
+							fieldWithPath("documents.businessLicense.extension").type(JsonFieldType.STRING)
+								.description("확장자")
+								.optional(),
+
+							// 4-2. 발전사업허가증
+							fieldWithPath("documents.powerGenerationLicense").type(JsonFieldType.OBJECT)
+								.description("발전사업허가증 정보")
+								.optional(),
+							fieldWithPath("documents.powerGenerationLicense.key").type(JsonFieldType.STRING)
+								.description("파일 키")
+								.optional(),
+							fieldWithPath("documents.powerGenerationLicense.name").type(JsonFieldType.STRING)
+								.description("원본명")
+								.optional(),
+							fieldWithPath("documents.powerGenerationLicense.size").type(JsonFieldType.NUMBER)
+								.description("크기")
+								.optional(),
+							fieldWithPath("documents.powerGenerationLicense.extension").type(JsonFieldType.STRING)
+								.description("확장자")
+								.optional(),
+
+							// 4-3. 기타 서류들
+							fieldWithPath("documents.preUseInspection").type(JsonFieldType.OBJECT)
+								.description("사용전 검사 확인증")
+								.optional(),
+							fieldWithPath("documents.supplyCertificate").type(JsonFieldType.OBJECT)
+								.description("공급인증서")
+								.optional(),
+							fieldWithPath("documents.etc").type(JsonFieldType.OBJECT).description("기타 서류").optional()),
+					responseFields(getInsuranceResponseFields().toArray(FieldDescriptor[]::new))));
 	}
 
 	@Test
 	@DisplayName("Step 4. 최종 가입 완료")
 	void complete() {
 		// given
+		Long userId = 1L;
 		Long appId = 101L;
+		DocumentRequest mockSignature = new DocumentRequest("signatures/2025/uuid.png", "sign.png", 512L, "png");
+
+		InsuranceCompleteRequest request = new InsuranceCompleteRequest(mockSignature);
+
 		InsuranceApplication mockApp = createMockApplication(appId, InsuranceStatus.COMPLETED);
 
-		given(insuranceApplicationService.completeApplication(appId)).willReturn(mockApp);
+		given(insuranceApplicationService.completeApplication(userId, appId, request.toSignatureFile()))
+			.willReturn(mockApp);
 
 		// when & then
 		webTestClient.post()
 			.uri("/v1/insurance/{applicationId}/complete", appId)
+			.header("Authorization", "Bearer {ACCESS_TOKEN}")
 			.contentType(MediaType.APPLICATION_JSON)
+			.bodyValue(request)
 			.exchange()
 			.expectStatus()
 			.isOk()
 			.expectBody()
 			.consumeWith(document("insurance-complete", requestPreprocessor(), responsePreprocessor(),
+					requestHeaders(headerWithName("Authorization").description("Bearer Access Token (필수)")),
 					pathParameters(parameterWithName("applicationId").description("청약서 ID")),
-					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 코드"),
-							fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("청약서 ID"),
-							fieldWithPath("data.applicationNumber").type(JsonFieldType.STRING).description("청약 번호"),
-							fieldWithPath("data.status").type(JsonFieldType.STRING).description("상태 (COMPLETED)"),
-							fieldWithPath("data.applicantInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("data.agreementInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("data.plantInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("data.conditionInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("data.coverageInfo").type(JsonFieldType.OBJECT).optional().ignored(),
-							fieldWithPath("error").type(JsonFieldType.STRING).optional().ignored())));
+					requestFields(fieldWithPath("signature").type(JsonFieldType.OBJECT).description("전자 서명 파일 정보 (필수)"),
+							fieldWithPath("signature.key").type(JsonFieldType.STRING).description("서명 파일 키 (업로드 후 발급)"),
+							fieldWithPath("signature.name").type(JsonFieldType.STRING).description("서명 파일명"),
+							fieldWithPath("signature.size").type(JsonFieldType.NUMBER).description("서명 파일 크기"),
+							fieldWithPath("signature.extension").type(JsonFieldType.STRING).description("서명 파일 확장자")),
+					responseFields(getInsuranceResponseFields().toArray(FieldDescriptor[]::new))));
+	}
+
+	private List<FieldDescriptor> getInsuranceResponseFields() {
+		List<FieldDescriptor> fields = new ArrayList<>();
+		// 공통
+		fields.addAll(List.of(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 코드"),
+				fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("청약서 ID"),
+				fieldWithPath("data.applicationNumber").type(JsonFieldType.STRING).description("청약 번호"),
+				fieldWithPath("data.status").type(JsonFieldType.STRING).description("상태")));
+
+		// 2. 각 도메인별 필드 추가 (헬퍼 메서드 호출)
+		fields.addAll(getApplicantDescriptors("data.applicantInfo"));
+		fields.addAll(getAgreementDescriptors("data.agreementInfo"));
+		fields.addAll(getPlantDescriptors("data.plantInfo"));
+		fields.addAll(getConditionDescriptors("data.conditionInfo"));
+		fields.addAll(getCoverageDescriptors("data.coverageInfo"));
+
+		// 문서 정보 (상세 기술 필요 시 Helper 활용)
+		fields.add(fieldWithPath("data.documentInfo").type(JsonFieldType.OBJECT).description("첨부 서류 정보").optional());
+		fields.addAll(generateFileDescriptors("data.documentInfo.businessLicense", "사업자등록증"));
+		fields.addAll(generateFileDescriptors("data.documentInfo.powerGenerationLicense", "발전사업허가증"));
+		fields.addAll(generateFileDescriptors("data.documentInfo.preUseInspection", "사용전 검사 확인증"));
+		fields.addAll(generateFileDescriptors("data.documentInfo.supplyCertificate", "공급인증서"));
+		fields.addAll(generateFileDescriptors("data.documentInfo.etc", "기타 서류"));
+
+		fields.add(fieldWithPath("error").type(JsonFieldType.STRING).optional().description("에러 정보"));
+
+		return fields;
+	}
+
+	private List<FieldDescriptor> getApplicantDescriptors(String prefix) {
+		return List.of(fieldWithPath(prefix).type(JsonFieldType.OBJECT).description("신청자 정보").optional(),
+				fieldWithPath(prefix + ".companyCode").type(JsonFieldType.STRING).description("사업자 번호").optional(),
+				fieldWithPath(prefix + ".companyName").type(JsonFieldType.STRING).description("회사명").optional(),
+				fieldWithPath(prefix + ".ceoName").type(JsonFieldType.STRING).description("대표자명").optional(),
+				fieldWithPath(prefix + ".ceoPhone").type(JsonFieldType.STRING).description("대표자 연락처").optional(),
+				fieldWithPath(prefix + ".applicantName").type(JsonFieldType.STRING).description("신청자명").optional(),
+				fieldWithPath(prefix + ".applicantPhone").type(JsonFieldType.STRING).description("신청자 연락처").optional(),
+				fieldWithPath(prefix + ".email").type(JsonFieldType.STRING).description("이메일").optional());
+	}
+
+	private List<FieldDescriptor> getAgreementDescriptors(String prefix) {
+		return List.of(fieldWithPath(prefix).type(JsonFieldType.OBJECT).description("약관 동의 내역").optional(),
+				fieldWithPath(prefix + ".re100Interest").type(JsonFieldType.BOOLEAN)
+					.description("RE100 관심 여부")
+					.optional(),
+				fieldWithPath(prefix + ".personalInfoCollectionAgreed").type(JsonFieldType.BOOLEAN)
+					.description("개인정보 수집 동의")
+					.optional(),
+				fieldWithPath(prefix + ".personalInfoThirdPartyAgreed").type(JsonFieldType.BOOLEAN)
+					.description("제3자 제공 동의")
+					.optional(),
+				fieldWithPath(prefix + ".groupRuleAgreed").type(JsonFieldType.BOOLEAN)
+					.description("단체규약 동의")
+					.optional(),
+				fieldWithPath(prefix + ".marketingAgreed").type(JsonFieldType.BOOLEAN).description("마케팅 동의").optional(),
+				fieldWithPath(prefix + ".agreedAt").type(JsonFieldType.STRING).description("동의 일시").optional());
+	}
+
+	private List<FieldDescriptor> getPlantDescriptors(String prefix) {
+		return List.of(fieldWithPath(prefix).type(JsonFieldType.OBJECT).description("발전소 정보").optional(),
+				fieldWithPath(prefix + ".name").type(JsonFieldType.STRING).description("발전소명").optional(),
+				fieldWithPath(prefix + ".address").type(JsonFieldType.STRING).description("주소").optional(),
+				fieldWithPath(prefix + ".region").type(JsonFieldType.STRING).description("지역").optional(),
+				fieldWithPath(prefix + ".capacity").type(JsonFieldType.NUMBER).description("용량(kW)").optional(),
+				fieldWithPath(prefix + ".area").type(JsonFieldType.NUMBER).description("면적(m²)").optional(),
+				fieldWithPath(prefix + ".inspectionDate").type(JsonFieldType.STRING).description("검사일").optional(),
+				fieldWithPath(prefix + ".facilityType").type(JsonFieldType.STRING).description("설비 형태").optional(),
+				fieldWithPath(prefix + ".driveMethod").type(JsonFieldType.STRING).description("구동 방식").optional(),
+				fieldWithPath(prefix + ".salesTarget").type(JsonFieldType.STRING).description("판매처").optional());
+	}
+
+	private List<FieldDescriptor> getConditionDescriptors(String prefix) {
+		return List.of(fieldWithPath(prefix).type(JsonFieldType.OBJECT).description("가입 조건").optional(),
+				fieldWithPath(prefix + ".essInstalled").type(JsonFieldType.BOOLEAN).description("ESS 설치 여부").optional(),
+				fieldWithPath(prefix + ".propertyDamageAmount").type(JsonFieldType.NUMBER)
+					.description("재물손해 가입금액")
+					.optional(),
+				fieldWithPath(prefix + ".civilWorkIncluded").type(JsonFieldType.BOOLEAN)
+					.description("토목공사 포함 여부")
+					.optional(),
+				fieldWithPath(prefix + ".liabilityAmount").type(JsonFieldType.NUMBER)
+					.description("배상책임 가입금액")
+					.optional(),
+				fieldWithPath(prefix + ".businessInterruptionAmount").type(JsonFieldType.NUMBER)
+					.description("기업휴지 가입금액")
+					.optional(),
+				fieldWithPath(prefix + ".startDate").type(JsonFieldType.STRING).description("보험 개시일").optional(),
+
+				// 사고 이력 (리스트)
+				fieldWithPath(prefix + ".accidents").type(JsonFieldType.ARRAY).description("사고 이력 리스트").optional(),
+				fieldWithPath(prefix + ".accidents[].date").type(JsonFieldType.STRING).description("사고 일자").optional(),
+				fieldWithPath(prefix + ".accidents[].paymentAmount").type(JsonFieldType.NUMBER)
+					.description("사고 보험금")
+					.optional(),
+				fieldWithPath(prefix + ".accidents[].content").type(JsonFieldType.STRING)
+					.description("사고 내용")
+					.optional(),
+
+				// 질권 설정 (객체)
+				fieldWithPath(prefix + ".pledge").type(JsonFieldType.OBJECT).description("질권 설정 정보").optional(),
+				fieldWithPath(prefix + ".pledge.bankName").type(JsonFieldType.STRING).description("질권 은행명").optional(),
+				fieldWithPath(prefix + ".pledge.managerName").type(JsonFieldType.STRING).description("담당자명").optional(),
+				fieldWithPath(prefix + ".pledge.phone").type(JsonFieldType.STRING).description("담당자 연락처").optional(),
+				fieldWithPath(prefix + ".pledge.amount").type(JsonFieldType.NUMBER).description("질권 금액").optional(),
+				fieldWithPath(prefix + ".pledge.address").type(JsonFieldType.STRING).description("질권 주소").optional(),
+				fieldWithPath(prefix + ".pledge.bondStatus").type(JsonFieldType.STRING)
+					.description("증권 송부 상태")
+					.optional(),
+				fieldWithPath(prefix + ".pledge.remark").type(JsonFieldType.STRING).description("비고").optional());
+	}
+
+	private List<FieldDescriptor> getCoverageDescriptors(String prefix) {
+		return List.of(fieldWithPath(prefix).type(JsonFieldType.OBJECT).description("보험료 정보").optional(),
+				fieldWithPath(prefix + ".mdPremium").type(JsonFieldType.NUMBER).description("재물손해 보험료").optional(),
+				fieldWithPath(prefix + ".biPremium").type(JsonFieldType.NUMBER).description("기업휴지 보험료").optional(),
+				fieldWithPath(prefix + ".glPremium").type(JsonFieldType.NUMBER).description("배상책임 보험료").optional(),
+				fieldWithPath(prefix + ".totalPremium").type(JsonFieldType.NUMBER).description("총 보험료").optional());
+	}
+
+	private List<FieldDescriptor> generateFileDescriptors(String path, String description) {
+		return List.of(fieldWithPath(path).type(JsonFieldType.OBJECT).description(description).optional(),
+				fieldWithPath(path + ".key").type(JsonFieldType.STRING).description("파일 식별자 Key").optional(),
+				fieldWithPath(path + ".originalFileName").type(JsonFieldType.STRING).description("원본 파일명").optional(),
+				fieldWithPath(path + ".size").type(JsonFieldType.NUMBER).description("파일 크기(Byte)").optional(),
+				fieldWithPath(path + ".extension").type(JsonFieldType.STRING).description("확장자").optional());
 	}
 
 }
