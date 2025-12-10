@@ -69,9 +69,6 @@ flyway:
   clean-disabled: true
   validate-on-migrate: false
   locations: classpath:db/migration
-  url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-  user: ${DB_USERNAME}
-  password: ${DB_PASSWORD}
 storage:
   datasource:
     core:

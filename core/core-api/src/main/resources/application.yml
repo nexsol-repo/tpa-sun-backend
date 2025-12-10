@@ -74,6 +74,9 @@ spring:
   config:
     activate:
       on-profile: dev
+docker:
+  compose:
+    enabled: false
   mail:
     host: smtp.gmail.com
     port: 587
