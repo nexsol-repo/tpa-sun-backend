@@ -1,0 +1,15 @@
+== 공통 에러 코드 (Error Codes)
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+// 스니펫 경로 변수 설정
+:snippets: build/generated-snippets
+== 소개
+본 프로젝트에서 발생하는 주요 에러 코드 및 설명입니다.
+모든 API 응답의 error.code 필드에 해당 값이 포함될 수 있습니다.
+
+=== 에러 내용
+include::{snippets}/common-error-codes/response-fields.adoc[]

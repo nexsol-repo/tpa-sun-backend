@@ -102,7 +102,7 @@ minio:
   endpoint: ${MINIO_URL}
   access-key: ${MINIO_ACCESS_KEY}
   secret-key: ${MINIO_SECRET_KEY}
-  bucket-name: tpa-sun
+  bucket-name: tpa-sun-dev
   region: ap-northeast-2
 
 ---
@@ -115,4 +115,34 @@ spring:
 spring:
   config:
     activate:
-      on-profile: live
+      on-profile: prod
+docker:
+  compose:
+    enabled: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_EMAIL}
+    password: ${GMAIL_PASSWORD}
+    properties:
+      mail:
+        debug: true
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  access-token-expiration: 3600
+  refresh-token-expiration: 1209600
+minio:
+  endpoint: ${MINIO_URL}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket-name: tpa-sun-prod
+  region: ap-northeast-2

@@ -46,7 +46,7 @@ public class AuthController {
 
 	@PostMapping("/email/send")
 	public ApiResponse<Object> sendEmailCode(@RequestBody @Valid EmailSendRequest request) {
-		emailVerifiedService.sendCode(request.email(), request.type());
+		emailVerifiedService.sendCode(request.companyCode(), request.email(), request.type());
 		return ApiResponse.success();
 	}
 

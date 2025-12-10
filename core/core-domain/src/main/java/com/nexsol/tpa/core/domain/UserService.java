@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserService {
 
-	private final UserReader userReader;
-
 	private final UserAppender userAppender;
 
 	private final EmailVerificationReader emailVerificationReader;
@@ -22,7 +20,7 @@ public class UserService {
 
 		verification.validateSignup(LocalDateTime.now());
 
-		userReader.exist(newUser.companyCode(), newUser.applicantEmail());
+		// userReader.exist(newUser.companyCode(), newUser.applicantEmail());
 
 		return userAppender.append(newUser.toUser());
 	}

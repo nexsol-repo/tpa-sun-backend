@@ -18,9 +18,14 @@ public class EmailVerifiedService {
 
 	private final EmailVerificationFinder emailVerificationFinder;
 
+	private final EmailSendValidator emailSendValidator;
+
 	private final EmailVerificationAppender emailVerificationAppender;
 
-	public void sendCode(String email, EmailVerifiedType type) {
+	public void sendCode(String companyCode, String email, EmailVerifiedType type) {
+
+		emailSendValidator.validate(companyCode, email, type);
+
 		LocalDateTime now = LocalDateTime.now();
 
 		emailVerificationFinder.find(email, type).ifPresent(exist -> exist.validateResend(now));

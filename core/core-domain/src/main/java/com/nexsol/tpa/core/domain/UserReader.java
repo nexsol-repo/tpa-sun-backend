@@ -27,4 +27,8 @@ public class UserReader {
 		}
 	}
 
+	public boolean exists(String bizNo, String email) {
+		return userRepository.existsCompanyCodeAndEmail(bizNo, email);
+	}
+
 }

@@ -7,6 +7,8 @@ import com.nexsol.tpa.core.domain.AuthService;
 import com.nexsol.tpa.core.domain.AuthToken;
 import com.nexsol.tpa.core.domain.EmailVerifiedService;
 import com.nexsol.tpa.core.enums.EmailVerifiedType;
+import com.nexsol.tpa.core.error.CoreErrorType;
+import com.nexsol.tpa.core.error.CoreException;
 import com.nexsol.tpa.test.api.RestDocsTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +19,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import static com.nexsol.tpa.test.api.RestDocsUtils.requestPreprocessor;
 import static com.nexsol.tpa.test.api.RestDocsUtils.responsePreprocessor;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
 import static org.springframework.restdocs.cookies.CookieDocumentation.responseCookies;
@@ -85,10 +88,10 @@ public class AuthControllerTest extends RestDocsTest {
 	@DisplayName("이메일 인증코드 발송 API 문서화")
 	void emailSend() {
 		// given
-		EmailSendRequest request = new EmailSendRequest("test@nexsol.com", EmailVerifiedType.SIGNUP);
+		EmailSendRequest request = new EmailSendRequest("111-11-1111", "test@nexsol.com", EmailVerifiedType.SIGNUP);
 
 		// void 메서드이므로 doNothing 사용 (또는 기본적으로 아무일도 안함)
-		doNothing().when(emailVerifiedService).sendCode(any(), any());
+		doNothing().when(emailVerifiedService).sendCode(any(), any(), any());
 
 		// when & then
 		webTestClient.post()
@@ -100,7 +103,8 @@ public class AuthControllerTest extends RestDocsTest {
 			.isOk()
 			.expectBody()
 			.consumeWith(document("auth-email-send", requestPreprocessor(), responsePreprocessor(),
-					requestFields(fieldWithPath("email").type(JsonFieldType.STRING).description("이메일 주소"),
+					requestFields(fieldWithPath("companyCode").type(JsonFieldType.STRING).description("사업자 번호"),
+							fieldWithPath("email").type(JsonFieldType.STRING).description("이메일 주소"),
 							fieldWithPath("type").type(JsonFieldType.STRING).description("인증 타입 (SIGNUP, SIGNIN)")),
 					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 상태 (SUCCESS)"),
 							fieldWithPath("data").type(JsonFieldType.NULL).description("데이터 (없음)"),

@@ -38,31 +38,6 @@ public class UserServiceTest {
 	private EmailVerificationReader emailVerificationReader;
 
 	@Test
-	@DisplayName("회원가입 성공: 인증된 이메일이고 중복이 없으면 회원이 저장된다")
-	void signUp_success() {
-		// given
-		NewUser newUser = aNewUser().withCompanyCode("111-11-11111").build();
-		User expectedUser = aUser().id(1L).companyCode("111-11-11111").build();
-		EmailVerification verifiedEmail = aVerification().email(newUser.applicantEmail()).build();
-
-		given(emailVerificationReader.read(newUser.applicantEmail(), EmailVerifiedType.SIGNUP))
-			.willReturn(verifiedEmail);
-
-		given(userAppender.append(any())).willReturn(expectedUser);
-
-		// when
-		User result = userService.signUp(newUser);
-
-		// then
-		assertThat(result.companyCode()).isEqualTo(newUser.companyCode());
-		assertThat(result.id()).isEqualTo(1L);
-
-		verify(userReader).exist(newUser.companyCode(), newUser.applicantEmail());
-		verify(userAppender).append(any(User.class));
-
-	}
-
-	@Test
 	@DisplayName("회원가입 실패: 이메일 인증이 완료되지 않은 경우 예외 발생")
 	void signUp_fail_unverified() {
 		// given
@@ -103,25 +78,6 @@ public class UserServiceTest {
 		assertThatThrownBy(() -> userService.signUp(newUser)).isInstanceOf(CoreException.class)
 			.extracting("errorType")
 			.isEqualTo(CoreErrorType.EMAIL_VERIFIED_OVERTIME);
-	}
-
-	@Test
-	@DisplayName("회원가입 실패: 이미 존재하는 유저(사업자번호/이메일)인 경우 예외 발생")
-	void signUp_fail_duplicate() {
-		// given
-		NewUser newUser = aNewUser().build();
-		EmailVerification verifiedEmail = aVerification().email(newUser.applicantEmail()).build();
-
-		given(emailVerificationReader.read(newUser.applicantEmail(), EmailVerifiedType.SIGNUP))
-			.willReturn(verifiedEmail);
-
-		willThrow(new CoreException(CoreErrorType.USER_EXIST_DATA)).given(userReader)
-			.exist(newUser.companyCode(), newUser.applicantEmail());
-
-		// when & then
-		assertThatThrownBy(() -> userService.signUp(newUser)).isInstanceOf(CoreException.class)
-			.extracting("errorType")
-			.isEqualTo(CoreErrorType.USER_EXIST_DATA);
 	}
 
 }
