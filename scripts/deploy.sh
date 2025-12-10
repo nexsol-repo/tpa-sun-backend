@@ -25,7 +25,6 @@ fi
 echo "🚀 Starting Deployment for $TARGET_ENV environment (App: $APP_NAME)..."
 
 # 1. 환경변수 파일 준비 (.env 생성)
-# [중요] source 명령어를 제거했습니다. docker-compose가 알아서 읽게 둡니다.
 if [ -f "${BASE_PATH}/${ENV_FILE}" ]; then
   echo "📄 Copying ${ENV_FILE} to .env"
   cp "${BASE_PATH}/${ENV_FILE}" "${BASE_PATH}/.env"
@@ -57,32 +56,38 @@ fi
 echo "🔄 $TARGET_ENV Deployment: $CURRENT_PORT -> $TARGET_PORT ($TARGET_COLOR)"
 
 # 4. 컨테이너 실행
-# HOST_PORT와 DOCKER_IMAGE는 docker-compose.app.yml에서 변수로 사용됨
 export HOST_PORT=$TARGET_PORT
-# DOCKER_IMAGE는 GitHub Actions에서 주입받지만, 없으면 기본값 설정
 if [ -z "$DOCKER_IMAGE" ]; then
   export DOCKER_IMAGE="tpa-sun-api:${TARGET_ENV}"
 fi
 
 COMPOSE_PROJECT_NAME="${APP_NAME}-${TARGET_ENV}-${TARGET_COLOR}"
 
-# docker-compose 실행 (env_file: .env 설정 덕분에 파일 내용을 자동으로 로드함)
+# docker-compose 실행
 docker compose -f docker-compose.app.yml -p $COMPOSE_PROJECT_NAME up -d
 
 # 5. Health Check
 echo "🏥 Health Checking ($TARGET_PORT)..."
-for i in {1..5}; do
+# 최대 60초 대기 (5초 * 12회)
+for i in {1..12}; do
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:${TARGET_PORT}/health)
   if [ "$STATUS" == "200" ]; then
     echo "✅ Health Check Passed!"
     break
   fi
-  echo "⏳ Waiting... ($i/5) HTTP $STATUS"
+  echo "⏳ Waiting... ($i/12) HTTP $STATUS"
   sleep 5
 done
 
 if [ "$STATUS" != "200" ]; then
-  echo "❌ Health Check Failed. Rolling back..."
+  echo "❌ Health Check Failed. Status: $STATUS"
+
+  # [디버깅] 실패 시 컨테이너 로그 출력
+  echo "--- Docker Logs (Last 50 lines) ---"
+  docker compose -f docker-compose.app.yml -p $COMPOSE_PROJECT_NAME logs --tail 50
+  echo "-----------------------------------"
+
+  echo "Rolling back..."
   docker compose -f docker-compose.app.yml -p $COMPOSE_PROJECT_NAME down
   exit 1
 fi

@@ -31,7 +31,7 @@ WORKDIR /app
 
 # 빌드 결과물 복사 (경로는 프로젝트 구조에 따라 다를 수 있음)
 # find 명령어로 jar를 찾아서 app.jar로 복사하는 트릭 사용
-COPY --from=builder /app/*/build/libs/*.jar app.jar
+COPY --from=builder /app/core/core-api/build/libs/*.jar app.jar
 
 # 시간대 설정 (KST)
 ENV TZ=Asia/Seoul

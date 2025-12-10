@@ -54,3 +54,34 @@ storage:
         idle-timeout: 300000
         connection-timeout: 20000
         validation-timeout: 5000
+
+---
+spring.config.activate.on-profile: dev
+spring:
+  docker:
+    compose:
+      enabled: false
+flyway:
+  enabled: true
+  # 기존 데이터가 있는 경우 (데이터 보존)
+  baseline-on-migrate: true
+  # 스키마를 삭제(clean)하는 명령을 원천 차단
+  clean-disabled: true
+  validate-on-migrate: false
+  locations: classpath:db/migration
+  url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+  user: ${DB_USERNAME}
+  password: ${DB_PASSWORD}
+storage:
+  datasource:
+    core:
+      jdbc-url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      driver-class-name: org.mariadb.jdbc.Driver
+      hikari:
+        maximum-pool-size: 8
+        minimum-idle: 5
+        idle-timeout: 300000
+        connection-timeout: 20000
+        validation-timeout: 5000
