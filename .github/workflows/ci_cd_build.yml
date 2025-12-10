@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - dev
-      - main # main 브랜치 추가
+      - main
   workflow_dispatch:
 
 env:
@@ -13,7 +13,7 @@ env:
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted
+    runs-on: self-hosted # 태그가 있다면 [self-hosted, sun] 등으로 변경
 
     steps:
       - name: Checkout Source
@@ -22,6 +22,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
+          # 로컬 Docker 데몬 드라이버 사용 (이미지를 로컬에 저장)
           driver: docker
 
       - name: Set Environment Variables based on Branch
@@ -39,29 +40,28 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          load: true
-          # 이미지 태그를 환경별로 구분 (latest vs dev) 또는 동일하게 latest 사용 후 배포 시 구분
-          # 여기서는 관리 편의상 환경별 태그를 붙입니다.
+          load: true # 빌드된 이미지를 로컬 Docker 데몬으로 로드
           tags: ${{ env.IMAGE_NAME }}:${{ env.TARGET_ENV }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # --- 배포 단계 ---
+      # --- 배포(CD) 단계 ---
 
       - name: Prepare Deployment Directory
         run: |
           mkdir -p ${{ env.DEPLOY_PATH }}
-          cp docker-compose.app.yml ${{ env.DEPLOY_PATH }}/
+          # 설정 파일 및 스크립트 복사
+          cp docker-compose.deploy.yml ${{ env.DEPLOY_PATH }}/
           cp scripts/deploy.sh ${{ env.DEPLOY_PATH }}/
           chmod +x ${{ env.DEPLOY_PATH }}/deploy.sh
 
       - name: Execute Deployment Script
         working-directory: ${{ env.DEPLOY_PATH }}
         env:
-          # 위에서 빌드한 이미지 태그 전달
+          # 빌드된 이미지 태그를 환경변수로 주입 (deploy.sh 내부 docker-compose가 사용)
           DOCKER_IMAGE: ${{ env.IMAGE_NAME }}:${{ env.TARGET_ENV }}
         run: |
-          # deploy.sh 실행 시 환경(dev/prod)을 인자로 전달
+          # 환경(dev/prod)을 인자로 전달하여 스크립트 실행
           ./deploy.sh ${{ env.TARGET_ENV }}
 
       - name: Cleanup Docker System
