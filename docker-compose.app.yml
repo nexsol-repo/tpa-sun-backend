@@ -12,7 +12,7 @@ services:
       - TZ=Asia/Seoul
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - DB_HOST=nex4
+      - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
@@ -23,6 +23,3 @@ services:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-    # 외부 서버(nex4) DB 접속을 위한 호스트 매핑
-   # extra_hosts:
-     # - ${DB_HOST_NAME}:${DB_HOST}
