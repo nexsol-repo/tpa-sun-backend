@@ -14,7 +14,9 @@ public class DocsController {
 	@GetMapping("/docs/error-codes")
 	public Map<String, String> getErrorCodes() {
 		return Arrays.stream(CoreErrorType.values())
-			.collect(Collectors.toMap(CoreErrorType::name, // Key: JSON 필드명 (에러 코드)
+			.collect(Collectors.toMap(type -> type.getCode().name(), // [수정] Key를 Enum 이름
+																		// 대신 에러 코드(T1000
+																		// 등)로 변경
 					CoreErrorType::getMessage // Value: 설명
 			));
 	}

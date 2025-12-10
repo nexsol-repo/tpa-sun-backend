@@ -28,11 +28,10 @@ public class DocsControllerTest extends RestDocsTest {
 	@Test
 	@DisplayName("공통 에러 코드 문서화")
 	void common_error_codes() {
-		// Enum을 순회하며 문서화 필드 정의 (Key가 에러코드, Value가 설명이 됨)
 		List<FieldDescriptor> descriptors = Arrays.stream(CoreErrorType.values())
-			.map(type -> fieldWithPath(type.name()) // Key (에러 코드)
+			.map(type -> fieldWithPath(type.getCode().name()) // 예: "T1000"
 				.type(JsonFieldType.STRING)
-				.description(type.getMessage())) // Value (설명)
+				.description(type.getMessage()))
 			.collect(Collectors.toList());
 
 		webTestClient.get()
@@ -41,8 +40,7 @@ public class DocsControllerTest extends RestDocsTest {
 			.expectStatus()
 			.isOk()
 			.expectBody()
-			.consumeWith(document("common-error-codes", // 스니펫 폴더명
-					responseFields(descriptors)));
+			.consumeWith(document("common-error-codes", responseFields(descriptors)));
 	}
 
 }
