@@ -65,7 +65,7 @@ export HOST_PORT=$TARGET_PORT
 COMPOSE_PROJECT_NAME="${APP_NAME}-${TARGET_ENV}-${TARGET_COLOR}"
 
 # -p 옵션으로 프로젝트 이름을 지정하여 중복 실행 방지 및 격리
-docker compose -f docker-compose.deploy.yml -p $COMPOSE_PROJECT_NAME up -d
+docker compose -f docker-compose.app.yml -p $COMPOSE_PROJECT_NAME up -d
 
 # 5. Health Check
 echo "🏥 Health Checking ($TARGET_PORT)..."
@@ -81,7 +81,7 @@ done
 
 if [ "$STATUS" != "200" ]; then
   echo "❌ Health Check Failed. Rolling back..."
-  docker compose -f docker-compose.deploy.yml -p $COMPOSE_PROJECT_NAME down
+  docker compose -f docker-compose.app.yml -p $COMPOSE_PROJECT_NAME down
   exit 1
 fi
 
