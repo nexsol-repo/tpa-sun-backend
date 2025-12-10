@@ -60,7 +60,7 @@ echo "🔄 $TARGET_ENV Deployment: $CURRENT_PORT -> $TARGET_PORT ($TARGET_COLOR)
 # 4. 컨테이너 실행
 export HOST_PORT=$TARGET_PORT
 # .env에 DOCKER_IMAGE가 있지만, CI에서 주입된 값이 있다면 우선순위를 가질 수 있음
-# export DOCKER_IMAGE=${DOCKER_IMAGE:-"tpa-sun-backend:${TARGET_ENV}"}
+# export DOCKER_IMAGE=${DOCKER_IMAGE:-"tpa-sun-api:${TARGET_ENV}"}
 
 COMPOSE_PROJECT_NAME="${APP_NAME}-${TARGET_ENV}-${TARGET_COLOR}"
 

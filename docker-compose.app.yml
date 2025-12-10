@@ -12,10 +12,7 @@ services:
     environment:
       - TZ=Asia/Seoul
       - SERVER_PORT=8080
-      # 외부 .env 파일에서 로드된 값을 컨테이너 내부로 전달
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      # DB_HOST는 이제 'nex4'라는 호스트 이름을 사용합니다.
-      # 이 이름은 아래 extra_hosts 설정에 의해 실제 IP로 연결됩니다.
       - DB_HOST=nex4
       - DB_PORT=${DB_PORT}
       - DB_DATABASE=${DB_DATABASE}
