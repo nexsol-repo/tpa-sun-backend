@@ -8,7 +8,7 @@ if [ -z "$TARGET_ENV" ]; then
   exit 1
 fi
 
-APP_NAME="tpa-sun-backend"
+APP_NAME="tpa-sun-api"
 BASE_PATH="/home/nex3/app/${APP_NAME}"
 
 # 환경별 설정 (Nginx Conf 경로 및 기본 포트)
