@@ -24,7 +24,7 @@ fi
 
 echo "🚀 Starting Deployment for $TARGET_ENV environment (App: $APP_NAME)..."
 
-# 1. 환경변수 파일 준비 (.env 생성)
+# 1. 환경변수 파일 준비
 if [ -f "${BASE_PATH}/${ENV_FILE}" ]; then
   echo "📄 Copying ${ENV_FILE} to .env"
   cp "${BASE_PATH}/${ENV_FILE}" "${BASE_PATH}/.env"
@@ -63,26 +63,27 @@ fi
 
 COMPOSE_PROJECT_NAME="${APP_NAME}-${TARGET_ENV}-${TARGET_COLOR}"
 
-# docker-compose 실행
 docker compose -f docker-compose.app.yml -p $COMPOSE_PROJECT_NAME up -d
 
-# 5. Health Check
 echo "🏥 Health Checking ($TARGET_PORT)..."
-# 최대 60초 대기 (5초 * 12회)
-for i in {1..12}; do
+
+# [수정] 5회 반복 (5초 간격, 총 25초 대기)
+for i in {1..5}; do
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:${TARGET_PORT}/health)
+
   if [ "$STATUS" == "200" ]; then
     echo "✅ Health Check Passed!"
     break
   fi
-  echo "⏳ Waiting... ($i/12) HTTP $STATUS"
+
+  echo "⏳ Waiting... ($i/5) HTTP $STATUS"
   sleep 5
 done
 
 if [ "$STATUS" != "200" ]; then
   echo "❌ Health Check Failed. Status: $STATUS"
 
-  # [디버깅] 실패 시 컨테이너 로그 출력
+  # 실패 시 로그 출력
   echo "--- Docker Logs (Last 50 lines) ---"
   docker compose -f docker-compose.app.yml -p $COMPOSE_PROJECT_NAME logs --tail 50
   echo "-----------------------------------"
