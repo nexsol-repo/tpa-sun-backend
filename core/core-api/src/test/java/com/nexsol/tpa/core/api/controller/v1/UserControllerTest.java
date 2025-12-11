@@ -8,8 +8,17 @@ import com.nexsol.tpa.test.api.RestDocsTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 import static com.nexsol.tpa.test.api.RestDocsUtils.requestPreprocessor;
 import static com.nexsol.tpa.test.api.RestDocsUtils.responsePreprocessor;
@@ -22,14 +31,35 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.document;
+import static org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.documentationConfiguration;
 
 public class UserControllerTest extends RestDocsTest {
 
 	private final UserService userService = mock(UserService.class);
 
 	@BeforeEach
-	void setUp() {
-		this.webTestClient = mockController(new UserController(userService));
+	public void setUp(RestDocumentationContextProvider restDocumentation) {
+		// 1. @AuthenticationPrincipal 처리를 위한 커스텀 리졸버
+		HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
+			@Override
+			public boolean supportsParameter(MethodParameter parameter) {
+				return parameter.getParameterType().equals(Long.class)
+						&& parameter.hasParameterAnnotation(AuthenticationPrincipal.class);
+			}
+
+			@Override
+			public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+					NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+				return 1L; // 테스트용 User ID
+			}
+		};
+
+		// 2. MockController 직접 빌드하여 부모 클래스(RestDocsTest)의 webTestClient 필드에 할당
+		this.webTestClient = MockMvcWebTestClient.bindToController(new UserController(userService))
+			.customArgumentResolvers(authPrincipalResolver) // 리졸버 등록
+			.configureClient()
+			.filter(documentationConfiguration(restDocumentation)) // RestDocs 설정 적용
+			.build();
 	}
 
 	@Test
@@ -72,13 +102,7 @@ public class UserControllerTest extends RestDocsTest {
 						.optional(),
 					fieldWithPath("termsAgreed").type(JsonFieldType.BOOLEAN).description("이용약관 동의 여부 (필수)"),
 					fieldWithPath("privacyAgreed").type(JsonFieldType.BOOLEAN).description("개인정보 처리방침 동의 여부 (필수)")),
-					responseFields(
-							fieldWithPath("result").type(JsonFieldType.STRING).description("결과 상태 (SUCCESS/ERROR)"),
-							fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("생성된 유저 ID"),
-							fieldWithPath("data.companyCode").type(JsonFieldType.STRING).description("사업자 번호"),
-							fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
-							fieldWithPath("data.name").type(JsonFieldType.STRING).description("대표자명"),
-							fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보 (성공 시 null)"))));
+					responseFields(getUserResponseFields())));
 	}
 
 	@Test
@@ -109,13 +133,7 @@ public class UserControllerTest extends RestDocsTest {
 			.expectBody()
 			.consumeWith(document("user-me", requestPreprocessor(), responsePreprocessor(),
 					requestHeaders(headerWithName("Authorization").description("Bearer Access Token (필수)")),
-					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 상태 (SUCCESS)"),
-							fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("유저 ID"),
-							fieldWithPath("data.companyCode").type(JsonFieldType.STRING).description("사업자 번호"),
-							fieldWithPath("data.companyName").type(JsonFieldType.STRING).description("회사명").optional(),
-							fieldWithPath("data.name").type(JsonFieldType.STRING).description("대표자명"),
-							fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
-							fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보"))));
+					responseFields(getUserResponseFields())));
 	}
 
 	@Test
@@ -124,8 +142,6 @@ public class UserControllerTest extends RestDocsTest {
 		// given
 		Long userId = 1L;
 
-		// 요청 DTO (Controller에 별도 Request DTO가 있다면 그것을 사용, 여기선 편의상 ModifyUser 사용 가정)
-		// 실제로는 UpdateUserRequest 같은 DTO를 만들어 @RequestBody로 받는 것이 일반적입니다.
 		ModifyUser request = ModifyUser.builder()
 			.applicantName("변경된신청자")
 			.applicantEmail("new@nexsol.com") // 이메일 변경 시도
@@ -133,12 +149,13 @@ public class UserControllerTest extends RestDocsTest {
 			.build();
 
 		User updatedUser = User.builder()
-			.id(userId)
 			.companyCode("123-45-67890")
-			.name("홍길동")
+			.companyName("(주)넥솔")
+			.name("testMaster")
+			.phoneNumber("010-1234-5678")
 			.applicantName("변경된신청자")
-			.applicantEmail("new@nexsol.com")
 			.applicantPhoneNumber("010-9999-9999")
+			.applicantEmail("new@nexsol.com")
 			.build();
 
 		given(userService.update(eq(userId), any(ModifyUser.class))).willReturn(updatedUser);
@@ -165,14 +182,21 @@ public class UserControllerTest extends RestDocsTest {
 							fieldWithPath("applicantPhoneNumber").type(JsonFieldType.STRING)
 								.description("변경할 연락처")
 								.optional()),
-					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 상태"),
-							fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("유저 ID"),
-							fieldWithPath("data.email").type(JsonFieldType.STRING).description("변경된 이메일"),
-							fieldWithPath("data.name").type(JsonFieldType.STRING).description("대표자명"),
-							// 필요한 필드 추가
-							fieldWithPath("data.companyCode").type(JsonFieldType.STRING).description("사업자 번호"),
-							fieldWithPath("data.companyName").type(JsonFieldType.STRING).description("회사명").optional(),
-							fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보"))));
+					responseFields(getUserResponseFields())));
+	}
+
+	private FieldDescriptor[] getUserResponseFields() {
+		return new FieldDescriptor[] {
+				fieldWithPath("result").type(JsonFieldType.STRING).description("결과 상태 (SUCCESS/ERROR)"),
+				fieldWithPath("data.companyCode").type(JsonFieldType.STRING).description("사업자 번호"),
+				fieldWithPath("data.companyName").type(JsonFieldType.STRING).description("회사명").optional(),
+				fieldWithPath("data.ceoName").type(JsonFieldType.STRING).description("대표자명"),
+				fieldWithPath("data.businessType").type(JsonFieldType.STRING).description("사업자 구분 (개인/법인)"),
+				fieldWithPath("data.ceoPhoneNumber").type(JsonFieldType.STRING).description("대표자 연락처").optional(),
+				fieldWithPath("data.applicantName").type(JsonFieldType.STRING).description("신청자명"),
+				fieldWithPath("data.applicantPhoneNumber").type(JsonFieldType.STRING).description("신청자 연락처"),
+				fieldWithPath("data.applicantEmail").type(JsonFieldType.STRING).description("신청자 이메일"),
+				fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보 (성공 시 null)").optional() };
 	}
 
 }

@@ -28,7 +28,7 @@ public class EmailVerifiedService {
 
 		LocalDateTime now = LocalDateTime.now();
 
-		emailVerificationFinder.find(email, type).ifPresent(exist -> exist.validateResend(now));
+		emailVerificationFinder.find(companyCode, email, type).ifPresent(exist -> exist.validateResend(now));
 
 		String newCode = emailGenerateCode.generateCode();
 
@@ -47,10 +47,10 @@ public class EmailVerifiedService {
 		emailSender.send(email, newCode);
 	}
 
-	public void verifyCode(String email, String code, EmailVerifiedType type) {
+	public void verifyCode(String companyCode, String email, String code, EmailVerifiedType type) {
 		LocalDateTime now = LocalDateTime.now();
 
-		EmailVerification verification = emailVerificationReader.read(email, type);
+		EmailVerification verification = emailVerificationReader.read(companyCode, email, type);
 
 		EmailVerification verified = verification.verify(code, now);
 

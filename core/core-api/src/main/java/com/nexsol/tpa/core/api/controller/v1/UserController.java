@@ -34,7 +34,7 @@ public class UserController {
 		return ApiResponse.success(UserResponse.of(savedUser));
 	}
 
-	@PatchMapping("/update")
+	@PatchMapping("/me")
 	public ApiResponse<UserResponse> update(@AuthenticationPrincipal Long userId,
 			@RequestBody @Valid ModifyUserRequest request) {
 		User updatedUser = userService.update(userId, ModifyUserRequest.toModifyUser(request));

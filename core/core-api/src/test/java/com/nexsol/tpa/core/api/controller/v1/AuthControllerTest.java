@@ -113,9 +113,10 @@ public class AuthControllerTest extends RestDocsTest {
 	@DisplayName("이메일 인증코드 검증 API 문서화")
 	void emailVerify() {
 		// given
-		EmailVerifyRequest request = new EmailVerifyRequest("test@nexsol.com", "123456", EmailVerifiedType.SIGNUP);
+		EmailVerifyRequest request = new EmailVerifyRequest("123-45-67890", "test@nexsol.com", "123456",
+				EmailVerifiedType.SIGNUP);
 
-		doNothing().when(emailVerifiedService).verifyCode(any(), any(), any());
+		doNothing().when(emailVerifiedService).verifyCode(any(), any(), any(), any());
 
 		// when & then
 		webTestClient.post()
@@ -127,7 +128,8 @@ public class AuthControllerTest extends RestDocsTest {
 			.isOk()
 			.expectBody()
 			.consumeWith(document("auth-email-verify", requestPreprocessor(), responsePreprocessor(),
-					requestFields(fieldWithPath("email").type(JsonFieldType.STRING).description("이메일 주소"),
+					requestFields(fieldWithPath("companyCode").type(JsonFieldType.STRING).description("사업자번호"),
+							fieldWithPath("email").type(JsonFieldType.STRING).description("이메일 주소"),
 							fieldWithPath("code").type(JsonFieldType.STRING).description("인증 코드"),
 							fieldWithPath("type").type(JsonFieldType.STRING).description("인증 타입 (SIGNUP, SIGNIN)")),
 					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 상태 (SUCCESS)"),

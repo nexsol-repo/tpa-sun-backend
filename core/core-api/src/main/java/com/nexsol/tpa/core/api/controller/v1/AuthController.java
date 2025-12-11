@@ -53,7 +53,7 @@ public class AuthController {
 	// 3. 이메일 인증번호 검증 (확인)
 	@PostMapping("/email/verify")
 	public ApiResponse<Object> verifyEmailCode(@RequestBody @Valid EmailVerifyRequest request) {
-		emailVerifiedService.verifyCode(request.email(), request.code(), request.type());
+		emailVerifiedService.verifyCode(request.companyCode(), request.email(), request.code(), request.type());
 		return ApiResponse.success();
 	}
 
