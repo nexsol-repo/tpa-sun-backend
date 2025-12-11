@@ -5,10 +5,7 @@ import com.nexsol.tpa.core.api.controller.v1.response.InsuranceListResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuranceResponse;
 import com.nexsol.tpa.core.api.support.response.ApiResponse;
 import com.nexsol.tpa.core.api.support.response.PageResponse;
-import com.nexsol.tpa.core.domain.InsuranceApplication;
-import com.nexsol.tpa.core.domain.InsuranceApplicationService;
-import com.nexsol.tpa.core.domain.InsuranceDocument;
-import com.nexsol.tpa.core.domain.JoinCondition;
+import com.nexsol.tpa.core.domain.*;
 import com.nexsol.tpa.core.support.PageResult;
 import com.nexsol.tpa.core.support.SortPage;
 import jakarta.validation.Valid;
@@ -24,6 +21,7 @@ import java.util.List;
 public class InsuranceController {
 
 	private final InsuranceApplicationService insuranceApplicationService;
+	private final FileService fileService;
 
 	@GetMapping("/{applicationId}")
 	public ApiResponse<InsuranceResponse> getApplication(@AuthenticationPrincipal Long userId,
@@ -31,7 +29,7 @@ public class InsuranceController {
 
 		// Service를 통해 조회 (건너뛰기 금지)
 		InsuranceApplication app = insuranceApplicationService.getInsuranceApplication(userId, applicationId);
-		return ApiResponse.success(InsuranceResponse.of(app));
+		return ApiResponse.success(InsuranceResponse.of(app, fileService::generatePresignedUrl));
 	}
 
 	@GetMapping("/me")
