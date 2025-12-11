@@ -2,8 +2,14 @@ package com.nexsol.tpa.storage.db.core;
 
 import com.nexsol.tpa.core.domain.*;
 import com.nexsol.tpa.core.enums.InsuranceStatus;
+import com.nexsol.tpa.core.support.PageResult;
+import com.nexsol.tpa.core.support.SortPage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,8 +23,6 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 
 	private final InsuranceAttachmentJpaRepository attachmentJpaRepository;
 
-	private final InsurancePlantJpaRepository plantJpaRepository;
-
 	private final InsuranceConditionJpaRepository conditionJpaRepository;
 
 	private final AccidentHistoryJpaRepository accidentHistoryJpaRepository;
@@ -26,25 +30,17 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 	@Override
 	@Transactional
 	public InsuranceApplication save(InsuranceApplication application) {
-		InsuranceApplicationEntity insuranceApplicationEntity = application.id() == null
+		InsuranceApplicationEntity entity = application.id() == null
 				? InsuranceApplicationEntity.fromDomain(application)
 				: applicationJpaRepository.findById(application.id())
 					.orElseGet(() -> InsuranceApplicationEntity.fromDomain(application));
 
-		insuranceApplicationEntity.update(application); // 상태, 견적 등 업데이트
-		InsuranceApplicationEntity savedApplicationEntity = applicationJpaRepository.save(insuranceApplicationEntity);
-		Long applicationId = savedApplicationEntity.getId();
+		entity.update(application);
 
-		// 2. [Plant] 발전소 정보 저장 (UPSERT)
-		if (application.plant() != null) {
-			InsurancePlantEntity insurancePlantEntity = plantJpaRepository.findByApplicationId(applicationId)
-				.orElseGet(() -> InsurancePlantEntity.fromDomain(application.plant(), applicationId));
+		InsuranceApplicationEntity savedEntity = applicationJpaRepository.save(entity);
+		Long applicationId = savedEntity.getId();
 
-			insurancePlantEntity.update(application.plant());
-			plantJpaRepository.save(insurancePlantEntity);
-		}
-
-		// 3. [Condition] 가입 조건 저장 (UPSERT)
+		// [Condition] 가입 조건 저장 (UPSERT)
 		if (application.condition() != null) {
 			InsuranceConditionEntity insuranceConditionEntity = conditionJpaRepository
 				.findByApplicationId(applicationId)
@@ -53,7 +49,7 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 			insuranceConditionEntity.update(application.condition());
 			conditionJpaRepository.save(insuranceConditionEntity);
 
-			// 3-1. [Accident] 사고 이력 저장 (Full Replace 전략: 삭제 후 재저장)
+			// [Accident] 사고 이력 저장 (Full Replace 전략: 삭제 후 재저장)
 			accidentHistoryJpaRepository.deleteByApplicationId(applicationId);
 
 			if (application.condition().hasAccidents()) {
@@ -87,10 +83,6 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 
 		InsuranceApplicationEntity insuranceApplicationEntity = appEntity.get();
 
-		InsurancePlant insurancePlant = plantJpaRepository.findByApplicationId(id)
-			.map(InsurancePlantEntity::toDomain)
-			.orElse(null);
-
 		JoinCondition joinCondition = null;
 		Optional<InsuranceConditionEntity> conditionEntityOptional = conditionJpaRepository.findByApplicationId(id);
 
@@ -103,7 +95,7 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 		}
 		InsuranceDocument insuranceDocument = loadDocuments(id);
 
-		return Optional.of(insuranceApplicationEntity.toDomain(insurancePlant, joinCondition, insuranceDocument));
+		return Optional.of(insuranceApplicationEntity.toDomain(joinCondition, insuranceDocument));
 	}
 
 	@Override
@@ -116,6 +108,44 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 	public Optional<InsuranceApplication> findWritingApplication(Long userId) {
 		return applicationJpaRepository.findByUserIdAndStatus(userId, InsuranceStatus.PENDING)
 			.flatMap(entity -> findById(entity.getId()));
+	}
+
+	@Override
+	public PageResult<InsuranceApplication> findAllByUserId(Long userId, SortPage sortPage) {
+		// 1. 도메인 요청(SortPage) -> JPA 요청(Pageable) 변환 (격벽 역할)
+		Pageable pageable = toJpaPageable(sortPage);
+
+		// 2. 순수 JPA 메서드 호출
+		Page<InsuranceApplicationEntity> entityPage = applicationJpaRepository.findByUserId(userId, pageable);
+
+		// 3. Entity -> Domain 변환 (리스트용)
+		// toDomain 호출 시 plantInfo가 이미 있으므로 바로 변환됨.
+		List<InsuranceApplication> content = entityPage.getContent()
+			.stream()
+			.map(entity -> entity.toDomain(null, null)) // 리스트에선 Condition, Docs 필요 없음
+			.toList();
+
+		return new PageResult<>(content, entityPage.getTotalElements(), entityPage.getTotalPages(),
+				entityPage.getNumber(), entityPage.hasNext());
+	}
+
+	private Pageable toJpaPageable(SortPage sortPage) {
+		if (sortPage.sort() == null) {
+			return PageRequest.of(sortPage.page(), sortPage.size(), Sort.by(Sort.Direction.DESC, "createdAt"));
+		}
+
+		SortPage.Sort sort = sortPage.sort();
+		Sort.Direction direction = sort.direction().isAscending() ? Sort.Direction.ASC : Sort.Direction.DESC;
+		String property = sort.property();
+
+		String entityProperty = switch (property) {
+
+			case "plantName" -> "plantInfo.name";
+			case "status" -> "insuranceStatus";
+			default -> "createdAt";
+		};
+
+		return PageRequest.of(sortPage.page(), sortPage.size(), Sort.by(direction, entityProperty));
 	}
 
 	private void saveAttachments(Long applicationId, InsuranceDocument documents) {
