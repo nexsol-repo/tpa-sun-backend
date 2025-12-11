@@ -1,0 +1,1 @@
+ALTER TABLE email_verification ADD COLUMN company_code VARCHAR(255);
