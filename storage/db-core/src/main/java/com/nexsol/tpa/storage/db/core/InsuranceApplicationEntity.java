@@ -34,6 +34,9 @@ public class InsuranceApplicationEntity extends BaseEntity {
 	private ApplicantInfoEmbeddable applicantInfo;
 
 	@Embedded
+	private InsurancePlantEmbeddable plantInfo;
+
+	@Embedded
 	private QuoteEmbeddable quoteInfo;
 
 	public static InsuranceApplicationEntity fromDomain(InsuranceApplication domain) {
@@ -52,6 +55,10 @@ public class InsuranceApplicationEntity extends BaseEntity {
 		if (domain.quote() != null) {
 			entity.quoteInfo = new QuoteEmbeddable(domain.quote());
 		}
+
+		if (domain.plant() != null) {
+			entity.plantInfo = new InsurancePlantEmbeddable(domain.plant());
+		}
 		return entity;
 	}
 
@@ -62,7 +69,7 @@ public class InsuranceApplicationEntity extends BaseEntity {
 		}
 	}
 
-	public InsuranceApplication toDomain(InsurancePlant plant, JoinCondition condition, InsuranceDocument documents) {
+	public InsuranceApplication toDomain(JoinCondition condition, InsuranceDocument documents) {
 		return InsuranceApplication.builder()
 			.id(this.getId())
 			.applicationNumber(this.applicationNumber)
@@ -71,7 +78,7 @@ public class InsuranceApplicationEntity extends BaseEntity {
 			.applicant(this.applicantInfo != null ? this.applicantInfo.toDomain() : null)
 			.agreement(this.agreementInfo != null ? this.agreementInfo.toDomain() : null)
 			.quote(this.quoteInfo != null ? this.quoteInfo.toDomain() : null)
-			.plant(plant)
+			.plant(this.plantInfo != null ? this.plantInfo.toDomain() : null)
 			.condition(condition)
 			.documents(documents)
 			.createdAt(this.getCreatedAt())

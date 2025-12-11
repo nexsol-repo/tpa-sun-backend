@@ -1,19 +1,22 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
-import com.nexsol.tpa.core.api.controller.v1.request.InsuranceCompleteRequest;
-import com.nexsol.tpa.core.api.controller.v1.request.InsuranceConditionRequest;
-import com.nexsol.tpa.core.api.controller.v1.request.InsurancePlantRequest;
-import com.nexsol.tpa.core.api.controller.v1.request.InsuranceStartRequest;
+import com.nexsol.tpa.core.api.controller.v1.request.*;
+import com.nexsol.tpa.core.api.controller.v1.response.InsuranceListResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuranceResponse;
 import com.nexsol.tpa.core.api.support.response.ApiResponse;
+import com.nexsol.tpa.core.api.support.response.PageResponse;
 import com.nexsol.tpa.core.domain.InsuranceApplication;
 import com.nexsol.tpa.core.domain.InsuranceApplicationService;
 import com.nexsol.tpa.core.domain.InsuranceDocument;
 import com.nexsol.tpa.core.domain.JoinCondition;
+import com.nexsol.tpa.core.support.PageResult;
+import com.nexsol.tpa.core.support.SortPage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/insurance")
@@ -29,6 +32,19 @@ public class InsuranceController {
 		// Service를 통해 조회 (건너뛰기 금지)
 		InsuranceApplication app = insuranceApplicationService.getInsuranceApplication(userId, applicationId);
 		return ApiResponse.success(InsuranceResponse.of(app));
+	}
+
+	@GetMapping("/me")
+	public ApiResponse<PageResponse<InsuranceListResponse>> getMyList(@AuthenticationPrincipal Long userId,
+			@ModelAttribute InsuranceSearchRequest request) {
+
+		SortPage sortPage = request.toSortPage();
+
+		PageResult<InsuranceApplication> result = insuranceApplicationService.getList(userId, sortPage);
+
+		List<InsuranceListResponse> responseList = InsuranceListResponse.from(result.getContent());
+
+		return ApiResponse.success(PageResponse.of(result, responseList));
 	}
 
 	/**

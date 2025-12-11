@@ -1,24 +1,15 @@
 package com.nexsol.tpa.storage.db.core;
 
 import com.nexsol.tpa.core.domain.InsurancePlant;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.Getter;
+import jakarta.persistence.Embeddable;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "insurance_plant")
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class InsurancePlantEntity extends BaseEntity {
-
-	@Column(nullable = false)
-	private Long applicationId;
+@Embeddable
+@NoArgsConstructor
+public class InsurancePlantEmbeddable {
 
 	private String plantName;
 
@@ -38,22 +29,9 @@ public class InsurancePlantEntity extends BaseEntity {
 
 	private String salesTarget;
 
-	public static InsurancePlantEntity fromDomain(InsurancePlant domain, Long applicationId) {
-		InsurancePlantEntity entity = new InsurancePlantEntity();
-		entity.applicationId = applicationId;
-		entity.plantName = domain.name();
-		entity.address = domain.address();
-		entity.region = domain.region();
-		entity.capacity = domain.capacity();
-		entity.area = domain.area();
-		entity.inspectionDate = domain.inspectionDate();
-		entity.facilityType = domain.facilityType();
-		entity.driveMethod = domain.driveMethod();
-		entity.salesTarget = domain.salesTarget();
-		return entity;
-	}
-
-	public void update(InsurancePlant domain) {
+	public InsurancePlantEmbeddable(InsurancePlant domain) {
+		if (domain == null)
+			return;
 		this.plantName = domain.name();
 		this.address = domain.address();
 		this.region = domain.region();

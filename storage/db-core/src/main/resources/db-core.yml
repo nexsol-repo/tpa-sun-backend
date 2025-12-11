@@ -81,3 +81,28 @@ storage:
         idle-timeout: 300000
         connection-timeout: 20000
         validation-timeout: 5000
+
+---
+spring.config.activate.on-profile: prod
+spring:
+  docker:
+    compose:
+      enabled: false
+flyway:
+  enabled: true
+  baseline-on-migrate: true
+  validate-on-migrate: false
+  locations: classpath:db/migration
+storage:
+  datasource:
+    core:
+      jdbc-url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      driver-class-name: org.mariadb.jdbc.Driver
+      hikari:
+        maximum-pool-size: 20
+        minimum-idle: 10
+        idle-timeout: 300000
+        connection-timeout: 20000
+        validation-timeout: 5000

@@ -37,4 +37,25 @@ public record InsuranceApplication(Long id, String applicationNumber, Long userI
 		}
 		return this.toBuilder().status(InsuranceStatus.COMPLETED).build();
 	}
+
+	public int calculateNextStep() {
+		// 1. 이미 가입 완료된 경우 -> 상세 페이지(5) 또는 별도 코드
+		if (this.status == InsuranceStatus.COMPLETED) {
+			return 5;
+		}
+
+		// 2. 견적(Quote)이 있다? -> 조건 입력(3단계)이 끝났다는 뜻 -> 서명(4단계)으로 이동
+		if (this.quote != null) {
+			return 4;
+		}
+
+		// 3. 발전소(Plant) 정보가 있다? -> 발전소 입력(2단계)이 끝났다는 뜻 -> 조건 입력(3단계)으로 이동
+		// (단, Plant가 Embeddable로 바뀌면서 null이 아닐 수 있으므로 내부 필수값(name 등)으로 체크 권장)
+		if (this.plant != null && this.plant.name() != null) {
+			return 3;
+		}
+
+		// 4. 아무것도 없다 -> 이제 막 약관동의하고 생성됨 -> 발전소 입력(2단계)으로 이동
+		return 2;
+	}
 }
