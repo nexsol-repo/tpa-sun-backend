@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmailVerificationEntity extends BaseEntity {
+	private String companyCode;
 
 	private String email;
 

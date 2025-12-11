@@ -8,6 +8,6 @@ public interface EmailVerificationRepository {
 
 	EmailVerification save(EmailVerification verification);
 
-	Optional<EmailVerification> findByEmailAndType(String email, EmailVerifiedType type);
+	Optional<EmailVerification> findByCompanyCodeAndEmailAndType(String companyCode,String email, EmailVerifiedType type);
 
 }

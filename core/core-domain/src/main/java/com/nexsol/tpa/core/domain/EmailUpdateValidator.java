@@ -16,7 +16,7 @@ public class EmailUpdateValidator {
 
         if (isEmailChanged(user, modifyUser)) {
 
-            emailVerificationReader.read(modifyUser.applicantEmail(), EmailVerifiedType.UPDATE)
+            emailVerificationReader.read(user.companyCode(),modifyUser.applicantEmail(), EmailVerifiedType.UPDATE)
                     .validateUpdate(LocalDateTime.now());
         }
     }

@@ -26,7 +26,7 @@ public class EmailVerificationRepositoryImpl implements EmailVerificationReposit
 	}
 
 	@Override
-	public Optional<EmailVerification> findByEmailAndType(String email, EmailVerifiedType type) {
+	public Optional<EmailVerification> findByCompanyCodeAndEmailAndType(String companyCode,String email, EmailVerifiedType type) {
 		return emailVerificationJpaRepository.findByEmailAndVerifiedType(email, type)
 			.map(EmailVerificationEntity::toDomain);
 	}
