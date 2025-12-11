@@ -18,6 +18,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import static com.nexsol.tpa.test.api.RestDocsUtils.requestPreprocessor;
 import static com.nexsol.tpa.test.api.RestDocsUtils.responsePreprocessor;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
 import static org.springframework.restdocs.cookies.CookieDocumentation.responseCookies;
@@ -38,6 +39,10 @@ public class AuthControllerTest extends RestDocsTest {
 	@Test
 	@DisplayName("로그인 API 문서화")
 	public void login() {
+		String companyCode = "123-45-67890";
+		String email = "test@nexsol.com";
+		String code = "123456";
+
 		// given
 		AuthToken mockToken = AuthToken.builder()
 			.accessToken("access-token-sample")
@@ -46,7 +51,8 @@ public class AuthControllerTest extends RestDocsTest {
 			.refreshTokenExpiration(1209600)
 			.build();
 
-		when(authService.signIn(any(), any(), any())).thenReturn(mockToken);
+		given(authService.signIn(eq(companyCode), eq(email), eq(code)))
+				.willReturn(mockToken);
 
 		SignInRequest request = new SignInRequest("123-45-67890", "test@nexsol.com", "123456");
 
