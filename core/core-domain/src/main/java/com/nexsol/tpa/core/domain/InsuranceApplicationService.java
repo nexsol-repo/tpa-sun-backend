@@ -1,5 +1,7 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.support.PageResult;
+import com.nexsol.tpa.core.support.SortPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,10 @@ public class InsuranceApplicationService {
 		InsuranceApplication application = applicationReader.read(applicationId);
 		application.validateOwner(userId);
 		return application;
+	}
+
+	public PageResult<InsuranceApplication> getList(Long userId, SortPage sortPage) {
+		return applicationReader.readAll(userId, sortPage);
 	}
 
 	public InsuranceApplication saveInit(Long userId, Agreement agreement) {
