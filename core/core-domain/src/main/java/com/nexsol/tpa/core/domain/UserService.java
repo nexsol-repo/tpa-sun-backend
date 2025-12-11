@@ -10,25 +10,32 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserService {
 
-	private final UserAppender userAppender;
+    private final UserFinder userFinder;
 
-	private final EmailVerificationReader emailVerificationReader;
+    private final UserAppender userAppender;
 
-	public User signUp(NewUser newUser) {
-		EmailVerification verification = emailVerificationReader.read(newUser.applicantEmail(),
-				EmailVerifiedType.SIGNUP);
+    private final EmailVerificationReader emailVerificationReader;
 
-		verification.validateSignup(LocalDateTime.now());
 
-		// userReader.exist(newUser.companyCode(), newUser.applicantEmail());
+    public User findUser(Long userId) {
+        return userFinder.find(userId);
+    }
 
-		return userAppender.append(newUser.toUser());
-	}
+    public User signUp(NewUser newUser) {
+        EmailVerification verification = emailVerificationReader.read(newUser.applicantEmail(),
+                EmailVerifiedType.SIGNUP);
 
-	public User update(User user, ModifyUser modifyUser) {
-		User updatedUser = user.update(modifyUser);
+        verification.validateSignup(LocalDateTime.now());
 
-		return userAppender.append(updatedUser);
-	}
+        // userReader.exist(newUser.companyCode(), newUser.applicantEmail());
+
+        return userAppender.append(newUser.toUser());
+    }
+
+    public User update(User user, ModifyUser modifyUser) {
+        User updatedUser = user.update(modifyUser);
+
+        return userAppender.append(updatedUser);
+    }
 
 }
