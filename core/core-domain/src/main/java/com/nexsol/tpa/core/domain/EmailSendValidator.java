@@ -16,7 +16,8 @@ public class EmailSendValidator {
 	private final UserReader userReader;
 
 	private final Map<EmailVerifiedType, Consumer<Boolean>> validationStrategies = Map.of(EmailVerifiedType.SIGNUP,
-			this::validateSignup, EmailVerifiedType.SIGNIN, this::validateSignin,EmailVerifiedType.UPDATE,this::validateUpdate);
+			this::validateSignup, EmailVerifiedType.SIGNIN, this::validateSignin, EmailVerifiedType.UPDATE,
+			this::validateUpdate);
 
 	public void validate(String companyCode, String email, EmailVerifiedType type) {
 		boolean exists = userReader.exists(companyCode, email);
@@ -25,8 +26,6 @@ public class EmailSendValidator {
 		validationStrategies.getOrDefault(type, _ -> {
 		}).accept(exists);
 	}
-
-
 
 	private void validateSignup(boolean exists) {
 		if (exists) {

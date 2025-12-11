@@ -10,19 +10,21 @@ import java.util.Objects;
 @Component
 @RequiredArgsConstructor
 public class EmailUpdateValidator {
-    private final EmailVerificationReader emailVerificationReader;
 
-    public void validate(User user, ModifyUser modifyUser) {
+	private final EmailVerificationReader emailVerificationReader;
 
-        if (isEmailChanged(user, modifyUser)) {
+	public void validate(User user, ModifyUser modifyUser) {
 
-            emailVerificationReader.read(user.companyCode(),modifyUser.applicantEmail(), EmailVerifiedType.UPDATE)
-                    .validateUpdate(LocalDateTime.now());
-        }
-    }
+		if (isEmailChanged(user, modifyUser)) {
 
-    private boolean isEmailChanged(User user, ModifyUser modifyUser) {
-        return modifyUser.applicantEmail() != null
-                && !Objects.equals(user.applicantEmail(), modifyUser.applicantEmail());
-    }
+			emailVerificationReader.read(user.companyCode(), modifyUser.applicantEmail(), EmailVerifiedType.UPDATE)
+				.validateUpdate(LocalDateTime.now());
+		}
+	}
+
+	private boolean isEmailChanged(User user, ModifyUser modifyUser) {
+		return modifyUser.applicantEmail() != null
+				&& !Objects.equals(user.applicantEmail(), modifyUser.applicantEmail());
+	}
+
 }

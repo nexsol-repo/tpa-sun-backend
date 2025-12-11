@@ -51,8 +51,7 @@ public class AuthControllerTest extends RestDocsTest {
 			.refreshTokenExpiration(1209600)
 			.build();
 
-		given(authService.signIn(eq(companyCode), eq(email), eq(code)))
-				.willReturn(mockToken);
+		given(authService.signIn(eq(companyCode), eq(email), eq(code))).willReturn(mockToken);
 
 		SignInRequest request = new SignInRequest("123-45-67890", "test@nexsol.com", "123456");
 

@@ -12,8 +12,8 @@ public class EmailVerificationReader {
 
 	private final EmailVerificationRepository emailVerificationRepository;
 
-	public EmailVerification read(String companyCode,String email, EmailVerifiedType type) {
-		return emailVerificationRepository.findByCompanyCodeAndEmailAndType(companyCode,email, type)
+	public EmailVerification read(String companyCode, String email, EmailVerifiedType type) {
+		return emailVerificationRepository.findByCompanyCodeAndEmailAndType(companyCode, email, type)
 			.orElseThrow(() -> new CoreException(CoreErrorType.EMAIL_VERIFIED_EMPTY));
 	}
 

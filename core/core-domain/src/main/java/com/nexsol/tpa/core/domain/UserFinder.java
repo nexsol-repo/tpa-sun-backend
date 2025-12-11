@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UserFinder {
-    private final UserRepository userRepository;
 
-    public User find(Long id){
-       User user = userRepository.findById(id).orElseThrow(()-> new CoreException(CoreErrorType.USER_NOT_FOUND));
+	private final UserRepository userRepository;
 
-       return user;
-    }
+	public User find(Long id) {
+		User user = userRepository.findById(id).orElseThrow(() -> new CoreException(CoreErrorType.USER_NOT_FOUND));
+
+		return user;
+	}
+
 }

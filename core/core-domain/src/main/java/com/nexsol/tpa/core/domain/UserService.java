@@ -10,40 +10,37 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserReader userReader;
+	private final UserReader userReader;
 
-    private final UserFinder userFinder;
+	private final UserFinder userFinder;
 
-    private final UserAppender userAppender;
+	private final UserAppender userAppender;
 
-    private final EmailUpdateValidator emailUpdateValidator;
+	private final EmailUpdateValidator emailUpdateValidator;
 
-    private final EmailVerificationReader emailVerificationReader;
+	private final EmailVerificationReader emailVerificationReader;
 
+	public User findUser(Long userId) {
+		return userFinder.find(userId);
+	}
 
-    public User findUser(Long userId) {
-        return userFinder.find(userId);
-    }
+	public User signUp(NewUser newUser) {
+		EmailVerification verification = emailVerificationReader.read(newUser.companyCode(), newUser.applicantEmail(),
+				EmailVerifiedType.SIGNUP);
 
-    public User signUp(NewUser newUser) {
-        EmailVerification verification = emailVerificationReader.read(newUser.companyCode(),newUser.applicantEmail(),
-                EmailVerifiedType.SIGNUP);
+		verification.validateSignup(LocalDateTime.now());
 
-        verification.validateSignup(LocalDateTime.now());
+		return userAppender.append(newUser.toUser());
+	}
 
+	public User update(Long userId, ModifyUser modifyUser) {
+		User user = userReader.read(userId);
 
-        return userAppender.append(newUser.toUser());
-    }
+		emailUpdateValidator.validate(user, modifyUser);
 
-    public User update(Long userId, ModifyUser modifyUser) {
-        User user = userReader.read(userId);
+		User updatedUser = user.update(modifyUser);
 
-        emailUpdateValidator.validate(user, modifyUser);
-
-        User updatedUser = user.update(modifyUser);
-
-
-        return userAppender.append(updatedUser);
-    }
+		return userAppender.append(updatedUser);
+	}
 
 }

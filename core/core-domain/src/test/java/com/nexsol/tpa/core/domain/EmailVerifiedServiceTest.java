@@ -73,7 +73,7 @@ public class EmailVerifiedServiceTest {
 
 		doNothing().when(emailSendValidator).validate(companyCode, email, EmailVerifiedType.SIGNUP);
 		// Finder는 빈 값 반환 (처음 요청)
-		given(emailVerificationFinder.find(companyCode,email, EmailVerifiedType.SIGNUP)).willReturn(Optional.empty());
+		given(emailVerificationFinder.find(companyCode, email, EmailVerifiedType.SIGNUP)).willReturn(Optional.empty());
 
 		// 코드 생성기 Mocking
 		given(emailGenerateCode.generateCode()).willReturn(newCode);
@@ -98,7 +98,7 @@ public class EmailVerifiedServiceTest {
 		// 30초 전에 보낸 기록이 있음
 		EmailVerification recentVerification = aVerification().sentAt(now.minusSeconds(30)).build();
 
-		given(emailVerificationFinder.find(companyCode,email, EmailVerifiedType.SIGNUP))
+		given(emailVerificationFinder.find(companyCode, email, EmailVerifiedType.SIGNUP))
 			.willReturn(Optional.of(recentVerification));
 
 		// when & then

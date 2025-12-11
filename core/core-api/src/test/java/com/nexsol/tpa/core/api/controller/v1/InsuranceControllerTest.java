@@ -423,7 +423,9 @@ public class InsuranceControllerTest extends RestDocsTest {
 				fieldWithPath(prefix + ".ceoName").type(JsonFieldType.STRING).description("대표자명").optional(),
 				fieldWithPath(prefix + ".ceoPhoneNumber").type(JsonFieldType.STRING).description("대표자 연락처").optional(),
 				fieldWithPath(prefix + ".applicantName").type(JsonFieldType.STRING).description("신청자명").optional(),
-				fieldWithPath(prefix + ".applicantPhoneNumber").type(JsonFieldType.STRING).description("신청자 연락처").optional(),
+				fieldWithPath(prefix + ".applicantPhoneNumber").type(JsonFieldType.STRING)
+					.description("신청자 연락처")
+					.optional(),
 				fieldWithPath(prefix + ".applicantEmail").type(JsonFieldType.STRING).description("이메일").optional());
 	}
 

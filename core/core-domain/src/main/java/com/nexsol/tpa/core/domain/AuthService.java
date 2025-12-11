@@ -25,7 +25,7 @@ public class AuthService {
 	public AuthToken signIn(String companyCode, String email, String code) {
 		User user = userReader.read(companyCode, email);
 
-		EmailVerification verification = emailVerificationReader.read(companyCode,email, EmailVerifiedType.SIGNIN);
+		EmailVerification verification = emailVerificationReader.read(companyCode, email, EmailVerifiedType.SIGNIN);
 
 		verification.checkCodeForLogin(code, LocalDateTime.now());
 
