@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserService {
 
+	private final UserReader userReader;
+
     private final UserFinder userFinder;
 
     private final UserAppender userAppender;
@@ -32,8 +34,10 @@ public class UserService {
         return userAppender.append(newUser.toUser());
     }
 
-    public User update(User user, ModifyUser modifyUser) {
-        User updatedUser = user.update(modifyUser);
+    public User update(Long userId, ModifyUser modifyUser) {
+        User user = userReader.read(userId);
+
+		User updatedUser = user.update(modifyUser);
 
         return userAppender.append(updatedUser);
     }

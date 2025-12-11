@@ -1,5 +1,6 @@
 package com.nexsol.tpa.core.api.controller.v1;
 
+import com.nexsol.tpa.core.api.controller.v1.request.ModifyUserRequest;
 import com.nexsol.tpa.core.api.controller.v1.request.SignUpRequest;
 import com.nexsol.tpa.core.api.controller.v1.response.SignUpResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.UserResponse;
@@ -16,23 +17,31 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-	private final UserService userService;
+    private final UserService userService;
 
 
-	@GetMapping("/me")
-	public ApiResponse<UserResponse> getMe(@AuthenticationPrincipal Long userId) {
-		User user = userService.findUser(userId);
+    @GetMapping("/me")
+    public ApiResponse<UserResponse> getMe(@AuthenticationPrincipal Long userId) {
+        User user = userService.findUser(userId);
 
-		return ApiResponse.success(UserResponse.of(user));
+        return ApiResponse.success(UserResponse.of(user));
 
-	}
+    }
 
-	@PostMapping("/signup")
-	public ApiResponse<SignUpResponse> signup(@RequestBody @Valid SignUpRequest request) {
+    @PostMapping("/signup")
+    public ApiResponse<SignUpResponse> signup(@RequestBody @Valid SignUpRequest request) {
 
-		User savedUser = userService.signUp(request.toNewUser());
+        User savedUser = userService.signUp(request.toNewUser());
 
-		return ApiResponse.success(SignUpResponse.of(savedUser));
-	}
+        return ApiResponse.success(SignUpResponse.of(savedUser));
+    }
+
+    @PostMapping("/update")
+    public ApiResponse<UserResponse> update(@AuthenticationPrincipal Long userId, @RequestBody ModifyUserRequest request) {
+        User updatedUser = userService.update(userId, ModifyUserRequest.toModifyUser(request));
+
+        return ApiResponse.success(UserResponse.of(updatedUser));
+
+    }
 
 }
