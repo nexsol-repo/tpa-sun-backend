@@ -57,6 +57,30 @@ include::{snippets}/user-signup/request-fields.adoc[]
 include::{snippets}/user-signup/http-response.adoc[]
 include::{snippets}/user-signup/response-fields.adoc[]
 
+=== 내 정보 조회
+로그인된 사용자의 정보를 조회합니다.
+
+==== 요청
+include::{snippets}/user-me/http-request.adoc[]
+include::{snippets}/user-me/request-headers.adoc[]
+
+==== 응답
+include::{snippets}/user-me/http-response.adoc[]
+include::{snippets}/user-me/response-fields.adoc[]
+
+=== 내 정보 수정
+로그인된 사용자의 정보를 수정합니다.
+이메일 등 변경된 정보만 전송하면 부분 업데이트(PATCH)가 수행됩니다.
+
+==== 요청
+include::{snippets}/user-update/http-request.adoc[]
+include::{snippets}/user-update/request-headers.adoc[]
+include::{snippets}/user-update/request-fields.adoc[]
+
+==== 응답
+include::{snippets}/user-update/http-response.adoc[]
+include::{snippets}/user-update/response-fields.adoc[]
+
 == 시스템 (System)
 
 === 헬스 체크
