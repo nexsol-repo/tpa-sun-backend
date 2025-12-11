@@ -1,5 +1,8 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.support.PageResult;
+import com.nexsol.tpa.core.support.SortPage;
+
 import java.util.Optional;
 
 public interface InsuranceApplicationRepository {
@@ -11,5 +14,7 @@ public interface InsuranceApplicationRepository {
 	Optional<InsuranceApplication> findByApplicationNumber(String applicationNumber);
 
 	Optional<InsuranceApplication> findWritingApplication(Long userId);
+
+	PageResult<InsuranceApplication> findAllByUserId(Long userId, SortPage sortPage);
 
 }
