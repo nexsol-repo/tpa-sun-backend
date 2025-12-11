@@ -14,7 +14,6 @@ public class FileService {
 
 	private final FileStorageClient fileStorageClient;
 
-
 	public String generatePresignedUrl(String fileKey) {
 		if (fileKey == null || fileKey.isBlank()) {
 			return null;

@@ -46,6 +46,8 @@ public class InsuranceControllerTest extends RestDocsTest {
 
 	private final InsuranceApplicationService insuranceApplicationService = mock(InsuranceApplicationService.class);
 
+	private final FileService fileService = mock(FileService.class);
+
 	@BeforeEach
 	public void setUp(RestDocumentationContextProvider restDocumentation) {
 		// 1. @AuthenticationPrincipal 처리를 위한 커스텀 리졸버
@@ -64,7 +66,8 @@ public class InsuranceControllerTest extends RestDocsTest {
 		};
 
 		// 2. MockController 직접 빌드하여 부모 클래스(RestDocsTest)의 webTestClient 필드에 할당
-		this.webTestClient = MockMvcWebTestClient.bindToController(new InsuranceController(insuranceApplicationService))
+		this.webTestClient = MockMvcWebTestClient
+			.bindToController(new InsuranceController(insuranceApplicationService, fileService))
 			.customArgumentResolvers(authPrincipalResolver) // 리졸버 등록
 			.configureClient()
 			.filter(documentationConfiguration(restDocumentation)) // RestDocs 설정 적용
@@ -195,6 +198,8 @@ public class InsuranceControllerTest extends RestDocsTest {
 
 		given(insuranceApplicationService.getInsuranceApplication(userId, appId)).willReturn(mockApp);
 
+		given(fileService.generatePresignedUrl(anyString())).willReturn("https://s3.example.com/signed-url");
+
 		// when & then
 		webTestClient.get()
 			.uri("/v1/insurance/{applicationId}", appId)
@@ -213,6 +218,7 @@ public class InsuranceControllerTest extends RestDocsTest {
 	@Test
 	@DisplayName("Step 1. 청약 시작 (약관 동의)")
 	void start() {
+
 		Long userId = 1L;
 		// given
 		InsuranceStartRequest request = new InsuranceStartRequest(true, true, true, true, true);
@@ -600,7 +606,10 @@ public class InsuranceControllerTest extends RestDocsTest {
 				fieldWithPath(path + ".key").type(JsonFieldType.STRING).description("파일 식별자 Key").optional(),
 				fieldWithPath(path + ".originalFileName").type(JsonFieldType.STRING).description("원본 파일명").optional(),
 				fieldWithPath(path + ".size").type(JsonFieldType.NUMBER).description("파일 크기(Byte)").optional(),
-				fieldWithPath(path + ".extension").type(JsonFieldType.STRING).description("확장자").optional());
+				fieldWithPath(path + ".extension").type(JsonFieldType.STRING).description("확장자").optional(),
+				fieldWithPath(path + ".url").type(JsonFieldType.STRING)
+					.description("파일 다운로드 URL (Presigned URL)")
+					.optional());
 	}
 
 }
