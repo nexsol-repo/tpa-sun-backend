@@ -26,7 +26,7 @@ public class UserService {
     }
 
     public User signUp(NewUser newUser) {
-        EmailVerification verification = emailVerificationReader.read(newUser.applicantEmail(),
+        EmailVerification verification = emailVerificationReader.read(newUser.companyCode(),newUser.applicantEmail(),
                 EmailVerifiedType.SIGNUP);
 
         verification.validateSignup(LocalDateTime.now());

@@ -7,8 +7,7 @@ import com.nexsol.tpa.core.domain.AuthService;
 import com.nexsol.tpa.core.domain.AuthToken;
 import com.nexsol.tpa.core.domain.EmailVerifiedService;
 import com.nexsol.tpa.core.enums.EmailVerifiedType;
-import com.nexsol.tpa.core.error.CoreErrorType;
-import com.nexsol.tpa.core.error.CoreException;
+
 import com.nexsol.tpa.test.api.RestDocsTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +18,6 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import static com.nexsol.tpa.test.api.RestDocsUtils.requestPreprocessor;
 import static com.nexsol.tpa.test.api.RestDocsUtils.responsePreprocessor;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
 import static org.springframework.restdocs.cookies.CookieDocumentation.responseCookies;
@@ -32,13 +30,8 @@ public class AuthControllerTest extends RestDocsTest {
 
 	private final EmailVerifiedService emailVerifiedService = mock(EmailVerifiedService.class);
 
-	// [변경] WebTestClient는 내부 Codec이 자동으로 변환하므로 ObjectMapper 필드 제거 가능
-	// 만약 날짜 포맷팅 등 커스텀 설정이 필요하다면 Jackson 3 JsonMapper를 빈으로 등록하거나 설정을 추가해야 함
-
 	@BeforeEach
 	void setUp() {
-		// [변경] 부모 클래스(RestDocsTest)의 mockController 메서드를 사용해 webTestClient 초기화
-		// 기존 initController() 오버라이드 방식 대신 명시적으로 호출하는 방식을 추천 (이전 답변 기준)
 		this.webTestClient = mockController(new AuthController(authService, emailVerifiedService));
 	}
 
