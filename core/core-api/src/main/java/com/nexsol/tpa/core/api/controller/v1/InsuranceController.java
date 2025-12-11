@@ -21,6 +21,7 @@ import java.util.List;
 public class InsuranceController {
 
 	private final InsuranceApplicationService insuranceApplicationService;
+
 	private final FileService fileService;
 
 	@GetMapping("/{applicationId}")
