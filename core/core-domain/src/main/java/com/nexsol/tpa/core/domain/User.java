@@ -13,9 +13,12 @@ public record User(Long id, String companyCode, String companyName, String name,
 			.companyName(this.companyName)
 			.name(this.name)
 			.phoneNumber(this.phoneNumber)
-			.applicantName(modify.applicantName())
-			.applicantEmail(modify.applicantEmail())
-			.applicantPhoneNumber(modify.applicantPhoneNumber())
+			.applicantName(modify.applicantName() != null ? modify.applicantName() : this.applicantName)
+			.applicantEmail(modify.applicantEmail() != null ? modify.applicantEmail() : this.applicantEmail)
+			.applicantPhoneNumber(
+					modify.applicantPhoneNumber() != null ? modify.applicantPhoneNumber() : this.applicantPhoneNumber)
 			.build();
+
 	}
+
 }

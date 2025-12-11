@@ -12,8 +12,8 @@ public class EmailVerificationFinder {
 
 	private final EmailVerificationRepository emailVerificationRepository;
 
-	public Optional<EmailVerification> find(String email, EmailVerifiedType type) {
-		return emailVerificationRepository.findByEmailAndType(email, type);
+	public Optional<EmailVerification> find(String companyCode, String email, EmailVerifiedType type) {
+		return emailVerificationRepository.findByCompanyCodeAndEmailAndType(companyCode, email, type);
 	}
 
 }

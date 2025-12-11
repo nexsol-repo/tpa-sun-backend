@@ -56,7 +56,7 @@ public class AuthServiceTest {
 		AuthToken expectedToken = new AuthToken("access", "refresh", 3600, 12000);
 
 		given(userReader.read(companyCode, email)).willReturn(user);
-		given(emailVerificationReader.read(email, EmailVerifiedType.SIGNIN)).willReturn(verification);
+		given(emailVerificationReader.read(companyCode, email, EmailVerifiedType.SIGNIN)).willReturn(verification);
 		given(tokenIssuer.issue(user.id(), user.applicantEmail())).willReturn(expectedToken);
 
 		// when
@@ -84,7 +84,7 @@ public class AuthServiceTest {
 		given(userReader.read(any(), any())).willReturn(aUser().build());
 
 		EmailVerification verification = aVerification().code(code).build();
-		given(emailVerificationReader.read(any(), any())).willReturn(verification);
+		given(emailVerificationReader.read(any(), any(), any())).willReturn(verification);
 
 		// when & then
 		assertThatThrownBy(() -> authService.signIn("122-22-2222", "email", wrongCode))

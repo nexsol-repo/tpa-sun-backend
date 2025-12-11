@@ -7,8 +7,7 @@ import com.nexsol.tpa.core.domain.AuthService;
 import com.nexsol.tpa.core.domain.AuthToken;
 import com.nexsol.tpa.core.domain.EmailVerifiedService;
 import com.nexsol.tpa.core.enums.EmailVerifiedType;
-import com.nexsol.tpa.core.error.CoreErrorType;
-import com.nexsol.tpa.core.error.CoreException;
+
 import com.nexsol.tpa.test.api.RestDocsTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +18,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import static com.nexsol.tpa.test.api.RestDocsUtils.requestPreprocessor;
 import static com.nexsol.tpa.test.api.RestDocsUtils.responsePreprocessor;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
 import static org.springframework.restdocs.cookies.CookieDocumentation.responseCookies;
@@ -32,19 +31,18 @@ public class AuthControllerTest extends RestDocsTest {
 
 	private final EmailVerifiedService emailVerifiedService = mock(EmailVerifiedService.class);
 
-	// [변경] WebTestClient는 내부 Codec이 자동으로 변환하므로 ObjectMapper 필드 제거 가능
-	// 만약 날짜 포맷팅 등 커스텀 설정이 필요하다면 Jackson 3 JsonMapper를 빈으로 등록하거나 설정을 추가해야 함
-
 	@BeforeEach
 	void setUp() {
-		// [변경] 부모 클래스(RestDocsTest)의 mockController 메서드를 사용해 webTestClient 초기화
-		// 기존 initController() 오버라이드 방식 대신 명시적으로 호출하는 방식을 추천 (이전 답변 기준)
 		this.webTestClient = mockController(new AuthController(authService, emailVerifiedService));
 	}
 
 	@Test
 	@DisplayName("로그인 API 문서화")
 	public void login() {
+		String companyCode = "123-45-67890";
+		String email = "test@nexsol.com";
+		String code = "123456";
+
 		// given
 		AuthToken mockToken = AuthToken.builder()
 			.accessToken("access-token-sample")
@@ -53,7 +51,7 @@ public class AuthControllerTest extends RestDocsTest {
 			.refreshTokenExpiration(1209600)
 			.build();
 
-		when(authService.signIn(any(), any(), any())).thenReturn(mockToken);
+		given(authService.signIn(eq(companyCode), eq(email), eq(code))).willReturn(mockToken);
 
 		SignInRequest request = new SignInRequest("123-45-67890", "test@nexsol.com", "123456");
 
@@ -115,9 +113,10 @@ public class AuthControllerTest extends RestDocsTest {
 	@DisplayName("이메일 인증코드 검증 API 문서화")
 	void emailVerify() {
 		// given
-		EmailVerifyRequest request = new EmailVerifyRequest("test@nexsol.com", "123456", EmailVerifiedType.SIGNUP);
+		EmailVerifyRequest request = new EmailVerifyRequest("123-45-67890", "test@nexsol.com", "123456",
+				EmailVerifiedType.SIGNUP);
 
-		doNothing().when(emailVerifiedService).verifyCode(any(), any(), any());
+		doNothing().when(emailVerifiedService).verifyCode(any(), any(), any(), any());
 
 		// when & then
 		webTestClient.post()
@@ -129,7 +128,8 @@ public class AuthControllerTest extends RestDocsTest {
 			.isOk()
 			.expectBody()
 			.consumeWith(document("auth-email-verify", requestPreprocessor(), responsePreprocessor(),
-					requestFields(fieldWithPath("email").type(JsonFieldType.STRING).description("이메일 주소"),
+					requestFields(fieldWithPath("companyCode").type(JsonFieldType.STRING).description("사업자번호"),
+							fieldWithPath("email").type(JsonFieldType.STRING).description("이메일 주소"),
 							fieldWithPath("code").type(JsonFieldType.STRING).description("인증 코드"),
 							fieldWithPath("type").type(JsonFieldType.STRING).description("인증 타입 (SIGNUP, SIGNIN)")),
 					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 상태 (SUCCESS)"),

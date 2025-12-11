@@ -22,10 +22,10 @@ public class AuthService {
 
 	private final EmailVerificationReader emailVerificationReader;
 
-	public AuthToken signIn(String CompanyCode, String email, String code) {
-		User user = userReader.read(CompanyCode, email);
+	public AuthToken signIn(String companyCode, String email, String code) {
+		User user = userReader.read(companyCode, email);
 
-		EmailVerification verification = emailVerificationReader.read(email, EmailVerifiedType.SIGNIN);
+		EmailVerification verification = emailVerificationReader.read(companyCode, email, EmailVerifiedType.SIGNIN);
 
 		verification.checkCodeForLogin(code, LocalDateTime.now());
 

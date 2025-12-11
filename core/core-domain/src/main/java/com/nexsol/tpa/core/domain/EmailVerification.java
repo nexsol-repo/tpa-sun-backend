@@ -8,7 +8,7 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record EmailVerification(String email, String code, boolean isVerified, int attemptCount,
+public record EmailVerification(String companyCode, String email, String code, boolean isVerified, int attemptCount,
 		EmailVerifiedType verifiedType, LocalDateTime sentAt, LocalDateTime expiredAt, LocalDateTime verifiedAt) {
 
 	public EmailVerification verify(String inputCode, LocalDateTime now) {
@@ -20,6 +20,7 @@ public record EmailVerification(String email, String code, boolean isVerified, i
 		}
 
 		return EmailVerification.builder()
+			.companyCode(this.companyCode)
 			.email(this.email)
 			.code(this.code)
 			.isVerified(true)
@@ -37,7 +38,18 @@ public record EmailVerification(String email, String code, boolean isVerified, i
 			throw new CoreException(CoreErrorType.EMAIL_VERIFIED_AUTH);
 		}
 
-		if (this.verifiedAt.isBefore(now.minusMinutes(60))) {
+		if (this.verifiedAt.isBefore(now.minusMinutes(10))) {
+			throw new CoreException(CoreErrorType.EMAIL_VERIFIED_OVERTIME);
+		}
+	}
+
+	public void validateUpdate(LocalDateTime now) {
+
+		if (!this.isVerified) {
+			throw new CoreException(CoreErrorType.EMAIL_VERIFIED_AUTH);
+		}
+
+		if (this.verifiedAt.isBefore(now.minusMinutes(10))) {
 			throw new CoreException(CoreErrorType.EMAIL_VERIFIED_OVERTIME);
 		}
 	}

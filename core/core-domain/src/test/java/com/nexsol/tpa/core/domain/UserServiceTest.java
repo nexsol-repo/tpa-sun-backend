@@ -46,7 +46,7 @@ public class UserServiceTest {
 		// [Fixture] 인증 안 된 상태(isVerified=false) 생성
 		EmailVerification unverifiedEmail = aVerification().email(newUser.applicantEmail()).isVerified(false).build();
 
-		given(emailVerificationReader.read(newUser.applicantEmail(), EmailVerifiedType.SIGNUP))
+		given(emailVerificationReader.read(newUser.companyCode(), newUser.applicantEmail(), EmailVerifiedType.SIGNUP))
 			.willReturn(unverifiedEmail);
 
 		// when & then
@@ -71,7 +71,7 @@ public class UserServiceTest {
 			.verifiedAt(past)
 			.build();
 
-		given(emailVerificationReader.read(newUser.applicantEmail(), EmailVerifiedType.SIGNUP))
+		given(emailVerificationReader.read(newUser.companyCode(), newUser.applicantEmail(), EmailVerifiedType.SIGNUP))
 			.willReturn(expiredVerification);
 
 		// when & then
