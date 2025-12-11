@@ -14,6 +14,15 @@ public class FileService {
 
 	private final FileStorageClient fileStorageClient;
 
+
+	public String generatePresignedUrl(String fileKey) {
+		if (fileKey == null || fileKey.isBlank()) {
+			return null;
+		}
+
+		return fileStorageClient.generatePresignedUrl(fileKey);
+	}
+
 	public DocumentFile uploadInsurance(Long userId, InputStream inputStream, String originalFileName, long size,
 			String contentType) {
 		String extension = getExtension(originalFileName);
