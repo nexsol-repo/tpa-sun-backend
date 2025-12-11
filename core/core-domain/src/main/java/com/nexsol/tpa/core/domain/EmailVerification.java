@@ -37,7 +37,18 @@ public record EmailVerification(String email, String code, boolean isVerified, i
 			throw new CoreException(CoreErrorType.EMAIL_VERIFIED_AUTH);
 		}
 
-		if (this.verifiedAt.isBefore(now.minusMinutes(60))) {
+		if (this.verifiedAt.isBefore(now.minusMinutes(10))) {
+			throw new CoreException(CoreErrorType.EMAIL_VERIFIED_OVERTIME);
+		}
+	}
+
+	public void validateUpdate(LocalDateTime now) {
+
+		if (!this.isVerified) {
+			throw new CoreException(CoreErrorType.EMAIL_VERIFIED_AUTH);
+		}
+
+		if (this.verifiedAt.isBefore(now.minusMinutes(10))) {
 			throw new CoreException(CoreErrorType.EMAIL_VERIFIED_OVERTIME);
 		}
 	}

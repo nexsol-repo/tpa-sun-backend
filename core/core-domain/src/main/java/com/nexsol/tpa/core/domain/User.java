@@ -2,6 +2,7 @@ package com.nexsol.tpa.core.domain;
 
 import lombok.Builder;
 
+
 @Builder
 public record User(Long id, String companyCode, String companyName, String name, String phoneNumber,
 		String applicantName, String applicantEmail, String applicantPhoneNumber) {
@@ -18,4 +19,6 @@ public record User(Long id, String companyCode, String companyName, String name,
 			.applicantPhoneNumber(modify.applicantPhoneNumber())
 			.build();
 	}
+
+
 }
