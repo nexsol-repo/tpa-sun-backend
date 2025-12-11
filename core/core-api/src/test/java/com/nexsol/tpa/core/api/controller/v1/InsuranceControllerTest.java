@@ -5,6 +5,8 @@ import com.nexsol.tpa.core.domain.*;
 import com.nexsol.tpa.core.enums.BondSendStatus;
 import com.nexsol.tpa.core.enums.InsuranceDocumentType;
 import com.nexsol.tpa.core.enums.InsuranceStatus;
+import com.nexsol.tpa.core.support.PageResult;
+import com.nexsol.tpa.core.support.SortPage;
 import com.nexsol.tpa.test.api.RestDocsTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,8 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.document;
 import static org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.documentationConfiguration;
 
@@ -79,6 +80,92 @@ public class InsuranceControllerTest extends RestDocsTest {
 			.createdAt(LocalDateTime.now())
 			.updatedAt(LocalDateTime.now())
 			.build();
+	}
+
+	@Test
+	@DisplayName("마이페이지 보험 가입 내역 리스트 조회")
+	void getMyList() {
+		// given
+		Long userId = 1L;
+
+		// Mock Data 생성 (InsuranceListResponse 매핑을 위한 데이터 포함)
+		InsuranceApplication app = InsuranceApplication.builder()
+			.id(1L)
+			.applicationNumber("2025-APP-001")
+			.userId(userId)
+			.status(InsuranceStatus.COMPLETED)
+			.plant(InsurancePlant.builder().name("해운대 햇살 발전소").build()) // 발전소명
+			.applicant(Applicant.builder().applicantName("홍길동").build()) // 신청자명
+			.quote(PremiumQuote.builder().totalPremium(1250000L).build()) // 납입 보험료
+			.condition(JoinCondition.builder().startDate(LocalDate.of(2025, 1, 1)).build()) // 보험
+			// 시작일
+			.createdAt(LocalDateTime.now())
+			.updatedAt(LocalDateTime.now()) // 결제일(예시)
+			.build();
+
+		List<InsuranceApplication> content = List.of(app);
+		PageResult<InsuranceApplication> pageResult = new PageResult<>(content, 1L, 1, 0, false);
+
+		// Service Mocking
+		given(insuranceApplicationService.getList(eq(userId), any(SortPage.class))).willReturn(pageResult);
+
+		// when & then
+		webTestClient.get()
+			.uri(uriBuilder -> uriBuilder.path("/v1/insurance/me")
+				.queryParam("page", "0")
+				.queryParam("size", "10")
+				.queryParam("sort", "createdAt")
+				.queryParam("direction", "DESC")
+				.build())
+			.header("Authorization", "Bearer {ACCESS_TOKEN}")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.consumeWith(document("insurance-my-list", requestPreprocessor(), responsePreprocessor(),
+					requestHeaders(headerWithName("Authorization").description("Bearer Access Token (필수)")),
+					queryParameters(parameterWithName("page").description("페이지 번호 (0부터 시작)"),
+							parameterWithName("size").description("페이지 크기 (기본 10)"),
+							parameterWithName("sort").description("정렬 필드").optional(),
+							parameterWithName("direction").description("정렬 방향").optional()),
+					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 상태"),
+							// PageResponse 필드
+							fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("가입 내역 리스트"),
+							fieldWithPath("data.totalElements").type(JsonFieldType.NUMBER).description("전체 데이터 수"),
+							fieldWithPath("data.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+							fieldWithPath("data.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
+							fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
+
+							// InsuranceListResponse 필드 (content 배열 내부)
+							fieldWithPath("data.content[].applicationId").type(JsonFieldType.NUMBER)
+								.description("청약서 ID"),
+							fieldWithPath("data.content[].applicationNumber").type(JsonFieldType.STRING)
+								.description("청약 번호"),
+							fieldWithPath("data.content[].plantName").type(JsonFieldType.STRING)
+								.description("발전소명")
+								.optional(),
+							fieldWithPath("data.content[].status").type(JsonFieldType.STRING).description("진행 상태"),
+							fieldWithPath("data.content[].applicantName").type(JsonFieldType.STRING)
+								.description("신청자명")
+								.optional(),
+							fieldWithPath("data.content[].totalPremium").type(JsonFieldType.NUMBER)
+								.description("납입 보험료")
+								.optional(),
+							fieldWithPath("data.content[].nextStep").type(JsonFieldType.NUMBER)
+								.description("작성 스텝 단계")
+								.optional(),
+
+							fieldWithPath("data.content[].startDate").type(JsonFieldType.STRING)
+								.description("보험 시작일")
+								.optional(),
+							fieldWithPath("data.content[].endDate").type(JsonFieldType.STRING)
+								.description("보험 종료일 (시작일 + 1년)")
+								.optional(),
+							fieldWithPath("data.content[].paymentDate").type(JsonFieldType.STRING)
+								.description("결제일 (가입완료 시)")
+								.optional(),
+
+							fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보"))));
 	}
 
 	@Test
