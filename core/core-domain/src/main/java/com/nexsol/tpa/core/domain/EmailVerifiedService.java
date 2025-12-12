@@ -33,6 +33,7 @@ public class EmailVerifiedService {
 		String newCode = emailGenerateCode.generateCode();
 
 		EmailVerification verification = EmailVerification.builder()
+			.companyCode(companyCode)
 			.email(email)
 			.code(newCode)
 			.isVerified(false)

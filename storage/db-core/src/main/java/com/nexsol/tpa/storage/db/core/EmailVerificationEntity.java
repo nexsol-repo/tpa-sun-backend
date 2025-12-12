@@ -39,6 +39,7 @@ public class EmailVerificationEntity extends BaseEntity {
 
 	public static EmailVerificationEntity fromDomain(EmailVerification verification) {
 		EmailVerificationEntity entity = new EmailVerificationEntity();
+		entity.companyCode = verification.companyCode();
 		entity.email = verification.email();
 		entity.code = verification.code();
 		entity.isVerified = verification.isVerified();
