@@ -67,6 +67,10 @@ public class InsuranceApplicationEntity extends BaseEntity {
 		if (domain.quote() != null) {
 			this.quoteInfo = new QuoteEmbeddable(domain.quote());
 		}
+
+		if (domain.plant() != null) {
+			this.plantInfo = new InsurancePlantEmbeddable(domain.plant());
+		}
 	}
 
 	public InsuranceApplication toDomain(JoinCondition condition, InsuranceDocument documents) {
