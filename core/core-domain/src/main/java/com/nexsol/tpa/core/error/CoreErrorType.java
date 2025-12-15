@@ -32,6 +32,7 @@ public enum CoreErrorType {
 	INSURANCE_RATE_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T3003, "요율 정보가 없습니다.", CoreErrorLevel.INFO),
 	INSURANCE_USER_UNAUTHORIZED(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T3004, "해당 청약서에 대한 접근 권한이 없습니다",
 			CoreErrorLevel.INFO),
+	INSURANCE_NOT_COMPLETED(CoreErrorKind.SERVER_ERROR,CoreErrorCode.T3005,"가입이 완료된 보험만 사고접수가 가능합니다.",CoreErrorLevel.INFO),
 
 	// FileUpload
 	FILE_UPLOAD_VALIDATION_KEY(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T4000, "파일 키는 필수 입니다.", CoreErrorLevel.INFO),

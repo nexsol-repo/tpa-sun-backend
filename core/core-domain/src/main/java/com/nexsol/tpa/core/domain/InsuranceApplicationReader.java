@@ -1,11 +1,14 @@
 package com.nexsol.tpa.core.domain;
 
+import com.nexsol.tpa.core.enums.InsuranceStatus;
 import com.nexsol.tpa.core.error.CoreErrorType;
 import com.nexsol.tpa.core.error.CoreException;
 import com.nexsol.tpa.core.support.PageResult;
 import com.nexsol.tpa.core.support.SortPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +23,10 @@ public class InsuranceApplicationReader {
 
 	public PageResult<InsuranceApplication> readAll(Long userId, SortPage sortPage) {
 		return insuranceApplicationRepository.findAllByUserId(userId, sortPage);
+	}
+
+	public List<InsuranceApplication> readAllCompleted(Long userId) {
+		return insuranceApplicationRepository.findAllByUserIdAndStatus(userId, InsuranceStatus.COMPLETED);
 	}
 
 }
