@@ -172,6 +172,48 @@ public class InsuranceControllerTest extends RestDocsTest {
 	}
 
 	@Test
+	@DisplayName("사고 접수용 가입 완료 발전소 목록 조회 (Select Box)")
+	void getCompletedOptions() {
+		// given
+		Long userId = 1L;
+
+		// Mocking Data: 가벼운 객체 생성 (plantInfo, quoteInfo 등 복잡한 객체 불필요)
+		InsuranceApplication app1 = InsuranceApplication.builder()
+			.id(101L)
+			.plant(InsurancePlant.builder().name("해운대 1호기").build())
+			.status(InsuranceStatus.COMPLETED)
+			.build();
+
+		InsuranceApplication app2 = InsuranceApplication.builder()
+			.id(102L)
+			.plant(InsurancePlant.builder().name("나주 2호기").build())
+			.status(InsuranceStatus.COMPLETED)
+			.build();
+
+		given(insuranceApplicationService.getCompletedList(userId)).willReturn(List.of(app1, app2));
+
+		// when & then
+		webTestClient.get()
+			.uri("/v1/insurance/options/completed")
+			.header("Authorization", "Bearer {ACCESS_TOKEN}")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.consumeWith(document("insurance-options-completed", requestPreprocessor(), responsePreprocessor(),
+					requestHeaders(headerWithName("Authorization").description("Bearer Access Token")),
+					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 상태"),
+
+							// 리스트 응답
+							fieldWithPath("data[]").type(JsonFieldType.ARRAY).description("가입 완료된 보험 목록"),
+							fieldWithPath("data[].applicationId").type(JsonFieldType.NUMBER)
+								.description("계약 ID (Value)"),
+							fieldWithPath("data[].plantName").type(JsonFieldType.STRING).description("발전소명 (Label)"),
+
+							fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보"))));
+	}
+
+	@Test
 	@DisplayName("청약서 상세 조회 (이어하기)")
 	void getApplication() {
 		// given
@@ -571,14 +613,12 @@ public class InsuranceControllerTest extends RestDocsTest {
 				fieldWithPath(prefix + ".startDate").type(JsonFieldType.STRING).description("보험 개시일").optional(),
 
 				// 사고 이력 (리스트)
-				fieldWithPath(prefix + ".accidents").type(JsonFieldType.ARRAY).description("사고 이력 리스트").optional(),
-				fieldWithPath(prefix + ".accidents[].date").type(JsonFieldType.STRING).description("사고 일자").optional(),
-				fieldWithPath(prefix + ".accidents[].paymentAmount").type(JsonFieldType.NUMBER)
+				fieldWithPath(prefix + ".accident").type(JsonFieldType.OBJECT).description("사고 이력 정보").optional(),
+				fieldWithPath(prefix + ".accident.date").type(JsonFieldType.STRING).description("사고 일자").optional(),
+				fieldWithPath(prefix + ".accident.paymentAmount").type(JsonFieldType.NUMBER)
 					.description("사고 보험금")
 					.optional(),
-				fieldWithPath(prefix + ".accidents[].content").type(JsonFieldType.STRING)
-					.description("사고 내용")
-					.optional(),
+				fieldWithPath(prefix + ".accident.content").type(JsonFieldType.STRING).description("사고 내용").optional(),
 
 				// 질권 설정 (객체)
 				fieldWithPath(prefix + ".pledge").type(JsonFieldType.OBJECT).description("질권 설정 정보").optional(),

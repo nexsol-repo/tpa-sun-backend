@@ -5,6 +5,8 @@ import com.nexsol.tpa.core.support.SortPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class InsuranceApplicationService {
@@ -27,6 +29,10 @@ public class InsuranceApplicationService {
 
 	public PageResult<InsuranceApplication> getList(Long userId, SortPage sortPage) {
 		return applicationReader.readAll(userId, sortPage);
+	}
+
+	public List<InsuranceApplication> getCompletedList(Long userId) {
+		return applicationReader.readAllCompleted(userId);
 	}
 
 	public InsuranceApplication saveInit(Long userId, Agreement agreement) {

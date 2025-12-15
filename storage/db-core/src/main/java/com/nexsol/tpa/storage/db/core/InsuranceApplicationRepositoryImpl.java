@@ -52,13 +52,10 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 			// [Accident] 사고 이력 저장 (Full Replace 전략: 삭제 후 재저장)
 			accidentHistoryJpaRepository.deleteByApplicationId(applicationId);
 
-			if (application.condition().hasAccidents()) {
-				List<AccidentHistoryEntity> accidentHistoryEntities = application.condition()
-					.accidents()
-					.stream()
-					.map(accident -> AccidentHistoryEntity.fromDomain(accident, applicationId))
-					.toList();
-				accidentHistoryJpaRepository.saveAll(accidentHistoryEntities);
+			if (application.condition().hasAccident()) {
+				Accident accident = application.condition().accident();
+				AccidentHistoryEntity historyEntity = AccidentHistoryEntity.fromDomain(accident, applicationId);
+				accidentHistoryJpaRepository.save(historyEntity);
 			}
 		}
 
@@ -87,11 +84,11 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 		Optional<InsuranceConditionEntity> conditionEntityOptional = conditionJpaRepository.findByApplicationId(id);
 
 		if (conditionEntityOptional.isPresent()) {
-			List<Accident> accidents = accidentHistoryJpaRepository.findByApplicationId(id)
-				.stream()
+			Accident accident = accidentHistoryJpaRepository.findByApplicationId(id)
 				.map(AccidentHistoryEntity::toDomain)
-				.toList();
-			joinCondition = conditionEntityOptional.get().toDomain(accidents);
+				.orElse(null);
+
+			joinCondition = conditionEntityOptional.get().toDomain(accident);
 		}
 		InsuranceDocument insuranceDocument = loadDocuments(id);
 
@@ -127,6 +124,14 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 
 		return new PageResult<>(content, entityPage.getTotalElements(), entityPage.getTotalPages(),
 				entityPage.getNumber(), entityPage.hasNext());
+	}
+
+	@Override
+	public List<InsuranceApplication> findAllByUserIdAndStatus(Long userId, InsuranceStatus status) {
+		List<InsuranceApplicationEntity> entities = applicationJpaRepository.findAllByUserIdAndInsuranceStatus(userId,
+				status);
+
+		return entities.stream().map(entity -> entity.toDomain(null, null)).toList();
 	}
 
 	private Pageable toJpaPageable(SortPage sortPage) {

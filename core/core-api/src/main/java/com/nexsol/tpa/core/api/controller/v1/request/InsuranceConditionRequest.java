@@ -27,15 +27,15 @@ public record InsuranceConditionRequest(@NotNull Boolean essInstalled, Long prop
 			.businessInterruptionAmount(businessInterruptionAmount)
 			.liabilityAmount(liabilityAmount)
 			.startDate(startDate)
-			.accidents(resolveAccidents())
+			.accident(resolveAccident())
 			.pledge(resolvePledge())
 			.build();
 	}
 
-	private List<Accident> resolveAccidents() {
+	private Accident resolveAccident() {
 		if (this.accident == null)
-			return Collections.emptyList();
-		return List.of(this.accident.toAccident());
+			return null;
+		return this.accident.toAccident();
 	}
 
 	private Pledge resolvePledge() {

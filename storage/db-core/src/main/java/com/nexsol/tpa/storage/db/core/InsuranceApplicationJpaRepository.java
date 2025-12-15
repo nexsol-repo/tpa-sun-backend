@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface InsuranceApplicationJpaRepository extends JpaRepository<InsuranceApplicationEntity, Long> {
@@ -13,6 +14,8 @@ public interface InsuranceApplicationJpaRepository extends JpaRepository<Insuran
 	Optional<InsuranceApplicationEntity> findByApplicationNumber(String applicationNumber);
 
 	Optional<InsuranceApplicationEntity> findByUserIdAndStatus(Long userId, InsuranceStatus status);
+
+	List<InsuranceApplicationEntity> findAllByUserIdAndInsuranceStatus(Long userId, InsuranceStatus insuranceStatus);
 
 	Page<InsuranceApplicationEntity> findByUserId(Long userId, Pageable pageable);
 

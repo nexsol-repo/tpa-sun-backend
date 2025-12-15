@@ -61,7 +61,7 @@ public class InsuranceConditionEntity extends BaseEntity {
 		}
 	}
 
-	public JoinCondition toDomain(List<Accident> accidents) {
+	public JoinCondition toDomain(Accident accident) {
 		return JoinCondition.builder()
 			.essInstalled(essInstalled)
 			.propertyDamageAmount(propertyDamageAmount)
@@ -70,7 +70,7 @@ public class InsuranceConditionEntity extends BaseEntity {
 			.businessInterruptionAmount(businessInterruptionAmount)
 			.startDate(startDate)
 			.pledge(pledge != null ? pledge.toDomain() : null)
-			.accidents(accidents) // 별도 조회한 사고 이력 주입
+			.accident(accident) // 별도 조회한 사고 이력 주입
 			.build();
 	}
 
