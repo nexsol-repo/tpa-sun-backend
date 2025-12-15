@@ -129,6 +129,15 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 				entityPage.getNumber(), entityPage.hasNext());
 	}
 
+	@Override
+	public List<InsuranceApplication> findAllByUserIdAndStatus(Long userId, InsuranceStatus status) {
+		List<InsuranceApplicationEntity> entities = applicationJpaRepository.findAllByUserIdAndInsuranceStatus(userId, status);
+
+		return entities.stream()
+				.map(entity -> entity.toDomain(null, null))
+				.toList();
+	}
+
 	private Pageable toJpaPageable(SortPage sortPage) {
 		if (sortPage.sort() == null) {
 			return PageRequest.of(sortPage.page(), sortPage.size(), Sort.by(Sort.Direction.DESC, "createdAt"));
