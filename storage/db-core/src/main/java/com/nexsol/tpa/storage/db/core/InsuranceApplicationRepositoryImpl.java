@@ -96,16 +96,12 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 	}
 
 	@Override
-	public Optional<InsuranceApplication> findByApplicationNumber(String applicationNumber) {
-		return applicationJpaRepository.findByApplicationNumber(applicationNumber)
-			.flatMap(entity -> findById(entity.getId()));
+	public List<InsuranceApplication> findAllById(List<Long> ids) {
+		return applicationJpaRepository.findAllById(ids).stream()
+				.map(entity -> entity.toDomain(null, null))
+				.toList();
 	}
 
-	@Override
-	public Optional<InsuranceApplication> findWritingApplication(Long userId) {
-		return applicationJpaRepository.findByUserIdAndStatus(userId, InsuranceStatus.PENDING)
-			.flatMap(entity -> findById(entity.getId()));
-	}
 
 	@Override
 	public PageResult<InsuranceApplication> findAllByUserId(Long userId, SortPage sortPage) {

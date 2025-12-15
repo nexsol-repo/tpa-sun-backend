@@ -545,6 +545,7 @@ public class InsuranceControllerTest extends RestDocsTest {
 		fields.addAll(generateFileDescriptors("data.documentInfo.preUseInspection", "사용전 검사 확인증"));
 		fields.addAll(generateFileDescriptors("data.documentInfo.supplyCertificate", "공급인증서"));
 		fields.addAll(generateFileDescriptors("data.documentInfo.etc", "기타 서류"));
+		fields.addAll(generateFileDescriptors("data.documentInfo.signature", "전자서명"));
 
 		fields.add(fieldWithPath("error").type(JsonFieldType.STRING).optional().description("에러 정보"));
 
@@ -624,7 +625,7 @@ public class InsuranceControllerTest extends RestDocsTest {
 				fieldWithPath(prefix + ".pledge").type(JsonFieldType.OBJECT).description("질권 설정 정보").optional(),
 				fieldWithPath(prefix + ".pledge.bankName").type(JsonFieldType.STRING).description("질권 은행명").optional(),
 				fieldWithPath(prefix + ".pledge.managerName").type(JsonFieldType.STRING).description("담당자명").optional(),
-				fieldWithPath(prefix + ".pledge.phone").type(JsonFieldType.STRING).description("담당자 연락처").optional(),
+				fieldWithPath(prefix + ".pledge.managerPhone").type(JsonFieldType.STRING).description("담당자 연락처").optional(),
 				fieldWithPath(prefix + ".pledge.amount").type(JsonFieldType.NUMBER).description("질권 금액").optional(),
 				fieldWithPath(prefix + ".pledge.address").type(JsonFieldType.STRING).description("질권 주소").optional(),
 				fieldWithPath(prefix + ".pledge.bondStatus").type(JsonFieldType.STRING)

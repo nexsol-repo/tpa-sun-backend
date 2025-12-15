@@ -10,7 +10,7 @@ public record PledgeRequest(String bankName, String managerName, String managerP
 		return Pledge.builder()
 			.bankName(bankName)
 			.managerName(managerName)
-			.phone(managerPhone)
+			.managerPhone(managerPhone)
 			.amount(amount)
 			.address(address)
 			.bondSendStatus(bondStatus)
