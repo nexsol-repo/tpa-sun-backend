@@ -7,18 +7,14 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record AccidentReportResponse(
-        Long reportId,
-        Long applicationId,
-        AccidentStatus status,
-        LocalDateTime reportedAt
-) {
-    public static AccidentReportResponse of(AccidentReport report) {
-        return AccidentReportResponse.builder()
-                .reportId(report.id())
-                .applicationId(report.applicationId())
-                .status(report.status())
-                .reportedAt(report.reportedAt())
-                .build();
-    }
+public record AccidentReportResponse(Long reportId, Long applicationId, AccidentStatus status,
+		LocalDateTime reportedAt) {
+	public static AccidentReportResponse of(AccidentReport report) {
+		return AccidentReportResponse.builder()
+			.reportId(report.id())
+			.applicationId(report.applicationId())
+			.status(report.status())
+			.reportedAt(report.reportedAt())
+			.build();
+	}
 }

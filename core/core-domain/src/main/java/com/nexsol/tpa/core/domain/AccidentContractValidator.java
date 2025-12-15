@@ -9,17 +9,19 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AccidentContractValidator {
-    private final InsuranceApplicationReader applicationReader;
 
-    public void validate(Long userId, Long applicationId){
-        InsuranceApplication application = applicationReader.read(applicationId);
+	private final InsuranceApplicationReader applicationReader;
 
-        if(!application.userId().equals(userId)){
-            throw new CoreException(CoreErrorType.INSURANCE_USER_UNAUTHORIZED);
-        }
+	public void validate(Long userId, Long applicationId) {
+		InsuranceApplication application = applicationReader.read(applicationId);
 
-        if(application.status()!= InsuranceStatus.COMPLETED){
-            throw new CoreException(CoreErrorType.INSURANCE_NOT_COMPLETED);
-        }
-    }
+		if (!application.userId().equals(userId)) {
+			throw new CoreException(CoreErrorType.INSURANCE_USER_UNAUTHORIZED);
+		}
+
+		if (application.status() != InsuranceStatus.COMPLETED) {
+			throw new CoreException(CoreErrorType.INSURANCE_NOT_COMPLETED);
+		}
+	}
+
 }

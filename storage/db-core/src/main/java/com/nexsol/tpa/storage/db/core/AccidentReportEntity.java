@@ -13,36 +13,44 @@ import java.time.LocalDateTime;
 @Table(name = "accident_report")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AccidentReportEntity extends BaseEntity{
-    private Long userId;
-    private Long applicationId;
+public class AccidentReportEntity extends BaseEntity {
 
-    @Enumerated(EnumType.STRING)
-    private AccidentStatus accidentStatus;
+	private Long userId;
 
-    private LocalDateTime reportedAt;
+	@Column(nullable = false, unique = true)
+	private String accidentNumber;
 
-    @Embedded
-    private AccidentInfoEmbeddable accidentInfo;
+	private Long applicationId;
 
-    public static AccidentReportEntity from(AccidentReport domain) {
-        AccidentReportEntity entity = new AccidentReportEntity();
-        entity.userId = domain.userId();
-        entity.applicationId = domain.applicationId();
-        entity.accidentStatus = domain.status();
-        entity.reportedAt = domain.reportedAt();
-        entity.accidentInfo = new AccidentInfoEmbeddable(domain.accidentInfo());
-        return entity;
-    }
+	@Enumerated(EnumType.STRING)
+	private AccidentStatus accidentStatus;
 
-    public AccidentReport toDomain() {
-        return AccidentReport.builder()
-                .id(this.getId())
-                .userId(this.userId)
-                .applicationId(this.applicationId)
-                .status(this.accidentStatus)
-                .reportedAt(this.reportedAt)
-                .accidentInfo(this.accidentInfo != null ? this.accidentInfo.toDomain() : null)
-                .build();
-    }
+	private LocalDateTime reportedAt;
+
+	@Embedded
+	private AccidentInfoEmbeddable accidentInfo;
+
+	public static AccidentReportEntity from(AccidentReport domain) {
+		AccidentReportEntity entity = new AccidentReportEntity();
+		entity.userId = domain.userId();
+		entity.accidentNumber = domain.accidentNumber();
+		entity.applicationId = domain.applicationId();
+		entity.accidentStatus = domain.status();
+		entity.reportedAt = domain.reportedAt();
+		entity.accidentInfo = new AccidentInfoEmbeddable(domain.accidentInfo());
+		return entity;
+	}
+
+	public AccidentReport toDomain() {
+		return AccidentReport.builder()
+			.id(this.getId())
+			.userId(this.userId)
+			.accidentNumber(this.accidentNumber)
+			.applicationId(this.applicationId)
+			.status(this.accidentStatus)
+			.reportedAt(this.reportedAt)
+			.accidentInfo(this.accidentInfo != null ? this.accidentInfo.toDomain() : null)
+			.build();
+	}
+
 }

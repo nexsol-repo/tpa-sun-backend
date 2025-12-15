@@ -20,4 +20,5 @@ public interface InsuranceApplicationRepository {
 	PageResult<InsuranceApplication> findAllByUserId(Long userId, SortPage sortPage);
 
 	List<InsuranceApplication> findAllByUserIdAndStatus(Long userId, InsuranceStatus status);
+
 }

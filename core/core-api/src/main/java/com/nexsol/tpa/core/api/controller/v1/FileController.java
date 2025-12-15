@@ -28,6 +28,15 @@ public class FileController {
 		return ApiResponse.success(FileResponse.of(uploadedFile));
 	}
 
+	@PostMapping("/accident")
+	public ApiResponse<FileResponse> uploadAccident(@AuthenticationPrincipal Long userId,
+			@RequestPart("file") MultipartFile file) throws IOException {
+		DocumentFile uploadedFile = fileService.uploadAccident(userId, file.getInputStream(),
+				file.getOriginalFilename(), file.getSize(), file.getContentType());
+
+		return ApiResponse.success(FileResponse.of(uploadedFile));
+	}
+
 	@PostMapping("/signature")
 	public ApiResponse<FileResponse> uploadSignature(@AuthenticationPrincipal Long userId,
 			@RequestPart("file") MultipartFile file) throws IOException {

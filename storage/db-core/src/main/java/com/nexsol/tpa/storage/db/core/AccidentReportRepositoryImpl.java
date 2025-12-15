@@ -11,37 +11,36 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class AccidentReportRepositoryImpl implements AccidentReportRepository {
-    private final AccidentReportJpaRepository reportJpaRepository;
-    private final AccidentAttachmentJpaRepository attachmentJpaRepository;
 
-    @Override
-    @Transactional
-    public AccidentReport save(AccidentReport report) {
+	private final AccidentReportJpaRepository reportJpaRepository;
 
-        AccidentReportEntity reportEntity = AccidentReportEntity.from(report);
-        AccidentReportEntity savedReportEntity = reportJpaRepository.save(reportEntity);
-        Long reportId = savedReportEntity.getId();
-        if (report.attachments() != null && !report.attachments().isEmpty()) {
-            List<AccidentAttachmentEntity> attachmentEntities = report.attachments().stream()
-                    .map(att -> AccidentAttachmentEntity.from(att, reportId))
-                    .toList();
-            attachmentJpaRepository.saveAll(attachmentEntities);
-        }
+	private final AccidentAttachmentJpaRepository attachmentJpaRepository;
 
+	@Override
+	@Transactional
+	public AccidentReport save(AccidentReport report) {
 
-        return savedReportEntity.toDomain().toBuilder()
-                .attachments(report.attachments())
-                .build();
-    }
+		AccidentReportEntity reportEntity = AccidentReportEntity.from(report);
+		AccidentReportEntity savedReportEntity = reportJpaRepository.save(reportEntity);
+		Long reportId = savedReportEntity.getId();
+		if (report.attachments() != null && !report.attachments().isEmpty()) {
+			List<AccidentAttachmentEntity> attachmentEntities = report.attachments()
+				.stream()
+				.map(att -> AccidentAttachmentEntity.from(att, reportId))
+				.toList();
+			attachmentJpaRepository.saveAll(attachmentEntities);
+		}
 
-    // 조회 메서드
-    /*
-    public Optional<AccidentReport> findById(Long id) {
-        return reportJpaRepository.findById(id).map(entity -> {
-            List<AccidentAttachment> attachments = attachmentJpaRepository.findByAccidentReportId(id)
-                    .stream().map(AccidentAttachmentEntity::toDomain).toList();
-            return entity.toDomain().toBuilder().attachments(attachments).build();
-        });
-    }
-    */
+		return savedReportEntity.toDomain().toBuilder().attachments(report.attachments()).build();
+	}
+
+	// 조회 메서드
+	/*
+	 * public Optional<AccidentReport> findById(Long id) { return
+	 * reportJpaRepository.findById(id).map(entity -> { List<AccidentAttachment>
+	 * attachments = attachmentJpaRepository.findByAccidentReportId(id)
+	 * .stream().map(AccidentAttachmentEntity::toDomain).toList(); return
+	 * entity.toDomain().toBuilder().attachments(attachments).build(); }); }
+	 */
+
 }

@@ -42,6 +42,26 @@ public class FileService {
 			.build();
 	}
 
+	public DocumentFile uploadAccident(Long userId, InputStream inputStream, String originalFileName, long size,
+			String contentType) {
+		String extension = getExtension(originalFileName);
+
+		if (!"pdf".equalsIgnoreCase(extension) && !isImageExtension(extension)) {
+			throw new CoreException(CoreErrorType.FILE_UPLOAD_VALIDATION_CONTENT);
+		}
+
+		String objectKey = "accidents/" + userId + "/" + UUID.randomUUID() + "." + extension;
+
+		String savedKey = fileStorageClient.upload(inputStream, objectKey, size, contentType);
+
+		return DocumentFile.builder()
+			.fileKey(savedKey)
+			.originalFileName(originalFileName)
+			.extension(extension)
+			.size(size)
+			.build();
+	}
+
 	public DocumentFile uploadSignature(Long userId, InputStream inputStream, String originalFileName, long size,
 			String contentType) {
 		String extension = getExtension(originalFileName);

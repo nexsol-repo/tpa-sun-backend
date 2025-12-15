@@ -48,14 +48,10 @@ public class InsuranceController {
 	}
 
 	@GetMapping("/options/completed")
-	public ApiResponse<List<InsuranceSummaryResponse>> getCompletedOptions(
-			@AuthenticationPrincipal Long userId
-	) {
+	public ApiResponse<List<InsuranceSummaryResponse>> getCompletedOptions(@AuthenticationPrincipal Long userId) {
 		List<InsuranceApplication> apps = insuranceApplicationService.getCompletedList(userId);
 
-		List<InsuranceSummaryResponse> response = apps.stream()
-				.map(InsuranceSummaryResponse::from)
-				.toList();
+		List<InsuranceSummaryResponse> response = apps.stream().map(InsuranceSummaryResponse::of).toList();
 
 		return ApiResponse.success(response);
 	}

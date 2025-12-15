@@ -6,17 +6,23 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AccidentReportService {
-    private final AccidentContractValidator contractValidator;
-    private final AccidentReportAppender reportAppender;
 
-    public AccidentReport reportAccident(NewAccidentReport newReport) {
+	private final AccidentContractValidator contractValidator;
 
-        contractValidator.validate(newReport.userId(), newReport.applicationId());
+	private final AccidentReportAppender reportAppender;
 
-        AccidentReport report = newReport.toAccidentReport();
+	private final AccidentNumberGenerator accidentNumberGenerator;
 
+	public AccidentReport reportAccident(NewAccidentReport newReport) {
 
-        return reportAppender.append(report);
-    }
+		contractValidator.validate(newReport.userId(), newReport.applicationId());
+
+		AccidentReport report = newReport.toAccidentReport();
+
+		String accidentNumber = accidentNumberGenerator.generate();
+		report = report.assignNumber(accidentNumber);
+
+		return reportAppender.append(report);
+	}
+
 }
-

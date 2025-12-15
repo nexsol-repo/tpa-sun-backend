@@ -18,14 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/accident")
 @RequiredArgsConstructor
 public class AccidentController {
-    private final AccidentReportService accidentReportService;
 
-    @PostMapping("/report")
-    public ApiResponse<AccidentReportResponse> reportAccident(@AuthenticationPrincipal Long userId, @RequestBody @Valid AccidentReportRequest request) {
-        NewAccidentReport newAccidentReport = request.toNewAccidentReport(userId);
+	private final AccidentReportService accidentReportService;
 
-        AccidentReport savedReport = accidentReportService.reportAccident(newAccidentReport);
+	@PostMapping("/report")
+	public ApiResponse<AccidentReportResponse> reportAccident(@AuthenticationPrincipal Long userId,
+			@RequestBody @Valid AccidentReportRequest request) {
+		NewAccidentReport newAccidentReport = request.toNewAccidentReport(userId);
 
-        return ApiResponse.success(AccidentReportResponse.of(savedReport));
-    }
+		AccidentReport savedReport = accidentReportService.reportAccident(newAccidentReport);
+
+		return ApiResponse.success(AccidentReportResponse.of(savedReport));
+	}
+
 }

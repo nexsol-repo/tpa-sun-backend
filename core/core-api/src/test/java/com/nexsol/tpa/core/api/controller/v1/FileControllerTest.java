@@ -112,6 +112,54 @@ public class FileControllerTest extends RestDocsTest {
 	}
 
 	@Test
+	@DisplayName("사고 접수 업로드")
+	void uploadAccident() {
+		// given
+		Long userId = 1L;
+		String originalFilename = "accident_picture.png";
+		String contentType = "image/png";
+		byte[] content = "dummy image content".getBytes();
+
+		// Service Mocking
+		DocumentFile mockFile = DocumentFile.builder()
+			.fileKey("accident/1/2025/accident_picture.png")
+			.originalFileName(originalFilename)
+			.size((long) content.length)
+			.extension("png")
+			.build();
+
+		given(fileService.uploadAccident(eq(userId), any(), eq(originalFilename), anyLong(), eq(contentType)))
+			.willReturn(mockFile);
+
+		// Multipart Body 생성
+		MultipartBodyBuilder builder = new MultipartBodyBuilder();
+		builder.part("file", new ByteArrayResource(content))
+			.header("Content-Disposition", "form-data; name=file; filename=" + originalFilename)
+			.header("Content-Type", contentType);
+
+		// when & then
+		webTestClient.post()
+			.uri("/v1/file/accident")
+			.header("Authorization", "Bearer {ACCESS_TOKEN}")
+			.contentType(MediaType.MULTIPART_FORM_DATA)
+			.body(fromMultipartData(builder.build()))
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.consumeWith(document("files-upload-accident", requestPreprocessor(), responsePreprocessor(),
+					requestHeaders(headerWithName("Authorization").description("Bearer Access Token (필수)")),
+					requestParts(partWithName("file").description("업로드 현장사진 등등")),
+					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 상태 (SUCCESS)"),
+							fieldWithPath("data").type(JsonFieldType.OBJECT).description("업로드 된 파일 정보"),
+							fieldWithPath("data.key").type(JsonFieldType.STRING).description("저장된 파일 식별자 (Key)"),
+							fieldWithPath("data.originalFileName").type(JsonFieldType.STRING).description("원본 파일명"),
+							fieldWithPath("data.size").type(JsonFieldType.NUMBER).description("파일 크기 (Byte)"),
+							fieldWithPath("data.extension").type(JsonFieldType.STRING).description("파일 확장자"),
+							fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보"))));
+	}
+
+	@Test
 	@DisplayName("전자 서명 이미지 업로드")
 	void uploadSignature() {
 		// given

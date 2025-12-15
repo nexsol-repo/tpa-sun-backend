@@ -15,16 +15,10 @@ import java.util.List;
  */
 @Builder
 public record JoinCondition(boolean essInstalled, Long propertyDamageAmount, boolean civilWorkIncluded,
-		Long liabilityAmount, Long businessInterruptionAmount, LocalDate startDate, List<Accident> accidents,
-		Pledge pledge
+		Long liabilityAmount, Long businessInterruptionAmount, LocalDate startDate, Accident accident, Pledge pledge
 
 ) {
-	public JoinCondition {
-		if (accidents == null)
-			accidents = Collections.emptyList();
-	}
-
-	public boolean hasAccidents() {
-		return accidents != null && !accidents.isEmpty();
+	public boolean hasAccident() {
+		return accident != null;
 	}
 }
