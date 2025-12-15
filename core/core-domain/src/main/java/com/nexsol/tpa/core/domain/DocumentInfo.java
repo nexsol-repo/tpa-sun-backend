@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 @Builder
 public record DocumentInfo(FileInfo businessLicense, FileInfo powerGenerationLicense, FileInfo preUseInspection,
-		FileInfo supplyCertificate, FileInfo etc) {
+		FileInfo supplyCertificate, FileInfo etc,FileInfo signature) {
 
 	public static DocumentInfo toDocumentInfo(InsuranceDocument docs, Function<String, String> urlGenerator) {
 		if (docs == null)
@@ -21,6 +21,8 @@ public record DocumentInfo(FileInfo businessLicense, FileInfo powerGenerationLic
 			.supplyCertificate(FileInfo.toFileInfo(
 					docs.findAttachmentByType(InsuranceDocumentType.SUPPLY_CERTIFICATE).orElse(null), urlGenerator))
 			.etc(FileInfo.toFileInfo(docs.findAttachmentByType(InsuranceDocumentType.ETC).orElse(null), urlGenerator))
-			.build();
+				.signature(FileInfo.toFileInfo(
+						docs.findAttachmentByType(InsuranceDocumentType.SIGNATURE).orElse(null), urlGenerator))
+				.build();
 	}
 }

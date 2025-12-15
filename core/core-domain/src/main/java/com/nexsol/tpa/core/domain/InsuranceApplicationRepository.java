@@ -13,9 +13,7 @@ public interface InsuranceApplicationRepository {
 
 	Optional<InsuranceApplication> findById(Long id);
 
-	Optional<InsuranceApplication> findByApplicationNumber(String applicationNumber);
-
-	Optional<InsuranceApplication> findWritingApplication(Long userId);
+	List<InsuranceApplication> findAllById(List<Long> ids);
 
 	PageResult<InsuranceApplication> findAllByUserId(Long userId, SortPage sortPage);
 
