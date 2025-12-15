@@ -3,6 +3,7 @@ package com.nexsol.tpa.core.api.controller.v1;
 import com.nexsol.tpa.core.api.controller.v1.request.*;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuranceListResponse;
 import com.nexsol.tpa.core.api.controller.v1.response.InsuranceResponse;
+import com.nexsol.tpa.core.api.controller.v1.response.InsuranceSummaryResponse;
 import com.nexsol.tpa.core.api.support.response.ApiResponse;
 import com.nexsol.tpa.core.api.support.response.PageResponse;
 import com.nexsol.tpa.core.domain.*;
@@ -44,6 +45,19 @@ public class InsuranceController {
 		List<InsuranceListResponse> responseList = InsuranceListResponse.from(result.getContent());
 
 		return ApiResponse.success(PageResponse.of(result, responseList));
+	}
+
+	@GetMapping("/options/completed")
+	public ApiResponse<List<InsuranceSummaryResponse>> getCompletedOptions(
+			@AuthenticationPrincipal Long userId
+	) {
+		List<InsuranceApplication> apps = insuranceApplicationService.getCompletedList(userId);
+
+		List<InsuranceSummaryResponse> response = apps.stream()
+				.map(InsuranceSummaryResponse::from)
+				.toList();
+
+		return ApiResponse.success(response);
 	}
 
 	/**
