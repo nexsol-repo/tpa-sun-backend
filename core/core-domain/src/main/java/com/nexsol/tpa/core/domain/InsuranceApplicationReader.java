@@ -21,6 +21,14 @@ public class InsuranceApplicationReader {
 			.orElseThrow(() -> new CoreException(CoreErrorType.INSURANCE_NOT_FOUND_DATA));
 	}
 
+	public List<InsuranceApplication> readAllByIds(List<Long> applicationIds) {
+		if (applicationIds == null || applicationIds.isEmpty()) {
+			return List.of();
+		}
+		// JPA의 findAllById는 내부적으로 WHERE ID IN (...) 쿼리를 생성합니다.
+		return insuranceApplicationRepository.findAllById(applicationIds);
+	}
+
 	public PageResult<InsuranceApplication> readAll(Long userId, SortPage sortPage) {
 		return insuranceApplicationRepository.findAllByUserId(userId, sortPage);
 	}

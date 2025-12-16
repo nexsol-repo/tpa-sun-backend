@@ -237,3 +237,30 @@ include::{snippets}/accident-report/request-fields.adoc[]
 ==== 응답
 include::{snippets}/accident-report/http-response.adoc[]
 include::{snippets}/accident-report/response-fields.adoc[]
+
+=== 사고 내역 리스트
+나의 사고 접수 내역을 조회합니다.
+
+==== 요청
+include::{snippets}/accident-list/http-request.adoc[]
+include::{snippets}/accident-list/request-headers.adoc[]
+include::{snippets}/accident-list/query-parameters.adoc[]
+
+==== 응답
+include::{snippets}/accident-list/http-response.adoc[]
+include::{snippets}/accident-list/response-fields.adoc[]
+
+=== 사고 상세 내역
+사고의 상세 내역을 조회합니다.
+
+==== 요청
+include::{snippets}/accident-detail/http-request.adoc[]
+include::{snippets}/accident-detail/request-headers.adoc[]
+include::{snippets}/accident-detail/path-parameters.adoc[]
+
+==== 응답
+include::{snippets}/accident-detail/http-response.adoc[]
+include::{snippets}/accident-detail/response-fields.adoc[]
+
+
+

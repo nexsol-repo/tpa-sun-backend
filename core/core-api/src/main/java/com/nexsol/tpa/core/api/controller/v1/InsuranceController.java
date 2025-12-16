@@ -29,7 +29,6 @@ public class InsuranceController {
 	public ApiResponse<InsuranceResponse> getApplication(@AuthenticationPrincipal Long userId,
 			@PathVariable Long applicationId) {
 
-		// Service를 통해 조회 (건너뛰기 금지)
 		InsuranceApplication app = insuranceApplicationService.getInsuranceApplication(userId, applicationId);
 		return ApiResponse.success(InsuranceResponse.of(app, fileService::generatePresignedUrl));
 	}

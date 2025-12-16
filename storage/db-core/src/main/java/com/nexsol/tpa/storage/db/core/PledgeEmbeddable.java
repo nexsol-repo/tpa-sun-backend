@@ -29,7 +29,7 @@ public class PledgeEmbeddable {
 	public PledgeEmbeddable(Pledge domain) {
 		this.pledgeBankName = domain.bankName();
 		this.pledgeManagerName = domain.managerName();
-		this.pledgeManagerPhone = domain.phone();
+		this.pledgeManagerPhone = domain.managerPhone();
 		this.pledgeAmount = domain.amount();
 		this.pledgeAddress = domain.address();
 		this.pledgeRemark = domain.remark();
@@ -41,7 +41,7 @@ public class PledgeEmbeddable {
 		return Pledge.builder()
 			.bankName(pledgeBankName)
 			.managerName(pledgeManagerName)
-			.phone(pledgeManagerPhone)
+			.managerPhone(pledgeManagerPhone)
 			.amount(pledgeAmount)
 			.address(pledgeAddress)
 			.bondSendStatus(pledgeBondStatus)
