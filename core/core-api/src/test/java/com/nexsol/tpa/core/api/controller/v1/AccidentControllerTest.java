@@ -159,8 +159,13 @@ public class AccidentControllerTest extends RestDocsTest {
 		AccidentReport report = AccidentReport.builder()
 			.id(100L)
 			.accidentNumber("ACT-20251216-001")
+			.insuredName("test")
 			.plantName("해운대 햇살 발전소")
-			.accidentInfo(AccidentInfo.builder().accidentType("재산").accidentDate(LocalDateTime.now()).build())
+			.accidentInfo(AccidentInfo.builder()
+				.accidentPlace("부산")
+				.accidentType("재산")
+				.accidentDate(LocalDateTime.now())
+				.build())
 			.reportedAt(LocalDateTime.now())
 			.status(AccidentStatus.RECEIVED)
 			.build();
@@ -193,7 +198,10 @@ public class AccidentControllerTest extends RestDocsTest {
 							fieldWithPath("data.content[].reportId").type(JsonFieldType.NUMBER).description("사고접수 ID"),
 							fieldWithPath("data.content[].accidentNumber").type(JsonFieldType.STRING)
 								.description("사고접수번호"),
+							fieldWithPath("data.content[].insuredName").type(JsonFieldType.STRING).description("보험자명"),
 							fieldWithPath("data.content[].plantName").type(JsonFieldType.STRING).description("발전소명"),
+							fieldWithPath("data.content[].accidentPlace").type(JsonFieldType.STRING)
+								.description("사고장소"),
 							fieldWithPath("data.content[].accidentType").type(JsonFieldType.STRING).description("사고종류"),
 							fieldWithPath("data.content[].accidentDate").type(JsonFieldType.STRING)
 								.description("사고발생일시"),
