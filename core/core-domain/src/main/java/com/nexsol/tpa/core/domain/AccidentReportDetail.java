@@ -9,25 +9,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-public record AccidentReportDetail(
-        Long id,
-        Long userId,
-        String accidentNumber,
-        AccidentStatus status,
-        LocalDateTime reportedAt,
+public record AccidentReportDetail(Long id, Long userId, String accidentNumber, AccidentStatus status,
+		LocalDateTime reportedAt,
 
-        AccidentInfo accidentInfo,
+		AccidentInfo accidentInfo,
 
-        List<AccidentAttachment> attachments,
+		AccidentPlant plantInfo,
 
-        Long applicationId,
-        String plantName,
-        String plantAddress
+		AccidentInsured insuredInfo,
+
+		List<AccidentAttachment> attachments
+
 ) {
 
-    public void validateOwner(Long currentUserId) {
-        if (!this.userId.equals(currentUserId)) {
-            throw new CoreException(CoreErrorType.INSURANCE_USER_UNAUTHORIZED);
-        }
-    }
+	public void validateOwner(Long currentUserId) {
+		if (!this.userId.equals(currentUserId)) {
+			throw new CoreException(CoreErrorType.INSURANCE_USER_UNAUTHORIZED);
+		}
+	}
 }

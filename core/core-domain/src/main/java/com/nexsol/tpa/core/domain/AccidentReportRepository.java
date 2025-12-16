@@ -8,7 +8,9 @@ import java.util.Optional;
 public interface AccidentReportRepository {
 
 	AccidentReport save(AccidentReport report);
+
 	Optional<AccidentReport> findById(Long id);
+
 	PageResult<AccidentReport> findAllByUserId(Long userId, SortPage sortPage);
 
 }

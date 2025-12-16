@@ -8,10 +8,11 @@ import java.util.List;
 
 @Builder(toBuilder = true)
 public record AccidentReport(Long id, String accidentNumber, Long userId, Long applicationId, AccidentInfo accidentInfo,
-		List<AccidentAttachment> attachments, AccidentStatus status, LocalDateTime reportedAt) {
+		List<AccidentAttachment> attachments, AccidentStatus status, LocalDateTime reportedAt, String plantName,
+		String insuredName, String insuredPhone) {
 
 	public static AccidentReport create(Long userId, Long applicationId, AccidentInfo info,
-			List<AccidentAttachment> attachments) {
+			List<AccidentAttachment> attachments, String plantName, String insuredName, String insuredPhone) {
 		return AccidentReport.builder()
 			.userId(userId)
 			.applicationId(applicationId)
@@ -19,6 +20,10 @@ public record AccidentReport(Long id, String accidentNumber, Long userId, Long a
 			.attachments(attachments)
 			.status(AccidentStatus.RECEIVED) // 초기 상태: 접수 완료
 			.reportedAt(LocalDateTime.now())
+			.plantName(plantName)
+			.insuredName(insuredName)
+			.insuredPhone(insuredPhone)
+
 			.build();
 	}
 

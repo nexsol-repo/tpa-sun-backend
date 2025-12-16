@@ -1,4 +1,4 @@
-package com.nexsol.tpa.core.domain;
+package com.nexsol.tpa.core.api.controller.v1.response;
 
 import com.nexsol.tpa.core.enums.AccidentStatus;
 import lombok.Builder;
@@ -6,8 +6,8 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record AccidentReportSummary(
-        Long id,
+public record AccidentListResponse(
+        Long reportId,
         String accidentNumber,
         String plantName,
         String accidentType,
@@ -15,5 +15,4 @@ public record AccidentReportSummary(
         LocalDateTime reportedAt,
         AccidentStatus status
 ) {
-
 }
