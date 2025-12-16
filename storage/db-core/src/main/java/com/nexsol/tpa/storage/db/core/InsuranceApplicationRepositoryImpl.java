@@ -97,22 +97,15 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 
 	@Override
 	public List<InsuranceApplication> findAllById(List<Long> ids) {
-		return applicationJpaRepository.findAllById(ids).stream()
-				.map(entity -> entity.toDomain(null, null))
-				.toList();
+		return applicationJpaRepository.findAllById(ids).stream().map(entity -> entity.toDomain(null, null)).toList();
 	}
-
 
 	@Override
 	public PageResult<InsuranceApplication> findAllByUserId(Long userId, SortPage sortPage) {
-		// 1. 도메인 요청(SortPage) -> JPA 요청(Pageable) 변환 (격벽 역할)
 		Pageable pageable = toJpaPageable(sortPage);
 
-		// 2. 순수 JPA 메서드 호출
 		Page<InsuranceApplicationEntity> entityPage = applicationJpaRepository.findByUserId(userId, pageable);
 
-		// 3. Entity -> Domain 변환 (리스트용)
-		// toDomain 호출 시 plantInfo가 이미 있으므로 바로 변환됨.
 		List<InsuranceApplication> content = entityPage.getContent()
 			.stream()
 			.map(entity -> entity.toDomain(null, null)) // 리스트에선 Condition, Docs 필요 없음

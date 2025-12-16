@@ -46,39 +46,26 @@ public class AccidentReportRepositoryImpl implements AccidentReportRepository {
 		return reportJpaRepository.findById(id).map(entity -> {
 			List<AccidentAttachmentEntity> attachments = attachmentJpaRepository.findByAccidentReportId(id);
 
-			return entity.toDomain().toBuilder()
-					.attachments(attachments.stream().map(AccidentAttachmentEntity::toDomain).toList())
-					.build();
+			return entity.toDomain()
+				.toBuilder()
+				.attachments(attachments.stream().map(AccidentAttachmentEntity::toDomain).toList())
+				.build();
 		});
 	}
 
 	@Override
 	public PageResult<AccidentReport> findAllByUserId(Long userId, SortPage sortPage) {
+
 		Pageable pageable = toJpaPageable(sortPage);
-		Page<AccidentReportEntity> entityPage;
 
-		// 2. 정렬 조건에 따라 적절한 쿼리 메서드 선택
-		if (isJoinRequired(sortPage)) {
-			// 발전소명 정렬 등 외부 테이블 정렬이 필요한 경우
-			entityPage = reportJpaRepository.findByUserIdWithJoin(userId, pageable);
-		} else {
-			// 일반 조회
-			entityPage = reportJpaRepository.findByUserId(userId, pageable);
-		}
+		Page<AccidentReportEntity> entityPage = reportJpaRepository.findByUserId(userId, pageable);
 
-		// 3. Entity -> Domain 변환 (List 조회 시엔 첨부파일 제외하여 가볍게 조회)
-		List<AccidentReport> content = entityPage.getContent().stream()
-				.map(AccidentReportEntity::toDomain)
-				.toList();
+		List<AccidentReport> content = entityPage.getContent().stream().map(AccidentReportEntity::toDomain).toList();
 
-		return new PageResult<>(
-				content,
-				entityPage.getTotalElements(),
-				entityPage.getTotalPages(),
-				entityPage.getNumber(),
-				entityPage.hasNext()
-		);
+		return new PageResult<>(content, entityPage.getTotalElements(), entityPage.getTotalPages(),
+				entityPage.getNumber(), entityPage.hasNext());
 	}
+
 	private Pageable toJpaPageable(SortPage sortPage) {
 		if (sortPage.sort() == null) {
 			return PageRequest.of(sortPage.page(), sortPage.size(), Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -87,7 +74,6 @@ public class AccidentReportRepositoryImpl implements AccidentReportRepository {
 		SortPage.Sort sort = sortPage.sort();
 		Sort.Direction direction = sort.direction().isAscending() ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-		// [핵심] 도메인 필드명 -> DB 프로퍼티 경로(Path) 매핑
 		String dbProperty = switch (sort.property()) {
 			case "no" -> "id"; // No -> ID
 			case "accidentNumber" -> "accidentNumber";
@@ -96,9 +82,6 @@ public class AccidentReportRepositoryImpl implements AccidentReportRepository {
 			case "reportedAt" -> "reportedAt"; // 등록일
 			case "status" -> "accidentStatus";
 
-			// [Explicit Join Alias 활용]
-			// JpaRepository의 @Query에서 정의한 별칭(ia)을 사용
-			// ia = InsuranceApplicationEntity, plantInfo = Embedded, plantName = 필드
 			case "plantName" -> "ia.plantInfo.plantName";
 
 			default -> "createdAt";
@@ -111,7 +94,8 @@ public class AccidentReportRepositoryImpl implements AccidentReportRepository {
 	 * 조인이 필요한 정렬인지 판단
 	 */
 	private boolean isJoinRequired(SortPage sortPage) {
-		if (sortPage.sort() == null) return false;
+		if (sortPage.sort() == null)
+			return false;
 		return "plantName".equals(sortPage.sort().property());
 	}
 

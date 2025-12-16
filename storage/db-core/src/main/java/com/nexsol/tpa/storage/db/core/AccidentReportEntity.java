@@ -27,6 +27,12 @@ public class AccidentReportEntity extends BaseEntity {
 
 	private LocalDateTime reportedAt;
 
+	private String plantName;
+
+	private String insuredName;
+
+	private String insuredPhone;
+
 	@Embedded
 	private AccidentInfoEmbeddable accidentInfo;
 
@@ -38,6 +44,9 @@ public class AccidentReportEntity extends BaseEntity {
 		entity.accidentStatus = domain.status();
 		entity.reportedAt = domain.reportedAt();
 		entity.accidentInfo = new AccidentInfoEmbeddable(domain.accidentInfo());
+		entity.plantName = domain.plantName();
+		entity.insuredName = domain.insuredName();
+		entity.insuredPhone = domain.insuredPhone();
 		return entity;
 	}
 
@@ -50,6 +59,9 @@ public class AccidentReportEntity extends BaseEntity {
 			.status(this.accidentStatus)
 			.reportedAt(this.reportedAt)
 			.accidentInfo(this.accidentInfo != null ? this.accidentInfo.toDomain() : null)
+			.plantName(this.plantName)
+			.insuredName(this.insuredName)
+			.insuredPhone(this.insuredPhone)
 			.build();
 	}
 
