@@ -7,6 +7,12 @@ spring:
       - optional:file:.env[.properties]
       - db-core.yml
   web.resources.add-mappings: false
+
+  # 파일 업로드 용량 제한 설정
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
   mail:
     host: smtp.gmail.com
     port: 587
