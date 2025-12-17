@@ -19,4 +19,6 @@ public interface InsuranceApplicationRepository {
 
 	List<InsuranceApplication> findAllByUserIdAndStatus(Long userId, InsuranceStatus status);
 
+	boolean existsByCompanyCodeAndPlantName(String companyCode, String plantName, Long excludeId);
+
 }

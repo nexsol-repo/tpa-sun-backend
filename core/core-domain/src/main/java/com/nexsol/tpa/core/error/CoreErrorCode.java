@@ -15,7 +15,7 @@ public enum CoreErrorCode {
 	// File Upload
 	T4000, T4001, T4002, T4003, T4004,
 
-	//Payment
-	T5000,T5001,T5002,T5003,T5004;
+	// Payment
+	T5000, T5001, T5002, T5003, T5004;
 
 }

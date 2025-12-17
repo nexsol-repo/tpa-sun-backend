@@ -34,6 +34,8 @@ public enum CoreErrorType {
 			CoreErrorLevel.INFO),
 	INSURANCE_NOT_COMPLETED(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T3005, "가입이 완료된 보험만 사고접수가 가능합니다.",
 			CoreErrorLevel.INFO),
+	INSURANCE_DUPLICATE_PLANT_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T3006, "이미 등록된 발전소입니다.",
+			CoreErrorLevel.INFO),
 
 	// FileUpload
 	FILE_UPLOAD_VALIDATION_KEY(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.T4000, "파일 키는 필수 입니다.", CoreErrorLevel.INFO),
@@ -45,9 +47,8 @@ public enum CoreErrorType {
 	FILE_UPLOAD_UNAUTHORIZED(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T4004, "잘못된 접근이거나 권한이 없는 파일입니다.",
 			CoreErrorLevel.INFO),
 
-	PAYMENT_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T5000, "결제 내역이 없습니다.",CoreErrorLevel.INFO),
-	PAYMENT_ALREADY_CANCELLED(CoreErrorKind.SERVER_ERROR,CoreErrorCode.T5001,"이미 취소된 결제건 입니다.",CoreErrorLevel.INFO);
-
+	PAYMENT_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T5000, "결제 내역이 없습니다.", CoreErrorLevel.INFO),
+	PAYMENT_ALREADY_CANCELLED(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T5001, "이미 취소된 결제건 입니다.", CoreErrorLevel.INFO);
 
 	private final CoreErrorKind kind;
 

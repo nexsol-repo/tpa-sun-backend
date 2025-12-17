@@ -8,23 +8,27 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class PaymentCancelService {
-    private final PaymentReader paymentReader;
-    private final PaymentValidator paymentValidator;
-    private final PaymentCancelAppender paymentCancelAppender;
-    private final RefundCalculator refundCalculator;
 
+	private final PaymentReader paymentReader;
 
-    public void cancelPayment(Long paymentId, Long userId) {
+	private final PaymentValidator paymentValidator;
 
-        Payment payment = paymentReader.read(paymentId);
+	private final PaymentCancelAppender paymentCancelAppender;
 
-        paymentValidator.validate(paymentId);
+	private final RefundCalculator refundCalculator;
 
-        Long refundAmount = refundCalculator.calculate(payment, LocalDateTime.now());
+	public void cancelPayment(Long paymentId, Long userId) {
 
-        PaymentCancel cancel = PaymentCancel.create(payment, refundAmount, "사용자 요청 취소");
+		Payment payment = paymentReader.read(paymentId);
 
-        paymentCancelAppender.append(cancel);
+		paymentValidator.validate(paymentId);
 
-    }
+		Long refundAmount = refundCalculator.calculate(payment, LocalDateTime.now());
+
+		PaymentCancel cancel = PaymentCancel.create(payment, refundAmount, "사용자 요청 취소");
+
+		paymentCancelAppender.append(cancel);
+
+	}
+
 }

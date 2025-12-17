@@ -9,13 +9,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PaymentValidator {
 
-    private final PaymentCancelReader paymentCancelReader;
+	private final PaymentCancelReader paymentCancelReader;
 
-    public void validate(Long paymentId) {
-        boolean alreadyCancelled = paymentCancelReader.exists(paymentId);
+	public void validate(Long paymentId) {
+		boolean alreadyCancelled = paymentCancelReader.exists(paymentId);
 
-        if (alreadyCancelled) {
-            throw new CoreException(CoreErrorType.PAYMENT_ALREADY_CANCELLED);
-        }
-    }
+		if (alreadyCancelled) {
+			throw new CoreException(CoreErrorType.PAYMENT_ALREADY_CANCELLED);
+		}
+	}
+
 }

@@ -6,9 +6,11 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PaymentCancelReader {
-    private final PaymentCancelRepository paymentCancelRepository;
 
-    public boolean exists(Long paymentId) {
-        return paymentCancelRepository.existsByPaymentId(paymentId);
-    }
+	private final PaymentCancelRepository paymentCancelRepository;
+
+	public boolean exists(Long paymentId) {
+		return paymentCancelRepository.existsByPaymentId(paymentId);
+	}
+
 }

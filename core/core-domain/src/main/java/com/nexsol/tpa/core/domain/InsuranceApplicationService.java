@@ -17,6 +17,8 @@ public class InsuranceApplicationService {
 
 	private final InsuranceApplicationWriter applicationWriter;
 
+	private final InsuranceApplicationValidator applicationValidator;
+
 	private final InsuranceInspector insuranceInspector;
 
 	private final InsuranceConditionPolicy insuranceConditionPolicy;
@@ -54,6 +56,10 @@ public class InsuranceApplicationService {
 		InsuranceApplication application = applicationReader.read(applicationId);
 
 		application.validateOwner(userId);
+
+		String companyCode = application.applicant().companyCode();
+
+		applicationValidator.checkDuplicatePlantName(companyCode, plant.name(), applicationId);
 
 		InsuranceApplication updated = application.toBuilder().plant(plant).build();
 
@@ -96,6 +102,16 @@ public class InsuranceApplicationService {
 		completed = completed.toBuilder().documents(signedDocs).build();
 
 		return applicationWriter.writer(completed);
+	}
+
+	public boolean isPlantNameDuplicated(Long userId, String plantName, Long applicationId) {
+
+		User user = userReader.read(userId);
+		String companyCode = user.companyCode();
+
+		Long excludeId = (applicationId == null) ? -1L : applicationId;
+
+		return applicationValidator.exists(companyCode, plantName, excludeId);
 	}
 
 }
