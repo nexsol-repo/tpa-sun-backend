@@ -13,7 +13,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -106,10 +109,21 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 
 		Page<InsuranceApplicationEntity> entityPage = applicationJpaRepository.findByUserId(userId, pageable);
 
-		List<InsuranceApplication> content = entityPage.getContent()
+		List<Long> applicationIds = entityPage.getContent().stream().map(InsuranceApplicationEntity::getId).toList();
+
+		Map<Long, InsuranceConditionEntity> conditionMap = conditionJpaRepository
+			.findAllByApplicationIdIn(applicationIds)
 			.stream()
-			.map(entity -> entity.toDomain(null, null)) // 리스트에선 Condition, Docs 필요 없음
-			.toList();
+			.collect(Collectors.toMap(InsuranceConditionEntity::getApplicationId, Function.identity()));
+
+		List<InsuranceApplication> content = entityPage.getContent().stream().map(entity -> {
+			InsuranceConditionEntity conditionEntity = conditionMap.get(entity.getId());
+			// ConditionEntity가 있으면 도메인으로 변환, 없으면 null
+			// (리스트이므로 Accident 정보까지 깊게 가져올 필요가 없다면 accident는 null 처리)
+			JoinCondition condition = (conditionEntity != null) ? conditionEntity.toDomain(null) : null;
+
+			return entity.toDomain(condition, null);
+		}).toList();
 
 		return new PageResult<>(content, entityPage.getTotalElements(), entityPage.getTotalPages(),
 				entityPage.getNumber(), entityPage.hasNext());

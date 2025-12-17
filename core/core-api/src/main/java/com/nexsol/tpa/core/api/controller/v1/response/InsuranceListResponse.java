@@ -1,6 +1,5 @@
 package com.nexsol.tpa.core.api.controller.v1.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.nexsol.tpa.core.domain.InsuranceApplication;
 import com.nexsol.tpa.core.enums.InsuranceStatus;
 import lombok.Builder;
@@ -26,7 +25,7 @@ public record InsuranceListResponse(Long applicationId, String applicationNumber
 		// 지정
 		LocalDateTime paymentDate) {
 
-	public static InsuranceListResponse of(InsuranceApplication app) {
+	public static InsuranceListResponse toInsuraceListResponse(InsuranceApplication app) {
 		// 1. 보험 시작일/종료일 계산
 		LocalDate start = null;
 		LocalDate end = null;
@@ -54,10 +53,10 @@ public record InsuranceListResponse(Long applicationId, String applicationNumber
 			.build();
 	}
 
-	public static List<InsuranceListResponse> from(List<InsuranceApplication> apps) {
+	public static List<InsuranceListResponse> of(List<InsuranceApplication> apps) {
 		if (apps == null) {
 			return List.of();
 		}
-		return apps.stream().map(InsuranceListResponse::of).toList();
+		return apps.stream().map(InsuranceListResponse::toInsuraceListResponse).toList();
 	}
 }

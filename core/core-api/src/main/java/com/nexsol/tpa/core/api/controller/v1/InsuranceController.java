@@ -41,7 +41,7 @@ public class InsuranceController {
 
 		PageResult<InsuranceApplication> result = insuranceApplicationService.getList(userId, sortPage);
 
-		List<InsuranceListResponse> responseList = InsuranceListResponse.from(result.getContent());
+		List<InsuranceListResponse> responseList = InsuranceListResponse.of(result.getContent());
 
 		return ApiResponse.success(PageResponse.of(result, responseList));
 	}
