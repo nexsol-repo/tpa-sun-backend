@@ -19,4 +19,7 @@ public interface InsuranceApplicationJpaRepository extends JpaRepository<Insuran
 
 	Page<InsuranceApplicationEntity> findByUserId(Long userId, Pageable pageable);
 
+	boolean existsByApplicantInfo_CompanyCodeAndPlantInfo_PlantNameAndIdNot(String companyCode, String plantName,
+			Long id);
+
 }

@@ -13,29 +13,37 @@ import java.time.LocalDateTime;
 @Table(name = "payment_cancel")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PaymentCancelEntity extends BaseEntity{
-    private Long paymentId;
-    private Long userId;
-    private Long refundAmount;
-    private String reason;
-    private LocalDateTime canceledAt;;
+public class PaymentCancelEntity extends BaseEntity {
 
-    public PaymentCancelEntity(PaymentCancel domain) {
-        this.paymentId = domain.paymentId();
-        this.userId = domain.userId();
-        this.refundAmount = domain.refundAmount();
-        this.reason = domain.reason();
-        this.canceledAt = domain.canceledAt();
-    }
+	private Long paymentId;
 
-    public PaymentCancel toDomain() {
-        return PaymentCancel.builder()
-                .id(getId())
-                .paymentId(paymentId)
-                .userId(userId)
-                .refundAmount(refundAmount)
-                .reason(reason)
-                .canceledAt(canceledAt)
-                .build();
-    }
+	private Long userId;
+
+	private Long refundAmount;
+
+	private String reason;
+
+	private LocalDateTime canceledAt;
+
+	;
+
+	public PaymentCancelEntity(PaymentCancel domain) {
+		this.paymentId = domain.paymentId();
+		this.userId = domain.userId();
+		this.refundAmount = domain.refundAmount();
+		this.reason = domain.reason();
+		this.canceledAt = domain.canceledAt();
+	}
+
+	public PaymentCancel toDomain() {
+		return PaymentCancel.builder()
+			.id(getId())
+			.paymentId(paymentId)
+			.userId(userId)
+			.refundAmount(refundAmount)
+			.reason(reason)
+			.canceledAt(canceledAt)
+			.build();
+	}
+
 }

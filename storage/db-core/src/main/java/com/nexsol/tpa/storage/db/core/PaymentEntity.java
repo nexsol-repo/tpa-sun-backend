@@ -13,42 +13,46 @@ import java.time.LocalDateTime;
 @Table(name = "payment")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PaymentEntity extends BaseEntity{
-    private Long applicationId;
-    private Long userId;
-    private Long amount;
-    private String method;
+public class PaymentEntity extends BaseEntity {
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PaymentStatus status;
+	private Long applicationId;
 
-    private LocalDateTime paidAt;
+	private Long userId;
 
-    public PaymentEntity(Payment payment) {
-        this.applicationId = payment.applicationId();
-        this.userId = payment.userId();
-        this.amount = payment.amount();
-        this.method = payment.method();
-        this.status = payment.status();
-        this.paidAt = payment.paidAt();
-    }
+	private Long amount;
 
+	private String method;
 
-    public void update(Payment payment) {
-        this.status = payment.status();
-        this.paidAt = payment.paidAt();
-    }
+	@Enumerated(EnumType.STRING)
+	@Column(name = "payment_status", nullable = false)
+	private PaymentStatus paymentStatus;
 
-    public Payment toDomain() {
-        return Payment.builder()
-                .id(getId())
-                .applicationId(applicationId)
-                .userId(userId)
-                .amount(amount)
-                .method(method)
-                .status(status)
-                .paidAt(paidAt)
-                .build();
-    }
+	private LocalDateTime paidAt;
+
+	public PaymentEntity(Payment payment) {
+		this.applicationId = payment.applicationId();
+		this.userId = payment.userId();
+		this.amount = payment.amount();
+		this.method = payment.method();
+		this.paymentStatus = payment.status();
+		this.paidAt = payment.paidAt();
+	}
+
+	public void update(Payment payment) {
+		this.paymentStatus = payment.status();
+		this.paidAt = payment.paidAt();
+	}
+
+	public Payment toDomain() {
+		return Payment.builder()
+			.id(getId())
+			.applicationId(applicationId)
+			.userId(userId)
+			.amount(amount)
+			.method(method)
+			.status(paymentStatus)
+			.paidAt(paidAt)
+			.build();
+	}
+
 }

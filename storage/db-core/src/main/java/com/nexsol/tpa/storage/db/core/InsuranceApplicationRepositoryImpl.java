@@ -137,6 +137,12 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 		return entities.stream().map(entity -> entity.toDomain(null, null)).toList();
 	}
 
+	@Override
+	public boolean existsByCompanyCodeAndPlantName(String companyCode, String plantName, Long excludeId) {
+		return applicationJpaRepository.existsByApplicantInfo_CompanyCodeAndPlantInfo_PlantNameAndIdNot(companyCode,
+				plantName, excludeId);
+	}
+
 	private Pageable toJpaPageable(SortPage sortPage) {
 		if (sortPage.sort() == null) {
 			return PageRequest.of(sortPage.page(), sortPage.size(), Sort.by(Sort.Direction.DESC, "createdAt"));
