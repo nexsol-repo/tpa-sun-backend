@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Builder(toBuilder = true)
 public record InsuranceApplication(Long id, String applicationNumber, Long userId, InsuranceStatus status,
-		Applicant applicant, Agreement agreement, InsurancePlant plant, JoinCondition condition,
+		Applicant applicant, Agreement agreement, InsurancePlant plant, InsuranceCondition condition,
 		InsuranceDocument documents, PremiumQuote quote, LocalDateTime createdAt, LocalDateTime updatedAt
 
 ) {
@@ -35,7 +35,11 @@ public record InsuranceApplication(Long id, String applicationNumber, Long userI
 		if (this.plant == null || this.condition == null || this.quote == null) {
 			throw new CoreException(CoreErrorType.INVALID_INPUT, "모든 가입 단계를 완료해야 합니다.");
 		}
-		return this.toBuilder().status(InsuranceStatus.COMPLETED).build();
+
+		if (this.status == InsuranceStatus.COMPLETED) {
+			return this;
+		}
+		return this.toBuilder().status(InsuranceStatus.COMPLETED).updatedAt(LocalDateTime.now()).build();
 	}
 
 	public int calculateNextStep() {

@@ -1,15 +1,11 @@
 package com.nexsol.tpa.core.api.controller.v1.request;
 
 import com.nexsol.tpa.core.domain.*;
-import com.nexsol.tpa.core.enums.BondSendStatus;
-import com.nexsol.tpa.core.enums.InsuranceDocumentType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 public record InsuranceConditionRequest(@NotNull Boolean essInstalled, Long propertyDamageAmount,
 		@NotNull Boolean civilWorkIncluded, Long liabilityAmount, Long businessInterruptionAmount, LocalDate startDate,
@@ -19,8 +15,8 @@ public record InsuranceConditionRequest(@NotNull Boolean essInstalled, Long prop
 
 		@Valid DocumentSetRequest documents) {
 
-	public JoinCondition toJoinCondition() {
-		return JoinCondition.builder()
+	public InsuranceCondition toJoinCondition() {
+		return InsuranceCondition.builder()
 			.essInstalled(essInstalled)
 			.propertyDamageAmount(propertyDamageAmount)
 			.civilWorkIncluded(civilWorkIncluded)

@@ -85,7 +85,7 @@ public class InsuranceController {
 	public ApiResponse<InsuranceResponse> saveCondition(@AuthenticationPrincipal Long userId,
 			@PathVariable Long applicationId, @RequestBody InsuranceConditionRequest request) {
 
-		JoinCondition condition = request.toJoinCondition();
+		InsuranceCondition condition = request.toJoinCondition();
 
 		InsuranceDocument documents = request.toInsuranceDocument();
 
@@ -104,6 +104,15 @@ public class InsuranceController {
 		InsuranceApplication app = insuranceApplicationService.completeApplication(userId, applicationId,
 				request.toSignatureFile());
 		return ApiResponse.success(InsuranceResponse.of(app));
+	}
+
+	@PostMapping("/check/plant-name")
+	public ApiResponse<Boolean> checkPlantName(@AuthenticationPrincipal Long userId,
+			@RequestBody @Valid CheckPlantNameRequest request) {
+		// 중복이면 true, 사용 가능하면 false 반환
+		boolean isDuplicated = insuranceApplicationService.isPlantNameDuplicated(userId, request.plantName(),
+				request.applicationId());
+		return ApiResponse.success(isDuplicated);
 	}
 
 }

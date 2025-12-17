@@ -14,18 +14,14 @@ public record InsuranceListResponse(Long applicationId, String applicationNumber
 		InsuranceStatus status, // 상태 (작성중, 가입완료 등)
 		String applicantName, // 신청자명
 		Long totalPremium, // 납입 보험료
-		Integer nextStep,
-
-		LocalDate startDate,
-
-		LocalDate endDate,
+		Integer nextStep, String division, LocalDate startDate, LocalDate endDate,
 
 		// @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss",
 		// timezone = "Asia/Seoul") // 포맷
 		// 지정
 		LocalDateTime paymentDate) {
 
-	public static InsuranceListResponse toInsuraceListResponse(InsuranceApplication app) {
+	public static InsuranceListResponse toInsuranceListResponse(InsuranceApplication app) {
 		// 1. 보험 시작일/종료일 계산
 		LocalDate start = null;
 		LocalDate end = null;
@@ -33,7 +29,7 @@ public record InsuranceListResponse(Long applicationId, String applicationNumber
 		// 가입 조건(Condition)이 입력된 경우에만 날짜 계산
 		if (app.condition() != null && app.condition().startDate() != null) {
 			start = app.condition().startDate();
-			end = start.plusYears(1); // 가입일 기준 1년
+			end = app.condition().endDate();
 		}
 
 		// 2. 결제일 (가입 완료 상태일 때만 노출, 임시로 updatedAt 사용)
@@ -44,6 +40,7 @@ public record InsuranceListResponse(Long applicationId, String applicationNumber
 			.applicationNumber(app.applicationNumber())
 			.plantName(app.plant() != null ? app.plant().name() : null)
 			.status(app.status())
+			.division(displayDivision(end, app.status()))
 			.nextStep(app.calculateNextStep())
 			.applicantName(app.applicant() != null ? app.applicant().applicantName() : null)
 			.totalPremium(app.quote() != null ? app.quote().totalPremium() : 0L)
@@ -57,6 +54,13 @@ public record InsuranceListResponse(Long applicationId, String applicationNumber
 		if (apps == null) {
 			return List.of();
 		}
-		return apps.stream().map(InsuranceListResponse::toInsuraceListResponse).toList();
+		return apps.stream().map(InsuranceListResponse::toInsuranceListResponse).toList();
+	}
+
+	private static String displayDivision(LocalDate endDate, InsuranceStatus status) {
+		if (status == InsuranceStatus.COMPLETED && endDate != null && LocalDate.now().isAfter(endDate)) {
+			return "갱신";
+		}
+		return "신규";
 	}
 }

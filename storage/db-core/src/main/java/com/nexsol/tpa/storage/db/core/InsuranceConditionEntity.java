@@ -1,7 +1,7 @@
 package com.nexsol.tpa.storage.db.core;
 
 import com.nexsol.tpa.core.domain.Accident;
-import com.nexsol.tpa.core.domain.JoinCondition;
+import com.nexsol.tpa.core.domain.InsuranceCondition;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -11,7 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Table(name = "insurance_condition")
@@ -35,23 +34,26 @@ public class InsuranceConditionEntity extends BaseEntity {
 
 	private LocalDate startDate;
 
+	private LocalDate endDate;
+
 	@Embedded
 	private PledgeEmbeddable pledge; // 질권은 1:1이므로 임베디드로 포함
 
-	public static InsuranceConditionEntity fromDomain(JoinCondition domain, Long applicationId) {
+	public static InsuranceConditionEntity fromDomain(InsuranceCondition domain, Long applicationId) {
 		InsuranceConditionEntity entity = new InsuranceConditionEntity();
 		entity.applicationId = applicationId;
 		entity.update(domain);
 		return entity;
 	}
 
-	public void update(JoinCondition domain) {
+	public void update(InsuranceCondition domain) {
 		this.essInstalled = domain.essInstalled();
 		this.propertyDamageAmount = domain.propertyDamageAmount();
 		this.civilWorkIncluded = domain.civilWorkIncluded();
 		this.liabilityAmount = domain.liabilityAmount();
 		this.businessInterruptionAmount = domain.businessInterruptionAmount();
 		this.startDate = domain.startDate();
+		this.endDate = domain.endDate();
 
 		if (domain.pledge() != null) {
 			this.pledge = new PledgeEmbeddable(domain.pledge());
@@ -61,14 +63,15 @@ public class InsuranceConditionEntity extends BaseEntity {
 		}
 	}
 
-	public JoinCondition toDomain(Accident accident) {
-		return JoinCondition.builder()
+	public InsuranceCondition toDomain(Accident accident) {
+		return InsuranceCondition.builder()
 			.essInstalled(essInstalled)
 			.propertyDamageAmount(propertyDamageAmount)
 			.civilWorkIncluded(civilWorkIncluded)
 			.liabilityAmount(liabilityAmount)
 			.businessInterruptionAmount(businessInterruptionAmount)
 			.startDate(startDate)
+			.endDate(endDate)
 			.pledge(pledge != null ? pledge.toDomain() : null)
 			.accident(accident) // 별도 조회한 사고 이력 주입
 			.build();

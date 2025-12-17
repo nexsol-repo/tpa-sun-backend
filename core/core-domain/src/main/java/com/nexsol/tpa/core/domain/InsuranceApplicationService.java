@@ -17,7 +17,11 @@ public class InsuranceApplicationService {
 
 	private final InsuranceApplicationWriter applicationWriter;
 
+	private final InsuranceApplicationValidator applicationValidator;
+
 	private final InsuranceInspector insuranceInspector;
+
+	private final InsuranceConditionPolicy insuranceConditionPolicy;
 
 	private final InsurancePremiumCalculator premiumCalculator;
 
@@ -53,12 +57,16 @@ public class InsuranceApplicationService {
 
 		application.validateOwner(userId);
 
+		String companyCode = application.applicant().companyCode();
+
+		applicationValidator.checkDuplicatePlantName(companyCode, plant.name(), applicationId);
+
 		InsuranceApplication updated = application.toBuilder().plant(plant).build();
 
 		return applicationWriter.writer(updated);
 	}
 
-	public InsuranceApplication saveCondition(Long userId, Long applicationId, JoinCondition condition,
+	public InsuranceApplication saveCondition(Long userId, Long applicationId, InsuranceCondition condition,
 			InsuranceDocument documents) {
 		InsuranceApplication application = applicationReader.read(applicationId);
 
@@ -66,7 +74,12 @@ public class InsuranceApplicationService {
 		insuranceInspector.inspectCondition(condition);
 		insuranceInspector.inspectDocuments(documents);
 
-		InsuranceApplication withCondition = application.toBuilder().condition(condition).documents(documents).build();
+		InsuranceCondition policyAppliedCondition = insuranceConditionPolicy.enforceDuration(condition);
+
+		InsuranceApplication withCondition = application.toBuilder()
+			.condition(policyAppliedCondition)
+			.documents(documents)
+			.build();
 
 		if (withCondition.plant() != null) {
 
@@ -89,6 +102,16 @@ public class InsuranceApplicationService {
 		completed = completed.toBuilder().documents(signedDocs).build();
 
 		return applicationWriter.writer(completed);
+	}
+
+	public boolean isPlantNameDuplicated(Long userId, String plantName, Long applicationId) {
+
+		User user = userReader.read(userId);
+		String companyCode = user.companyCode();
+
+		Long excludeId = (applicationId == null) ? -1L : applicationId;
+
+		return applicationValidator.exists(companyCode, plantName, excludeId);
 	}
 
 }
