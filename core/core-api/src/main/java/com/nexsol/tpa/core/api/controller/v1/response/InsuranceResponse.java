@@ -9,7 +9,7 @@ import java.util.function.Function;
 @Builder
 public record InsuranceResponse(Long id, String applicationNumber, InsuranceStatus status, Applicant applicantInfo,
 
-		Agreement agreementInfo, InsurancePlant plantInfo, JoinCondition conditionInfo, PremiumQuote coverageInfo,
+		Agreement agreementInfo, InsurancePlant plantInfo, InsuranceCondition conditionInfo, PremiumQuote coverageInfo,
 		DocumentInfo documentInfo
 
 ) {

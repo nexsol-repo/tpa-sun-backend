@@ -100,7 +100,10 @@ public class InsuranceControllerTest extends RestDocsTest {
 			.plant(InsurancePlant.builder().name("해운대 햇살 발전소").build()) // 발전소명
 			.applicant(Applicant.builder().applicantName("홍길동").build()) // 신청자명
 			.quote(PremiumQuote.builder().totalPremium(1250000L).build()) // 납입 보험료
-			.condition(JoinCondition.builder().startDate(LocalDate.of(2025, 1, 1)).build()) // 보험
+			.condition(InsuranceCondition.builder()
+				.startDate(LocalDate.of(2025, 1, 1))
+				.endDate(LocalDate.of(2025, 1, 1).plusYears(1).minusDays(1))
+				.build()) // 보험
 			// 시작일
 			.createdAt(LocalDateTime.now())
 			.updatedAt(LocalDateTime.now()) // 결제일(예시)
@@ -156,6 +159,9 @@ public class InsuranceControllerTest extends RestDocsTest {
 								.optional(),
 							fieldWithPath("data.content[].nextStep").type(JsonFieldType.NUMBER)
 								.description("작성 스텝 단계")
+								.optional(),
+							fieldWithPath("data.content[].division").type(JsonFieldType.STRING)
+								.description("구분 : 신규, 갱신")
 								.optional(),
 
 							fieldWithPath("data.content[].startDate").type(JsonFieldType.STRING)
@@ -372,7 +378,7 @@ public class InsuranceControllerTest extends RestDocsTest {
 		InsuranceApplication mockApp = createMockApplication(appId, InsuranceStatus.PENDING);
 
 		// Service Mocking (도메인 객체 매핑 확인)
-		given(insuranceApplicationService.saveCondition(eq(userId), eq(appId), any(JoinCondition.class),
+		given(insuranceApplicationService.saveCondition(eq(userId), eq(appId), any(InsuranceCondition.class),
 				any(InsuranceDocument.class)))
 			.willReturn(mockApp);
 

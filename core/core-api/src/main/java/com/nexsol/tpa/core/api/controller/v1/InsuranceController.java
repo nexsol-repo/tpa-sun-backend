@@ -85,7 +85,7 @@ public class InsuranceController {
 	public ApiResponse<InsuranceResponse> saveCondition(@AuthenticationPrincipal Long userId,
 			@PathVariable Long applicationId, @RequestBody InsuranceConditionRequest request) {
 
-		JoinCondition condition = request.toJoinCondition();
+		InsuranceCondition condition = request.toJoinCondition();
 
 		InsuranceDocument documents = request.toInsuranceDocument();
 

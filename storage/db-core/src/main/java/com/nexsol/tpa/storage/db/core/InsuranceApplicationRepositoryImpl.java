@@ -83,7 +83,7 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 
 		InsuranceApplicationEntity insuranceApplicationEntity = appEntity.get();
 
-		JoinCondition joinCondition = null;
+		InsuranceCondition insuranceCondition = null;
 		Optional<InsuranceConditionEntity> conditionEntityOptional = conditionJpaRepository.findByApplicationId(id);
 
 		if (conditionEntityOptional.isPresent()) {
@@ -91,11 +91,11 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 				.map(AccidentHistoryEntity::toDomain)
 				.orElse(null);
 
-			joinCondition = conditionEntityOptional.get().toDomain(accident);
+			insuranceCondition = conditionEntityOptional.get().toDomain(accident);
 		}
 		InsuranceDocument insuranceDocument = loadDocuments(id);
 
-		return Optional.of(insuranceApplicationEntity.toDomain(joinCondition, insuranceDocument));
+		return Optional.of(insuranceApplicationEntity.toDomain(insuranceCondition, insuranceDocument));
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public class InsuranceApplicationRepositoryImpl implements InsuranceApplicationR
 			InsuranceConditionEntity conditionEntity = conditionMap.get(entity.getId());
 			// ConditionEntity가 있으면 도메인으로 변환, 없으면 null
 			// (리스트이므로 Accident 정보까지 깊게 가져올 필요가 없다면 accident는 null 처리)
-			JoinCondition condition = (conditionEntity != null) ? conditionEntity.toDomain(null) : null;
+			InsuranceCondition condition = (conditionEntity != null) ? conditionEntity.toDomain(null) : null;
 
 			return entity.toDomain(condition, null);
 		}).toList();

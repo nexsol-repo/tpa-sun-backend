@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class InsuranceInspector {
 
-	public void inspectCondition(JoinCondition condition) {
+	public void inspectCondition(InsuranceCondition condition) {
 		if (condition == null)
 			return;
 

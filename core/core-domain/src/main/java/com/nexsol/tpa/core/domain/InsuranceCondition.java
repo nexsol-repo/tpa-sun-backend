@@ -3,8 +3,6 @@ package com.nexsol.tpa.core.domain;
 import lombok.Builder;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @param essInstalled ess 설치여부
@@ -13,9 +11,10 @@ import java.util.List;
  * @param liabilityAmount 배상가입금액
  * @param businessInterruptionAmount 휴지 가입 금액
  */
-@Builder
-public record JoinCondition(boolean essInstalled, Long propertyDamageAmount, boolean civilWorkIncluded,
-		Long liabilityAmount, Long businessInterruptionAmount, LocalDate startDate, Accident accident, Pledge pledge
+@Builder(toBuilder = true)
+public record InsuranceCondition(boolean essInstalled, Long propertyDamageAmount, boolean civilWorkIncluded,
+		Long liabilityAmount, Long businessInterruptionAmount, LocalDate startDate, LocalDate endDate,
+		Accident accident, Pledge pledge
 
 ) {
 	public boolean hasAccident() {

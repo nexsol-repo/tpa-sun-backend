@@ -11,7 +11,7 @@ public class InsurancePremiumCalculator {
 
 	private final InsuranceRatePolicy ratePolicy;
 
-	public PremiumQuote calculate(InsurancePlant plant, JoinCondition condition) {
+	public PremiumQuote calculate(InsurancePlant plant, InsuranceCondition condition) {
 
 		// 1. 요율 조회 (Policy 위임)
 		String region = plant.region();

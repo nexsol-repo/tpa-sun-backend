@@ -43,7 +43,11 @@ public enum CoreErrorType {
 			CoreErrorLevel.INFO),
 	FILE_UPLOAD_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T4003, "파일이 존재하지 않습니다.", CoreErrorLevel.INFO),
 	FILE_UPLOAD_UNAUTHORIZED(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T4004, "잘못된 접근이거나 권한이 없는 파일입니다.",
-			CoreErrorLevel.INFO);
+			CoreErrorLevel.INFO),
+
+	PAYMENT_NOT_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.T5000, "결제 내역이 없습니다.",CoreErrorLevel.INFO),
+	PAYMENT_ALREADY_CANCELLED(CoreErrorKind.SERVER_ERROR,CoreErrorCode.T5001,"이미 취소된 결제건 입니다.",CoreErrorLevel.INFO);
+
 
 	private final CoreErrorKind kind;
 

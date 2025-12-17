@@ -1,0 +1,1 @@
+ALTER TABLE insurance_condition ADD COLUMN end_date DATE;

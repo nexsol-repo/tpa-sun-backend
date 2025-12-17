@@ -7,8 +7,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "insurance_application")
 @Getter
@@ -73,7 +71,7 @@ public class InsuranceApplicationEntity extends BaseEntity {
 		}
 	}
 
-	public InsuranceApplication toDomain(JoinCondition condition, InsuranceDocument documents) {
+	public InsuranceApplication toDomain(InsuranceCondition condition, InsuranceDocument documents) {
 		return InsuranceApplication.builder()
 			.id(this.getId())
 			.applicationNumber(this.applicationNumber)

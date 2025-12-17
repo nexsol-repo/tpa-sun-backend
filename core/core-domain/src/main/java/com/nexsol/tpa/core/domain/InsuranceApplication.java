@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Builder(toBuilder = true)
 public record InsuranceApplication(Long id, String applicationNumber, Long userId, InsuranceStatus status,
-		Applicant applicant, Agreement agreement, InsurancePlant plant, JoinCondition condition,
+		Applicant applicant, Agreement agreement, InsurancePlant plant, InsuranceCondition condition,
 		InsuranceDocument documents, PremiumQuote quote, LocalDateTime createdAt, LocalDateTime updatedAt
 
 ) {
