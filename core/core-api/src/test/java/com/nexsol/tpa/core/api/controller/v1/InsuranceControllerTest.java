@@ -24,6 +24,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.math.BigDecimal;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -527,6 +528,43 @@ public class InsuranceControllerTest extends RestDocsTest {
 							fieldWithPath("signature.size").type(JsonFieldType.NUMBER).description("서명 파일 크기"),
 							fieldWithPath("signature.extension").type(JsonFieldType.STRING).description("서명 파일 확장자")),
 					responseFields(getInsuranceResponseFields().toArray(FieldDescriptor[]::new))));
+	}
+
+	@Test
+	@DisplayName("발전소명 중복 확인 API")
+	void checkPlantName() {
+		// given
+		Long userId = 1L;
+		String plantName = "해운대 햇살 발전소";
+		Long applicationId = 100L;
+
+		// 요청 객체 생성
+		CheckPlantNameRequest request = new CheckPlantNameRequest(plantName, applicationId);
+
+		// Service Mocking
+		given(insuranceApplicationService.isPlantNameDuplicated(userId, plantName, applicationId)).willReturn(true);
+
+		// when & then
+		webTestClient.post() // GET -> POST 변경
+			.uri("/v1/insurance/check/plant-name") // 쿼리 파라미터 제거
+			.header("Authorization", "Bearer {ACCESS_TOKEN}")
+			.contentType(MediaType.APPLICATION_JSON)
+			.bodyValue(request) // Body에 객체 전달
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.consumeWith(document("insurance-check-plant-name", requestPreprocessor(), responsePreprocessor(),
+					requestHeaders(headerWithName("Authorization").description("Bearer Access Token (필수)")),
+					requestFields( // queryParameters -> requestFields 변경
+							fieldWithPath("plantName").type(JsonFieldType.STRING).description("중복 확인할 발전소명"),
+							fieldWithPath("applicationId").type(JsonFieldType.NUMBER)
+								.description("현재 작성 중인 청약서 ID (수정 시 본인 제외용)")
+								.optional()),
+					responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("결과 상태 (SUCCESS)"),
+							fieldWithPath("data").type(JsonFieldType.BOOLEAN)
+								.description("중복 여부 (true: 중복됨, false: 사용 가능)"),
+							fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보").optional())));
 	}
 
 	private List<FieldDescriptor> getInsuranceResponseFields() {

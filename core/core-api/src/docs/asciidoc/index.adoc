@@ -263,4 +263,56 @@ include::{snippets}/accident-detail/http-response.adoc[]
 include::{snippets}/accident-detail/response-fields.adoc[]
 
 
+== 결제 (Payment)
 
+=== 결제 승인
+보험 가입 후 산출된 보험료를 결제합니다.
+
+==== 요청
+include::{snippets}/payment-process/http-request.adoc[]
+include::{snippets}/payment-process/request-headers.adoc[]
+include::{snippets}/payment-process/request-fields.adoc[]
+
+==== 응답
+include::{snippets}/payment-process/http-response.adoc[]
+include::{snippets}/payment-process/response-fields.adoc[]
+
+=== 결제 취소
+완료된 결제를 취소합니다.
+
+==== 요청
+include::{snippets}/payment-cancel/http-request.adoc[]
+include::{snippets}/payment-cancel/request-headers.adoc[]
+include::{snippets}/payment-cancel/path-parameters.adoc[]
+include::{snippets}/payment-cancel/request-fields.adoc[]
+
+==== 응답
+include::{snippets}/payment-cancel/http-response.adoc[]
+include::{snippets}/payment-cancel/response-fields.adoc[]
+
+=== 결제 내역 조회 (청약서 기준)
+특정 청약서(Application)와 연결된 결제 내역을 조회합니다.
+
+==== 요청
+include::{snippets}/payment-get/http-request.adoc[]
+include::{snippets}/payment-get/request-headers.adoc[]
+include::{snippets}/payment-get/path-parameters.adoc[]
+
+==== 응답
+include::{snippets}/payment-get/http-response.adoc[]
+include::{snippets}/payment-get/response-fields.adoc[]
+
+
+=== 발전소명 중복 확인
+입력한 발전소명이 해당 사업자 내에서 중복되는지 확인합니다.
+수정(Update) 시에는 자신의 `applicationId`를 함께 전달하여 본인을 제외하고 검사합니다.
+
+==== 요청
+include::{snippets}/insurance-check-plant-name/http-request.adoc[]
+include::{snippets}/insurance-check-plant-name/request-headers.adoc[]
+include::{snippets}/insurance-check-plant-name/request-fields.adoc[]
+
+
+==== 응답
+include::{snippets}/insurance-check-plant-name/http-response.adoc[]
+include::{snippets}/insurance-check-plant-name/response-fields.adoc[]

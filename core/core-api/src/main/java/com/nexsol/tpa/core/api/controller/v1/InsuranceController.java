@@ -106,4 +106,13 @@ public class InsuranceController {
 		return ApiResponse.success(InsuranceResponse.of(app));
 	}
 
+	@PostMapping("/check/plant-name")
+	public ApiResponse<Boolean> checkPlantName(@AuthenticationPrincipal Long userId,
+			@RequestBody @Valid CheckPlantNameRequest request) {
+		// 중복이면 true, 사용 가능하면 false 반환
+		boolean isDuplicated = insuranceApplicationService.isPlantNameDuplicated(userId, request.plantName(),
+				request.applicationId());
+		return ApiResponse.success(isDuplicated);
+	}
+
 }
