@@ -16,7 +16,6 @@ public record InsurancePlantRequest(String plantName, String address, String reg
                 .address(address)
                 .capacity(capacity != null ? capacity : BigDecimal.ZERO)
                 .area(area != null ? area : BigDecimal.ZERO)
-                .area(area)
                 .inspectionDate(inspectionDate)
                 .facilityType(facilityType)
                 .driveMethod(driveMethod)
