@@ -14,6 +14,7 @@ public record InsurancePlantRequest(String plantName, String address, String reg
         return InsurancePlant.builder()
                 .name(plantName)
                 .address(address)
+                .region(region)
                 .capacity(capacity != null ? capacity : BigDecimal.ZERO)
                 .area(area != null ? area : BigDecimal.ZERO)
                 .inspectionDate(inspectionDate)
