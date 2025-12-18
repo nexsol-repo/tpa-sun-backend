@@ -8,18 +8,19 @@ import java.time.LocalDate;
 
 @Builder
 public record InsurancePlantRequest(String plantName, String address, String region, BigDecimal capacity,
-		BigDecimal area, LocalDate inspectionDate, String facilityType, String driveMethod, String salesTarget) {
-	public InsurancePlant toInsuredPlant() {
-		return InsurancePlant.builder()
-			.name(plantName)
-			.address(address)
-			.region(region)
-			.capacity(capacity)
-			.area(area)
-			.inspectionDate(inspectionDate)
-			.facilityType(facilityType)
-			.driveMethod(driveMethod)
-			.salesTarget(salesTarget)
-			.build();
-	}
+                                    BigDecimal area, LocalDate inspectionDate, String facilityType, String driveMethod,
+                                    String salesTarget) {
+    public InsurancePlant toInsuredPlant() {
+        return InsurancePlant.builder()
+                .name(plantName)
+                .address(address)
+                .capacity(capacity != null ? capacity : BigDecimal.ZERO)
+                .area(area != null ? area : BigDecimal.ZERO)
+                .area(area)
+                .inspectionDate(inspectionDate)
+                .facilityType(facilityType)
+                .driveMethod(driveMethod)
+                .salesTarget(salesTarget)
+                .build();
+    }
 }
