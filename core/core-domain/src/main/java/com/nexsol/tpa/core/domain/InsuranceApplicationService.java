@@ -52,6 +52,15 @@ public class InsuranceApplicationService {
 
 	}
 
+	public InsuranceApplication saveAgreement(Long userId, Long applicationId, Agreement agreement) {
+		InsuranceApplication application = applicationReader.read(applicationId);
+		application.validateOwner(userId);
+
+		InsuranceApplication updated = application.updateAgreement(agreement);
+
+		return applicationWriter.writer(updated);
+	}
+
 	public InsuranceApplication savePlantInfo(Long userId, Long applicationId, InsurancePlant plant) {
 		InsuranceApplication application = applicationReader.read(applicationId);
 

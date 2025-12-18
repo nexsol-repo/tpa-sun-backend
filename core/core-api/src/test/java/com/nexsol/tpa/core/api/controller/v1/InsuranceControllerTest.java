@@ -265,7 +265,7 @@ public class InsuranceControllerTest extends RestDocsTest {
 	}
 
 	@Test
-	@DisplayName("Step 1. 청약 시작 (약관 동의)")
+	@DisplayName("청약 시작")
 	void start() {
 
 		Long userId = 1L;
@@ -286,6 +286,44 @@ public class InsuranceControllerTest extends RestDocsTest {
 			.isOk()
 			.expectBody()
 			.consumeWith(document("insurance-start", requestPreprocessor(), responsePreprocessor(),
+					requestHeaders(headerWithName("Authorization").description("Bearer Access Token (필수)")),
+					requestFields(
+							fieldWithPath("re100Interest").type(JsonFieldType.BOOLEAN)
+								.description("RE100 발전함 장기고정계약 안내 관심 여부 (선택)"),
+							fieldWithPath("personalInfoCollectionAgreed").type(JsonFieldType.BOOLEAN)
+								.description("개인(신용)정보 수집 및 이용 동의 (필수)"),
+							fieldWithPath("personalInfoThirdPartyAgreed").type(JsonFieldType.BOOLEAN)
+								.description("개인정보 제3자 제공 동의 (필수)"),
+							fieldWithPath("groupRuleAgreed").type(JsonFieldType.BOOLEAN)
+								.description("단체규약 및 가입 시 유의사항 동의 (필수)"),
+							fieldWithPath("marketingAgreed").type(JsonFieldType.BOOLEAN)
+								.description("마케팅 및 홍보서비스 동의 (선택)")),
+					responseFields(getInsuranceResponseFields().toArray(FieldDescriptor[]::new))));
+	}
+
+	@Test
+	@DisplayName("Step 1. 약관동의(수정가능)")
+	void saveAgreement() {
+		Long appId = 101L;
+		Long userId = 1L;
+		// given
+		InsuranceStartRequest request = new InsuranceStartRequest(true, true, true, true, true);
+		InsuranceApplication mockApp = createMockApplication(101L, InsuranceStatus.PENDING);
+
+		given(insuranceApplicationService.saveAgreement(eq(userId), eq(appId), any(Agreement.class)))
+			.willReturn(mockApp);
+
+		// when & then
+		webTestClient.post()
+			.uri("/v1/insurance/{applicationId}/agreement", appId)
+			.header("Authorization", "Bearer {ACCESS_TOKEN}")
+			.contentType(MediaType.APPLICATION_JSON)
+			.bodyValue(request)
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.consumeWith(document("insurance-agreement", requestPreprocessor(), responsePreprocessor(),
 					requestHeaders(headerWithName("Authorization").description("Bearer Access Token (필수)")),
 					requestFields(
 							fieldWithPath("re100Interest").type(JsonFieldType.BOOLEAN)

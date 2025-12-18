@@ -41,7 +41,7 @@ public record InsuranceListResponse(Long applicationId, String applicationNumber
 			.plantName(app.plant() != null ? app.plant().name() : null)
 			.status(app.status())
 			.division(displayDivision(end, app.status()))
-			.nextStep(app.calculateNextStep())
+			.nextStep(calculateNextStep(app))
 			.applicantName(app.applicant() != null ? app.applicant().applicantName() : null)
 			.totalPremium(app.quote() != null ? app.quote().totalPremium() : 0L)
 			.startDate(start)
@@ -62,5 +62,24 @@ public record InsuranceListResponse(Long applicationId, String applicationNumber
 			return "갱신";
 		}
 		return "신규";
+	}
+
+	private static int calculateNextStep(InsuranceApplication app) {
+		if (app == null)
+			return 1; // 청약서 자체가 없으면 1단계(약관동의)부터 시작
+
+		if (app.status() == InsuranceStatus.COMPLETED)
+			return 5; // 완료된 경우
+
+		if (app.quote() != null)
+			return 4; // 견적이 있으면 4단계(최종서명)로
+
+		if (app.plant() != null && app.plant().name() != null)
+			return 3; // 발전소 정보가 있으면 3단계(조건입력)로
+
+		if (app.agreement() != null)
+			return 2; // 약관 동의가 있으면 2단계(발전소입력)로
+
+		return 1; // 그 외 초기 상태는 1단계
 	}
 }
