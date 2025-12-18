@@ -56,13 +56,25 @@ public class InsuranceController {
 	}
 
 	/**
-	 * [Step 1] 신규 가입 시작 (약관 동의) - 무조건 새로운 청약서 생성
+	 * 신규 가입 시작 (약관 동의) - 무조건 새로운 청약서 생성
 	 */
 	@PostMapping("/start")
 	public ApiResponse<InsuranceResponse> start(@AuthenticationPrincipal Long userId,
 			@RequestBody @Valid InsuranceStartRequest request) {
 
 		InsuranceApplication app = insuranceApplicationService.saveInit(userId, request.toAgreementInfo());
+		return ApiResponse.success(InsuranceResponse.of(app));
+	}
+
+	/**
+	 * [Step 1] 약관 동의 저장 (이미 생성된 applicationId에 데이터 입력)
+	 */
+	@PostMapping("/{applicationId}/agreement")
+	public ApiResponse<InsuranceResponse> saveAgreement(@AuthenticationPrincipal Long userId,
+			@PathVariable Long applicationId, @RequestBody @Valid InsuranceStartRequest request) {
+
+		InsuranceApplication app = insuranceApplicationService.saveAgreement(userId, applicationId,
+				request.toAgreementInfo());
 		return ApiResponse.success(InsuranceResponse.of(app));
 	}
 

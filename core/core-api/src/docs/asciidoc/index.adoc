@@ -144,7 +144,7 @@ include::{snippets}/files-delete/response-fields.adoc[]
 
 == 보험 (Insurance)
 
-=== 1. 청약 시작 (약관 동의)
+=== 청약시자
 신규 보험 가입 프로세스를 시작합니다. 약관 동의 내역을 저장하고 새로운 청약서 ID를 발급받습니다.
 
 ==== 요청
@@ -154,6 +154,18 @@ include::{snippets}/insurance-start/request-fields.adoc[]
 ==== 응답
 include::{snippets}/insurance-start/http-response.adoc[]
 include::{snippets}/insurance-start/response-fields.adoc[]
+
+
+=== 1. 청약 약관 동의(수정가능)
+1단계 약관동의 이어가기 및 수정을 합니다.
+
+==== 요청
+include::{snippets}/insurance-agreement/http-request.adoc[]
+include::{snippets}/insurance-agreement/request-fields.adoc[]
+
+==== 응답
+include::{snippets}/insurance-agreement/http-response.adoc[]
+include::{snippets}/insurance-agreement/response-fields.adoc[]
 
 === 2. 발전소 정보 저장 (임시저장)
 발전소 정보를 저장합니다. 임시저장이 가능하므로 필수 값이 누락되어도 저장됩니다.

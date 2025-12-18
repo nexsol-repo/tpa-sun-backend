@@ -4,7 +4,9 @@ import com.nexsol.tpa.core.domain.Agreement;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 
-public record InsuranceStartRequest(@NotNull Boolean re100Interest,
+public record InsuranceStartRequest(
+
+		@NotNull Boolean re100Interest,
 
 		// [필수] 개인정보 수집 이용 (진입 단계이므로 강제)
 		@AssertTrue(message = "개인(신용)정보 수집 및 이용에 동의해야 합니다.") @NotNull Boolean personalInfoCollectionAgreed,
