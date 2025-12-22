@@ -3,6 +3,7 @@ package com.nexsol.tpa.core.domain;
 import com.nexsol.tpa.core.support.PageResult;
 import com.nexsol.tpa.core.support.SortPage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,8 @@ public class InsuranceApplicationService {
 	private final InsuranceConditionPolicy insuranceConditionPolicy;
 
 	private final InsurancePremiumCalculator premiumCalculator;
+
+	private final ApplicationEventPublisher eventPublisher;
 
 	public InsuranceApplication getInsuranceApplication(Long userId, Long applicationId) {
 		InsuranceApplication application = applicationReader.read(applicationId);
@@ -85,19 +88,19 @@ public class InsuranceApplicationService {
 
 		InsuranceCondition policyAppliedCondition = insuranceConditionPolicy.enforceDuration(condition);
 
-		InsuranceApplication withCondition = application.toBuilder()
+		InsuranceApplication updatedApp = application.toBuilder()
 			.condition(policyAppliedCondition)
 			.documents(documents)
 			.build();
 
-		if (withCondition.plant() != null) {
+		applicationWriter.writer(updatedApp);
 
-			PremiumQuote quote = premiumCalculator.calculate(withCondition.plant(), condition);
+		// 3. 비즈니스 이벤트 발행 (산출 개념과의 격벽)
+		eventPublisher.publishEvent(new InsuranceConditionChangedEvent(applicationId));
 
-			withCondition = withCondition.toBuilder().quote(quote).build();
-		}
+		InsuranceApplication savedApp = applicationReader.read(applicationId);
 
-		return applicationWriter.writer(withCondition);
+		return savedApp;
 	}
 
 	public InsuranceApplication completeApplication(Long userId, Long applicationId, DocumentFile signatureFile) {
