@@ -39,6 +39,8 @@ public class InsuranceApplicationService {
 		return applicationReader.readAllCompleted(userId);
 	}
 
+
+
 	public InsuranceApplication saveInit(Long userId, Agreement agreement) {
 		User user = userReader.read(userId);
 		Applicant applicant = Applicant.toApplicant(user);

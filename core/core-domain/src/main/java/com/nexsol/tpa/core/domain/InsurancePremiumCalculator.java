@@ -43,19 +43,29 @@ public class InsurancePremiumCalculator {
 		if (liabilityAmount == null)
 			return 0;
 
-		// 면적 보정 로직
+		// 1. 면적 보정 로직 (기존 유지)
 		BigDecimal area = plant.area();
 		if (area == null || area.compareTo(BigDecimal.ZERO) == 0) {
 			BigDecimal capacity = plant.capacity() != null ? plant.capacity() : BigDecimal.ZERO;
 			area = capacity.multiply(BigDecimal.valueOf(4.93));
 		}
 
-		// Policy를 통해 값 조회 (구간 로직 등은 Policy가 알아서 처리)
-		long basePremium = ratePolicy.getBasePremium(area.doubleValue());
+		// 2. DB에서 요율 및 설정값 조회 (하드코딩 방지)
+		double unitPrice = ratePolicy.getGlUnitPrice();    // 36,000
+		double unitArea = ratePolicy.getGlUnitArea();      // 500
+		double minPremium = ratePolicy.getGlMinPremium();  // 60,000
+		double discountFactor = ratePolicy.getGlDiscountFactor(); // 0.85
+
 		double amountFactor = ratePolicy.getAmountCoefficient(liabilityAmount);
 		double typeFactor = ratePolicy.getFacilityTypeCoefficient(plant.facilityType());
 
-		return (long) (basePremium * amountFactor * typeFactor);
+		// 3. 엑셀 수식 적용: ((면적/500) * 36000) * 계수들 * 0.85
+		double calculatedBase = (area.doubleValue() / unitArea) * unitPrice;
+		double finalAmount = calculatedBase * amountFactor * typeFactor * discountFactor;
+
+		// 4. 최저 보험료 적용 및 반올림 (십원 단위 반올림하여 백원 단위 표시)
+		long premium = (long) Math.max(minPremium, finalAmount);
+		return Math.round(premium / 100.0) * 100;
 	}
 
 }
