@@ -48,4 +48,9 @@ public record InsuranceApplication(Long id, String applicationNumber, Long userI
 		}
 		return this.toBuilder().agreement(newAgreement).updatedAt(LocalDateTime.now()).build();
 	}
+
+	public boolean canCalculatePremium() {
+		return this.plant != null && this.plant.capacity() != null
+				&& this.plant.capacity().compareTo(java.math.BigDecimal.ZERO) > 0;
+	}
 }

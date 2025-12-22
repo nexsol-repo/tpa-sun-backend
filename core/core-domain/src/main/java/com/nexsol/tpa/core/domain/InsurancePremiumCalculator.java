@@ -51,9 +51,9 @@ public class InsurancePremiumCalculator {
 		}
 
 		// 2. DB에서 요율 및 설정값 조회 (하드코딩 방지)
-		double unitPrice = ratePolicy.getGlUnitPrice();    // 36,000
-		double unitArea = ratePolicy.getGlUnitArea();      // 500
-		double minPremium = ratePolicy.getGlMinPremium();  // 60,000
+		double unitPrice = ratePolicy.getGlUnitPrice(); // 36,000
+		double unitArea = ratePolicy.getGlUnitArea(); // 500
+		double minPremium = ratePolicy.getGlMinPremium(); // 60,000
 		double discountFactor = ratePolicy.getGlDiscountFactor(); // 0.85
 
 		double amountFactor = ratePolicy.getAmountCoefficient(liabilityAmount);

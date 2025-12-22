@@ -10,17 +10,16 @@ public class InsuranceRatePolicy {
 
 	private final InsuranceRateReader rateReader;
 
-//	private final AreaKeyResolver areaKeyResolver;
-//
-//	// 1. 기본료 조회 (면적 기반)
-//	public long getBasePremium(double area) {
-//		// 구간 Key 매핑 로직 (도메인 정책)
-//		String areaKey = areaKeyResolver.resolveKey(area);
-//
-//		// DB 조회
-//		return rateReader.read(RateType.GL_BASE_PREMIUM, areaKey).longValue();
-//	}
-
+	// private final AreaKeyResolver areaKeyResolver;
+	//
+	// // 1. 기본료 조회 (면적 기반)
+	// public long getBasePremium(double area) {
+	// // 구간 Key 매핑 로직 (도메인 정책)
+	// String areaKey = areaKeyResolver.resolveKey(area);
+	//
+	// // DB 조회
+	// return rateReader.read(RateType.GL_BASE_PREMIUM, areaKey).longValue();
+	// }
 
 	public double getGlUnitPrice() {
 		return rateReader.read(RateType.GL_CALC_CONFIG, "UNIT_PRICE").doubleValue();
